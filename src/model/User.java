@@ -1,14 +1,14 @@
 package model;
 
 import model.base.Identifiable;
-import model.enums.Role;
+import model.enums.UserRole;
 
 public class User implements Identifiable {
     private String username;
     private String password;
-    private Role role;
+    private UserRole role;
 
-    public User(String username, String password, Role role) {
+    public User(String username, String password, UserRole role) {
         this.username = username;
         this.password = password;
         this.role = role;
@@ -22,7 +22,7 @@ public class User implements Identifiable {
         return password;
     }
 
-    public Role getRole() {
+    public UserRole getRole() {
         return role;
     }
 
@@ -34,7 +34,7 @@ public class User implements Identifiable {
         this.password = password;
     }
 
-    public void setRole(Role role) {
+    public void setRole(UserRole role) {
         this.role = role;
     }
 

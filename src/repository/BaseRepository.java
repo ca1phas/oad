@@ -22,7 +22,7 @@ public abstract class BaseRepository<T extends Identifiable> {
     protected abstract List<String> mapFromModel(T model);
 
     // Find all records
-    public List<T> findAll() {
+    public List<T> readAll() {
         List<T> result = new ArrayList<>();
         List<List<String>> rows = FileHandlerUtil.readData(filePath);
         for (List<String> row : rows) {
@@ -47,7 +47,7 @@ public abstract class BaseRepository<T extends Identifiable> {
 
     // Update first matching record
     public boolean update(Predicate<T> matcher, T updatedModel) {
-        List<T> data = findAll();
+        List<T> data = readAll();
         for (int i = 0; i < data.size(); i++) {
             if (matcher.test(data.get(i))) {
                 data.set(i, updatedModel);
@@ -60,7 +60,7 @@ public abstract class BaseRepository<T extends Identifiable> {
 
     // Delete matching records
     public boolean delete(Predicate<T> matcher) {
-        List<T> data = findAll();
+        List<T> data = readAll();
         boolean removed = data.removeIf(matcher);
         if (removed) {
             saveAll(data);
@@ -69,7 +69,7 @@ public abstract class BaseRepository<T extends Identifiable> {
     }
 
     public Optional<T> findByKey(String key) {
-        return findAll().stream()
+        return readAll().stream()
                 .filter(model -> model.getKey().equalsIgnoreCase(key))
                 .findFirst();
     }

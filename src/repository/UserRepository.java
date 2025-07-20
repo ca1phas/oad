@@ -1,7 +1,7 @@
 package repository;
 
 import model.User;
-import model.enums.Role;
+import model.enums.UserRole;
 
 import java.util.*;
 
@@ -16,7 +16,7 @@ public class UserRepository extends BaseRepository<User> {
         return new User(
                 row.get(0),
                 row.get(1),
-                Role.fromString(row.get(2)));
+                UserRole.fromString(row.get(2)));
     }
 
     @Override

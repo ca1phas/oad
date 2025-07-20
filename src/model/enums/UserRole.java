@@ -1,11 +1,11 @@
 package model.enums;
 
-public enum Role {
+public enum UserRole {
     ADMIN,
     MEMBER;
 
-    public static Role fromString(String role) {
-        for (Role r : Role.values())
+    public static UserRole fromString(String role) {
+        for (UserRole r : UserRole.values())
             if (r.name().equalsIgnoreCase(role.trim()))
                 return r;
         throw new IllegalArgumentException("Invalid role: " + role);
