@@ -3,9 +3,10 @@ package model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import model.base.Identifiable;
 import model.enums.ReservationStatus;
 
-public class Reservation {
+public class Reservation implements Identifiable {
     private int id;
     private int bookId;
     private String username;
@@ -72,5 +73,10 @@ public class Reservation {
         return id + ": Book " + bookId
                 + " reserved by " + username + " (" + status.toString() + ") on "
                 + reservationDate + ", from " + startDate + " to " + endDate + ".";
+    }
+
+    @Override
+    public String getKey() {
+        return String.valueOf(id);
     }
 }

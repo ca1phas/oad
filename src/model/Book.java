@@ -2,7 +2,9 @@ package model;
 
 import java.time.LocalDate;
 
-public class Book {
+import model.base.Identifiable;
+
+public class Book implements Identifiable {
     private int id;
     private String title;
     private String author;
@@ -71,5 +73,10 @@ public class Book {
                 + "in genre " + genre
                 + ", released on " + releasedDate
                 + ". File: " + filename;
+    }
+
+    @Override
+    public String getKey() {
+        return String.valueOf(id);
     }
 }

@@ -1,8 +1,9 @@
 package model;
 
+import model.base.Identifiable;
 import model.enums.Role;
 
-public class User {
+public class User implements Identifiable {
     private String username;
     private String password;
     private Role role;
@@ -40,5 +41,10 @@ public class User {
     @Override
     public String toString() {
         return username + " (" + role.toString() + ")";
+    }
+
+    @Override
+    public String getKey() {
+        return username;
     }
 }
