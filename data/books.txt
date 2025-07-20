@@ -1,0 +1,2 @@
+id|title|author|genre|releasedDate|filename
+1|Sample|Cas|Non-fiction|2025-07-20|sample
