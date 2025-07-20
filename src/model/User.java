@@ -1,6 +1,6 @@
 package model;
 
-import util.Role;
+import model.enums.Role;
 
 public class User {
     private String username;

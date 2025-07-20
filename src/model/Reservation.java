@@ -1,8 +1,9 @@
 package model;
 
-import util.ReservationStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import model.enums.ReservationStatus;
 
 public class Reservation {
     private int id;
