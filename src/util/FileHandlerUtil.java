@@ -1,36 +1,33 @@
 package util;
 
-import java.io.*;
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FileHandlerUtil {
-
-    private static final String DELIMITER = "\\|";
+    private static final String DELIMITER = "|";
 
     // Reads data lines (excluding header) and splits them
     public static List<List<String>> readData(String filePath) {
-        List<List<String>> records = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            reader.readLine(); // skip header
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.trim().split(DELIMITER);
-                List<String> fields = new ArrayList<>();
-                for (String part : parts) {
-                    fields.add(part.trim());
-                }
-                records.add(fields);
-            }
+        try (Stream<String> lines = Files.lines(Path.of(filePath))) {
+            return lines
+                    .skip(1) // skip header
+                    .map(line -> Arrays.stream(line.trim().split(DELIMITER))
+                            .map(String::trim)
+                            .collect(Collectors.toList()))
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             System.err.println("Error reading " + filePath + ": " + e.getMessage());
+            return new ArrayList<>();
         }
-        return records;
     }
 
     // Reads only the header
     public static String readHeader(String filePath) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            return reader.readLine();
+        try (Stream<String> lines = Files.lines(Path.of(filePath))) {
+            return lines.findFirst().orElse("");
         } catch (IOException e) {
             System.err.println("Error reading header from " + filePath + ": " + e.getMessage());
             return "";
@@ -39,11 +36,13 @@ public class FileHandlerUtil {
 
     // Writes header and all records
     public static void writeData(String filePath, String header, List<List<String>> records) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
-            writer.println(header);
-            for (List<String> row : records) {
-                writer.println(String.join("|", row));
-            }
+        List<String> lines = new ArrayList<>();
+        lines.add(header);
+        for (List<String> row : records) {
+            lines.add(String.join(DELIMITER, row));
+        }
+        try {
+            Files.write(Path.of(filePath), lines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             System.err.println("Error writing " + filePath + ": " + e.getMessage());
         }
@@ -51,8 +50,9 @@ public class FileHandlerUtil {
 
     // Appends a new data row
     public static void appendDataRow(String filePath, List<String> row) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, true))) {
-            writer.println(String.join("|", row));
+        String line = String.join(DELIMITER, row);
+        try {
+            Files.write(Path.of(filePath), Collections.singletonList(line), StandardOpenOption.APPEND);
         } catch (IOException e) {
             System.err.println("Error appending to " + filePath + ": " + e.getMessage());
         }
