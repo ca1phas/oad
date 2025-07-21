@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import model.User;
 import model.enums.UserRole;
 import repository.UserRepository;
-import util.PaginationHelper;
+import util.PaginationUtil;
 
 public class UserService {
     private final UserRepository userRepository;
@@ -121,9 +121,9 @@ public class UserService {
         return true;
     }
 
-    // FR35/36: Filter, sort users
-    public List<User> filterAndSortUsers(String usernameFilter, UserRole roleFilter,
-            String sortField, boolean ascending) {
+    // FR35 & FR36 & FR34: Filter + Sort + Paginate users
+    public List<User> filterSortPaginateUsers(String usernameFilter, UserRole roleFilter,
+            String sortField, boolean ascending, int pageNumber, int pageSize) {
         List<User> users = userRepository.readAll();
 
         // Filtering
@@ -151,16 +151,6 @@ public class UserService {
 
         users.sort(comparator);
 
-        return users;
-    }
-
-    // FR34: Paginate results
-    public List<User> getPaginatedUsers(List<User> users, int pageNumber, int pageSize) {
-        return PaginationHelper.paginate(users, pageNumber, pageSize);
-    }
-
-    // Admin utility: get all users (unfiltered)
-    public List<User> getAllUsers() {
-        return userRepository.readAll();
+        return PaginationUtil.paginate(users, pageNumber, pageSize);
     }
 }

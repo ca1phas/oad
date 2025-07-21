@@ -8,17 +8,17 @@ import model.enums.ReservationStatus;
 
 public class Reservation implements Identifiable {
     private int id;
-    private int bookId;
+    private Book book;
     private String username;
     private LocalDateTime reservationDate;
     private ReservationStatus status;
     private LocalDate startDate;
     private LocalDate endDate;
 
-    public Reservation(int id, int bookId, String username, LocalDateTime reservationDate,
+    public Reservation(int id, Book book, String username, LocalDateTime reservationDate,
             ReservationStatus status, LocalDate startDate, LocalDate endDate) {
         this.id = id;
-        this.bookId = bookId;
+        this.book = book;
         this.username = username;
         this.reservationDate = reservationDate;
         this.status = status;
@@ -31,8 +31,8 @@ public class Reservation implements Identifiable {
         return id;
     }
 
-    public int getBookId() {
-        return bookId;
+    public Book getBook() {
+        return book;
     }
 
     public String getUsername() {
@@ -70,7 +70,7 @@ public class Reservation implements Identifiable {
 
     @Override
     public String toString() {
-        return id + ": Book " + bookId
+        return id + ": \n" + book.toString() + "\n"
                 + " reserved by " + username + " (" + status.toString() + ") on "
                 + reservationDate + ", from " + startDate + " to " + endDate + ".";
     }

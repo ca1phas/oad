@@ -3,7 +3,7 @@ package service;
 import model.Book;
 import repository.BookRepository;
 import util.IDGeneratorUtil;
-import util.PaginationHelper;
+import util.PaginationUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,7 +31,7 @@ public class BookService {
         return true;
     }
 
-    // FR23&25: View book details (& Select book)
+    // FR23 & FR25: View book details (& Select book)
     public Optional<Book> viewBook(int id) {
         return bookRepository.findById(id);
     }
@@ -48,7 +48,7 @@ public class BookService {
         int pageSize = 20;
         try {
             List<String> lines = Files.readAllLines(filePath);
-            return PaginationHelper.paginate(lines, pageNumber, pageSize);
+            return PaginationUtil.paginate(lines, pageNumber, pageSize);
         } catch (IOException e) {
             return Collections.emptyList();
         }
@@ -135,8 +135,8 @@ public class BookService {
         return bookRepository.delete(bookId);
     }
 
-    // FR21 & FR22: Filter + Sort books
-    public List<Book> filterAndSortBooks(
+    // FR21 & FR22 & FR 20: Filter + Sort + Paginate books
+    public List<Book> filterSortPaginateBooks(
             String idFilter,
             String titleFilter,
             String authorFilter,
@@ -144,7 +144,9 @@ public class BookService {
             LocalDate releasedStart,
             LocalDate releasedEnd,
             String sortField,
-            boolean ascending) {
+            boolean ascending,
+            int pageNumber,
+            int pageSize) {
 
         List<Book> books = bookRepository.readAll();
 
@@ -204,11 +206,6 @@ public class BookService {
         }
 
         books.sort(comparator);
-        return books;
-    }
-
-    // FR20: Pagination
-    public List<Book> getPaginatedBooks(List<Book> books, int pageNumber, int pageSize) {
-        return PaginationHelper.paginate(books, pageNumber, pageSize);
+        return PaginationUtil.paginate(books, pageNumber, pageSize);
     }
 }

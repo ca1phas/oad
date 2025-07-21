@@ -3,7 +3,7 @@ package util;
 import java.util.Collections;
 import java.util.List;
 
-public class PaginationHelper<T> {
+public class PaginationUtil<T> {
 
     // Generic pagination method
     public static <T> List<T> paginate(List<T> items, int pageNumber, int pageSize) {
