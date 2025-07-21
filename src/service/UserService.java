@@ -6,22 +6,18 @@ import java.util.stream.Collectors;
 import model.User;
 import model.enums.UserRole;
 import repository.UserRepository;
+import util.PaginationHelper;
 
 public class UserService {
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserService() {
+        this.userRepository = new UserRepository();
     }
 
     // FR02: Sign up (member registration)
     public boolean registerUser(String username, String password, String confirmPassword) {
-        if (!password.equals(confirmPassword) || usernameExists(username))
-            return false;
-
-        User user = new User(username, password, UserRole.MEMBER);
-        userRepository.append(user);
-        return true;
+        return createUser(username, password, confirmPassword, UserRole.MEMBER, true);
     }
 
     // FR03: Log in
@@ -115,7 +111,6 @@ public class UserService {
             boolean isAdmin) {
         if (!isAdmin)
             return false;
-
         if (!password.equals(confirmPassword))
             return false;
         if (usernameExists(username))
@@ -160,13 +155,8 @@ public class UserService {
     }
 
     // FR34: Paginate results
-    public List<User> paginateUsers(List<User> users, int pageNumber, int pageSize) {
-        int fromIndex = Math.max((pageNumber - 1) * pageSize, 0);
-        int toIndex = Math.min(fromIndex + pageSize, users.size());
-
-        if (fromIndex >= users.size())
-            return Collections.emptyList();
-        return users.subList(fromIndex, toIndex);
+    public List<User> getPaginatedUsers(List<User> users, int pageNumber, int pageSize) {
+        return PaginationHelper.paginate(users, pageNumber, pageSize);
     }
 
     // Admin utility: get all users (unfiltered)

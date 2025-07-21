@@ -16,6 +16,16 @@ public abstract class BaseRepository<T extends Identifiable> {
         this.header = header;
     }
 
+    // Get the file path
+    public String getFilePath() {
+        return filePath;
+    }
+
+    // Get the header
+    public String getHeader() {
+        return header;
+    }
+
     // Abstract methods to be implemented by subclasses
     protected abstract T mapToModel(List<String> row);
 
