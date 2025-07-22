@@ -31,7 +31,7 @@ public class BookService {
         return true;
     }
 
-    // FR23 & FR25: View book details (& Select book)
+    // FR 15 & FR23 & FR25: View book details (& Select book)
     public Optional<Book> viewBook(int id) {
         return bookRepository.findById(id);
     }
@@ -151,36 +151,35 @@ public class BookService {
         List<Book> books = bookRepository.readAll();
 
         // Filtering
-        if (idFilter != null && !idFilter.isBlank()) {
+        if (idFilter != null && !idFilter.isBlank())
             books = books.stream()
                     .filter(b -> String.valueOf(b.getId()).equalsIgnoreCase(idFilter))
                     .collect(Collectors.toList());
-        }
-        if (titleFilter != null && !titleFilter.isBlank()) {
+
+        if (titleFilter != null && !titleFilter.isBlank())
             books = books.stream()
                     .filter(b -> b.getTitle().toLowerCase().contains(titleFilter.toLowerCase()))
                     .collect(Collectors.toList());
-        }
-        if (authorFilter != null && !authorFilter.isBlank()) {
+
+        if (authorFilter != null && !authorFilter.isBlank())
             books = books.stream()
                     .filter(b -> b.getAuthor().toLowerCase().contains(authorFilter.toLowerCase()))
                     .collect(Collectors.toList());
-        }
-        if (genreFilter != null && !genreFilter.isBlank()) {
+
+        if (genreFilter != null && !genreFilter.isBlank())
             books = books.stream()
                     .filter(b -> b.getGenre().toLowerCase().contains(genreFilter.toLowerCase()))
                     .collect(Collectors.toList());
-        }
-        if (releasedStart != null) {
+
+        if (releasedStart != null)
             books = books.stream()
                     .filter(b -> !b.getReleasedDate().isBefore(releasedStart))
                     .collect(Collectors.toList());
-        }
-        if (releasedEnd != null) {
+
+        if (releasedEnd != null)
             books = books.stream()
                     .filter(b -> !b.getReleasedDate().isAfter(releasedEnd))
                     .collect(Collectors.toList());
-        }
 
         // Sorting
         Comparator<Book> comparator = Comparator.comparing(Book::getTitle);
@@ -201,9 +200,8 @@ public class BookService {
                 comparator = Comparator.comparing(Book::getReleasedDate);
                 break;
         }
-        if (!ascending) {
+        if (!ascending)
             comparator = comparator.reversed();
-        }
 
         books.sort(comparator);
         return PaginationUtil.paginate(books, pageNumber, pageSize);

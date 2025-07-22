@@ -15,8 +15,13 @@ public class UserService {
         this.userRepository = new UserRepository();
     }
 
-    // FR02: Sign up (member registration)
-    public boolean registerUser(String username, String password, String confirmPassword) {
+    // Utility
+    public boolean usernameExists(String username) {
+        return userRepository.findByUsername(username).isPresent();
+    }
+
+    // FR02: Sign up
+    public boolean signup(String username, String password, String confirmPassword) {
         return createUser(username, password, confirmPassword, UserRole.MEMBER, true);
     }
 
@@ -26,14 +31,9 @@ public class UserService {
                 .filter(user -> user.getPassword().equals(password));
     }
 
-    // FR04 / FR37: View/Select user details
+    // FR04 & FR37: View & select user details
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
-    }
-
-    // Utility
-    public boolean usernameExists(String username) {
-        return userRepository.findByUsername(username).isPresent();
     }
 
     // FR05: Update username
@@ -67,7 +67,8 @@ public class UserService {
             return false;
 
         User user = optionalUser.get();
-        if (!isAdmin && !user.getPassword().equals(oldPassword))
+        if (!user.getPassword().equals(oldPassword)
+                || !newPassword.equals(confirmNewPassword))
             return false;
 
         user.setPassword(newPassword);
@@ -75,7 +76,7 @@ public class UserService {
         return true;
     }
 
-    // FR07: Update role (admin only)
+    // FR07: Update role
     public boolean updateRole(String targetUsername, UserRole newRole, boolean isAdmin) {
         if (!isAdmin)
             return false;
@@ -127,27 +128,23 @@ public class UserService {
         List<User> users = userRepository.readAll();
 
         // Filtering
-        if (usernameFilter != null && !usernameFilter.isBlank()) {
+        if (usernameFilter != null && !usernameFilter.isBlank())
             users = users.stream()
                     .filter(u -> u.getUsername().toLowerCase().contains(usernameFilter.toLowerCase()))
                     .collect(Collectors.toList());
-        }
 
-        if (roleFilter != null) {
+        if (roleFilter != null)
             users = users.stream()
                     .filter(u -> u.getRole() == roleFilter)
                     .collect(Collectors.toList());
-        }
 
         // Sorting
         Comparator<User> comparator = Comparator.comparing(User::getUsername);
-        if ("role".equalsIgnoreCase(sortField)) {
+        if ("role".equalsIgnoreCase(sortField))
             comparator = Comparator.comparing(user -> user.getRole().name());
-        }
 
-        if (!ascending) {
+        if (!ascending)
             comparator = comparator.reversed();
-        }
 
         users.sort(comparator);
 
