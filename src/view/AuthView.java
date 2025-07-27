@@ -1,6 +1,8 @@
 package view;
 
 import model.User;
+import model.enums.UserRole;
+
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -117,9 +119,9 @@ public class AuthView {
         String password = sc.nextLine();
 
         if (username.equals("admin") && password.equals("admin")) {
-            return Optional.of(new User("admin", "admin", "ADMIN"));
+        return Optional.of(new User("admin", "admin", UserRole.fromString("ADMIN")));
         } else if (username.equals("user") && password.equals("user")) {
-            return Optional.of(new User("user", "user", "USER"));
+        return Optional.of(new User("user", "user", UserRole.fromString("MEMBER")));
         } else {
             return Optional.empty();
         }
