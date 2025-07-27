@@ -1,6 +1,7 @@
 package view;
 
 import model.User;
+import model.enums.UserRole;
 
 import java.util.List;
 import java.util.Scanner;
@@ -35,9 +36,8 @@ public class UserView {
 
     public void viewUserDetails(User user) {
         System.out.println("\n=== User Details ===");
-        System.out.println("Username: " + user.getUsername());
-        System.out.println("Role: " + user.getRole());
-        // Add more fields if needed (e.g., registration date, email)
+        System.out.println("My Username: " + user.getUsername());
+        System.out.println("My Role: " + (user.getRole() == UserRole.ADMIN ? "Admin" : "Member"));
     }
 
     public void displayUsers(List<User> users) {

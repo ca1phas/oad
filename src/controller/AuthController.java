@@ -24,7 +24,7 @@ public class AuthController {
         String username = authView.promptUsername();
         String password = authView.promptPassword();
 
-        Optional<User> user = userService.findByUsername(username);
+        Optional<User> user = userService.login(username, password);
         if (user.isEmpty()) {
             authView.showUserNotFound();
             return Optional.empty();
@@ -50,11 +50,17 @@ public class AuthController {
             return;
         }
 
-        if (userService.findByUsername(username).isEmpty()) {
-            userService.createUser(username, password, "MEMBER", UserRole.MEMBER, true);
+        if (userService.usernameExists(username)) {
+        authView.showUserAlreadyExists();
+        return;
+        }
+
+        boolean success = userService.signup(username, password, confirmPassword);
+
+        if (success) {
             authView.showSignupSuccess();
         } else {
-            authView.showUserAlreadyExists();
+            authView.displayRegisterFailed("Unknown error during registration.");
         }
     }
 
