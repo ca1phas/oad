@@ -1,6 +1,7 @@
 package controller;
 
 import model.User;
+import model.enums.UserRole;
 import service.UserService;
 import view.AuthView;
 
@@ -57,23 +58,13 @@ public class AuthController {
         }
     }
 
-    public void handleAdminCreateUser() {
-        authView.showCreateUserHeader();
-        String username = authView.promptUsername();
-        String password = authView.promptPassword();
-        String confirmPassword = authView.promptConfirmPassword();
-        String role = authView.promptRole();
-
-        if (!password.equals(confirmPassword)) {
-            authView.showPasswordMismatch();
-            return;
-        }
-
-        if (userService.findByUsername(username).isEmpty()) {
-            userService.createUser(username, password, role);
-            authView.showUserCreated();
-        } else {
-            authView.showUserAlreadyExists();
+    public boolean createUser(String username, String password, String confirmPassword, String roleStr) {
+        try {
+            UserRole role = UserRole.valueOf(roleStr.toUpperCase());
+            return userService.createUser(username, password, confirmPassword, role, true);
+        } catch (IllegalArgumentException e) {
+            authView.displayMessage("Invalid role: " + roleStr);
+            return false;
         }
     }
 }
