@@ -50,7 +50,7 @@ public class AuthController {
         }
 
         if (userService.findByUsername(username).isEmpty()) {
-            userService.createUser(username, password, "MEMBER");
+            userService.createUser(username, password, "MEMBER", UserRole.MEMBER, true);
             authView.showSignupSuccess();
         } else {
             authView.showUserAlreadyExists();
