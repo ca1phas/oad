@@ -38,6 +38,10 @@ public class User implements Identifiable {
         this.role = role;
     }
 
+    public boolean isAdmin(){
+        return UserRole.ADMIN.equals(this.role);
+    }
+
     @Override
     public String toString() {
         return username + " (" + role.toString() + ")";
