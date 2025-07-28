@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FileHandlerUtil {
-    private static final String DELIMITER = "|";
+    private static final String DELIMITER = "\\|";
 
     // Reads data lines (excluding header) and splits them
     public static List<List<String>> readData(String filePath) {
