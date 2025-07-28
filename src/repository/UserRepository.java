@@ -17,7 +17,7 @@ public class UserRepository extends BaseRepository<User> {
                 Integer.parseInt(row.get(0)),
                 row.get(1),
                 row.get(2),
-                UserRole.fromString(row.get(2)));
+                UserRole.fromString(row.get(3)));
     }
 
     @Override
