@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 public class FileHandlerUtil {
     private static final String DELIMITER = "\\|";
+    private static final String SEPERATOR = "|";
 
     // Reads data lines (excluding header) and splits them
     public static List<List<String>> readData(String filePath) {
@@ -39,7 +40,7 @@ public class FileHandlerUtil {
         List<String> lines = new ArrayList<>();
         lines.add(header);
         for (List<String> row : records) {
-            lines.add(String.join(DELIMITER, row));
+            lines.add(String.join(SEPERATOR, row));
         }
         try {
             Files.write(Path.of(filePath), lines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -50,7 +51,7 @@ public class FileHandlerUtil {
 
     // Appends a new data row
     public static void appendDataRow(String filePath, List<String> row) {
-        String line = String.join(DELIMITER, row);
+        String line = String.join(SEPERATOR, row);
         try {
             Files.write(Path.of(filePath), Collections.singletonList(line), StandardOpenOption.APPEND);
         } catch (IOException e) {
