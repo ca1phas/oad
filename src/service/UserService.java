@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import model.User;
 import model.enums.UserRole;
 import repository.UserRepository;
+import util.IDGeneratorUtil;
 import util.PaginationUtil;
 
 public class UserService {
@@ -117,7 +118,8 @@ public class UserService {
         if (usernameExists(username))
             return false;
 
-        User user = new User(username, password, role);
+        int id = IDGeneratorUtil.generateId(userRepository.getFilePath());
+        User user = new User(id, username, password, role);
         userRepository.append(user);
         return true;
     }

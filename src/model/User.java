@@ -4,14 +4,20 @@ import model.base.Identifiable;
 import model.enums.UserRole;
 
 public class User implements Identifiable {
+    private int id;
     private String username;
     private String password;
     private UserRole role;
 
-    public User(String username, String password, UserRole role) {
+    public User(int id, String username, String password, UserRole role) {
+        this.id = id;
         this.username = username;
         this.password = password;
         this.role = role;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getUsername() {
@@ -38,7 +44,7 @@ public class User implements Identifiable {
         this.role = role;
     }
 
-    public boolean isAdmin(){
+    public boolean isAdmin() {
         return UserRole.ADMIN.equals(this.role);
     }
 
@@ -49,6 +55,6 @@ public class User implements Identifiable {
 
     @Override
     public String getKey() {
-        return username;
+        return String.valueOf(id);
     }
 }
