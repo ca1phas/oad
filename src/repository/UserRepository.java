@@ -30,7 +30,9 @@ public class UserRepository extends BaseRepository<User> {
     }
 
     public Optional<User> findByUsername(String username) {
-        return findByKey(username);
+        return readAll().stream()
+                .filter(u -> u.getUsername().equalsIgnoreCase(username))
+                .findFirst();
     }
 
     public boolean update(User updated) {
