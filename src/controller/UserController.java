@@ -1,12 +1,14 @@
 package controller;
 
 import model.User;
+import model.enums.UserRole;
 import service.UserService;
 import view.UserView;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.io.Console;
 
 public class UserController {
     private final Scanner sc;
@@ -19,10 +21,10 @@ public class UserController {
         this.userView = new UserView(sc);
     }
 
-    public void handleAccountMenu(User currentUser) {
+    public boolean handleAccountMenu(User currentUser) {
         boolean inMenu = true;
         while (inMenu) {
-            userView.displayAccountMenu();
+            userView.displayAccountMenu(currentUser);
             String choice = sc.nextLine();
             switch (choice) {
                 case "1":
@@ -31,49 +33,102 @@ public class UserController {
                 case "2":
                     handleUpdateUsername(currentUser);
                     break;
+
                 case "3":
                     handleUpdatePassword(currentUser);
                     break;
+
                 case "4":
-                    handleUpdateRole(currentUser);
+                    if (currentUser.isAdmin()){
+                        handleUpdateRole(currentUser);
+                    } else {
+                        boolean deletedOwnAccount = handleDeleteUser(currentUser);
+                        if (deletedOwnAccount) return true;
+                        inMenu = false;
+                    }
                     break;
+
                 case "5":
-                    inMenu = !handleDeleteUser(currentUser);
+                    if (currentUser.isAdmin()){
+                        boolean deletedOther = handleDeleteUser(currentUser);
+                    } else {
+                        inMenu = false;
+                    }
                     break;
+
                 case "6":
-                    inMenu = false;
+                    if (currentUser.isAdmin()){
+                        inMenu = false;
+                    } else {
+                        System.out.print("Invalid option. Try again.");
+                    }
                     break;
+
                 default:
                     System.out.println("Invalid option. Try again.");
                     break;
             }
         }
+        return false;
     }
 
     public void handleUpdateUsername(User currentUser) {
         userView.prompt("Enter new username: ");
         String newUsername = sc.nextLine();
-        boolean success = userService.updateUsername(
-            currentUser.getUsername(), newUsername,
+        
+        // Reason checks before calling service
+        if (newUsername == null || newUsername.isBlank()) {
+            userView.displayMessage("Username update failed: Username cannot be empty.");
+            return;
+        }
+
+        if (userService.usernameExists(newUsername)) {
+            userView.displayMessage("Username update failed: Username already exists.");
+            return;
+        }
+
+        if (!currentUser.isAdmin() && !currentUser.getUsername().equals(currentUser.getUsername())) {
+            userView.displayMessage("Username update failed: Permission denied.");
+            return;
+        }
+    
+        // Proceed with service call
+        boolean success = userService.updateUsername(currentUser.getUsername(), newUsername,
             currentUser.isAdmin(), currentUser.getUsername()
         );
-        userView.displayMessage(success ? "Username updated successfully." : "Username update failed.");
+
+        if (success) {
+            userView.displayMessage("Username updated successfully.");
+        } else {
+            userView.displayMessage("Username update failed: Unexpected error occurred.");
+        
+        }
     }
 
     public void handleUpdatePassword(User currentUser) {
-        userView.prompt("Enter old password: ");
-        String oldPassword = sc.nextLine();
-        userView.prompt("Enter new password: ");
-        String newPassword = sc.nextLine();
-        userView.prompt("Confirm new password: ");
-        String confirm = sc.nextLine();
+        String oldPassword = userView.promptPassword("Enter old password: ");
+        String newPassword = userView.promptPassword("Enter new password: ");
+        String confirm = userView.promptPassword("Confirm new password: ");
+
+        if (newPassword == null || newPassword.isBlank() || confirm == null){
+            userView.displayMessage("Password update failed. New password cannot be empty or spaces.");
+            return;
+        }
+
+        if (!newPassword.equals(confirm)){
+            userView.displayMessage("Password update failed. New password and confirmation do not match.");
+            return;
+        }
 
         boolean success = userService.updatePassword(
-            currentUser.getUsername(), oldPassword,
-            newPassword, confirm,
+            currentUser.getUsername(), oldPassword, newPassword, confirm,
             currentUser.isAdmin(), currentUser.getUsername()
         );
-        userView.displayMessage(success ? "Password updated successfully." : "Password update failed.");
+
+        if (success){
+            userView.displayMessage(success ? "Password updated successfully." : "Password update failed. Your old password might be wrong.");
+
+        }
     }
 
     public void handleUpdateRole(User currentUser) {
@@ -90,14 +145,34 @@ public class UserController {
     }
 
     public boolean handleDeleteUser(User currentUser) {
-        userView.prompt("Enter username to delete: ");
-        String username = sc.nextLine();
-        boolean deleted = userService.deleteUser(
-            username, currentUser.isAdmin(), currentUser.getUsername()
-        );
-        userView.displayMessage(deleted ? "User deleted successfully." : "Delete failed.");
-        return deleted && username.equals(currentUser.getUsername());
+        String usernameToDelete;
+
+        if (!currentUser.isAdmin()) {
+            userView.prompt("Are you sure you want to delete your account? (yes/no): ");
+            String confirm = sc.nextLine().trim().toLowerCase();
+            if (!confirm.equals("yes")) {
+                userView.displayMessage("Account deletion cancelled.");
+                return false;
+            }
+
+            usernameToDelete = currentUser.getUsername(); // auto-set
+        } else {
+        // Admin can choose any username to delete
+            userView.prompt("Enter username to delete: ");
+            usernameToDelete = sc.nextLine();
+        }
+
+        boolean deleted = userService.deleteUser(usernameToDelete, currentUser.isAdmin(), currentUser.getUsername());
+
+        if (deleted && usernameToDelete.equals(currentUser.getUsername())) {
+            userView.displayMessage("Account deleted successfully.\n\nYou have been logged out because your account was deleted.");
+        } else {
+            userView.displayMessage(deleted ? "User deleted successfully." : "Delete failed.");
+        }
+
+        return deleted && usernameToDelete.equals(currentUser.getUsername());
     }
+
 
     public void handleUserManagementMenu(User currentUser) {
         if (!currentUser.isAdmin()) {
@@ -114,6 +189,7 @@ public class UserController {
                     List<User> firstPage = userService.filterSortPaginateUsers(
                         null, null, "username", true, 1, 10);
                     userView.displayUsers(firstPage);
+                    break;
                 case "2":
                     handleFilterAndSort();
                     break;

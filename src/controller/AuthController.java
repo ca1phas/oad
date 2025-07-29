@@ -41,9 +41,10 @@ public class AuthController {
 
     public void handleSignup() {
         authView.showSignupHeader();
-        String username = authView.promptUsername();
-        String password = authView.promptPassword();
-        String confirmPassword = authView.promptConfirmPassword();
+        userView.prompt("Enter username: ");
+        String username = sc.nextLine();
+        String password = authView.promptPassword("Enter password: ");
+        String confirmPassword = authView.promptConfirmPassword("Confirm password: ");
 
         if (!password.equals(confirmPassword)) {
             authView.showPasswordMismatch();

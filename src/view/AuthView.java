@@ -55,7 +55,7 @@ public class AuthView {
     }
 
     public void showLoginSuccess(User user) {
-        System.out.println("Login successful. Welcome, " + user.getUsername() + "!");
+        System.out.println("Login successful.\n\nWelcome, " + user.getUsername() + "!");
     }
 
     public void displayLoginSuccess(User user) {
@@ -72,7 +72,8 @@ public class AuthView {
     }
 
     public String promptConfirmPassword() {
-        System.out.print("Confirm password: ");
+        String confirm = userView.promptPassword("Confirm password: ")
+
         return sc.nextLine();
     }
 
@@ -110,19 +111,23 @@ public class AuthView {
         System.out.println("User created successfully.");
     }
 
-    // === Optional Prompted Login (legacy/demo/testing) ===
     public Optional<User> promptLogin() {
         System.out.print("Enter username: ");
         String username = sc.nextLine();
 
-        System.out.print("Enter password: ");
-        String password = sc.nextLine();
+        String password = userView.promptPassword("Enter password: ");
+
+        if (username.isBlank() || password.isBlank()){
+            System.out.println("Username and password cannot be empty.");
+            return Optional.empty();
+        }
 
         if (username.equals("admin") && password.equals("admin")) {
         return Optional.of(new User("admin", "admin", UserRole.fromString("ADMIN")));
         } else if (username.equals("user") && password.equals("user")) {
-        return Optional.of(new User("user", "user", UserRole.fromString("MEMBER")));
+            return Optional.of(new User("user", "user", UserRole.fromString("MEMBER")));
         } else {
+            System.out.println("Login failed. Invalid username or password.");
             return Optional.empty();
         }
     }
