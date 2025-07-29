@@ -2,7 +2,6 @@ package controller;
 
 import model.User;
 import model.enums.UserRole;
-import model.enums.UserRole;
 import service.UserService;
 import view.UserView;
 
@@ -23,10 +22,8 @@ public class UserController {
     }
 
     public boolean handleAccountMenu(User currentUser) {
-    public boolean handleAccountMenu(User currentUser) {
         boolean inMenu = true;
         while (inMenu) {
-            userView.displayAccountMenu(currentUser);
             userView.displayAccountMenu(currentUser);
             String choice = sc.nextLine();
             switch (choice) {
@@ -36,13 +33,9 @@ public class UserController {
                 case "2":
                     handleUpdateUsername(currentUser);
                     break;
-
-
                 case "3":
                     handleUpdatePassword(currentUser);
                     break;
-
-
                 case "4":
                     if (currentUser.isAdmin()){
                         handleUpdateRole(currentUser);
@@ -51,23 +44,14 @@ public class UserController {
                         if (deletedOwnAccount) return true;
                         inMenu = false;
                     }
-                    break;
-
-
+                    break；
                 case "5":
                     if (currentUser.isAdmin()){
                         boolean deletedOther = handleDeleteUser(currentUser);
                     } else {
                         inMenu = false;
                     }
-                    if (currentUser.isAdmin()){
-                        boolean deletedOther = handleDeleteUser(currentUser);
-                    } else {
-                        inMenu = false;
-                    }
                     break;
-
-
                 case "6":
                     if (currentUser.isAdmin()){
                         inMenu = false;
@@ -75,8 +59,6 @@ public class UserController {
                         System.out.print("Invalid option. Try again.");
                     }
                     break;
-
-
                 default:
                     System.out.println("Invalid option. Try again.");
                     break;
@@ -139,8 +121,8 @@ public class UserController {
         );
 
         if (success){
-            userView.displayMessage(success ? "Password updated successfully." : "Password update failed. Your old password might be wrong.");
-
+            userView.displayMessage(success ? "Password updated successfully." : 
+            "Password update failed. Your old password might be wrong.");
         }
     }
 
@@ -158,32 +140,6 @@ public class UserController {
     }
 
     public boolean handleDeleteUser(User currentUser) {
-        String usernameToDelete;
-
-        if (!currentUser.isAdmin()) {
-            userView.prompt("Are you sure you want to delete your account? (yes/no): ");
-            String confirm = sc.nextLine().trim().toLowerCase();
-            if (!confirm.equals("yes")) {
-                userView.displayMessage("Account deletion cancelled.");
-                return false;
-            }
-
-            usernameToDelete = currentUser.getUsername(); // auto-set
-        } else {
-        // Admin can choose any username to delete
-            userView.prompt("Enter username to delete: ");
-            usernameToDelete = sc.nextLine();
-        }
-
-        boolean deleted = userService.deleteUser(usernameToDelete, currentUser.isAdmin(), currentUser.getUsername());
-
-        if (deleted && usernameToDelete.equals(currentUser.getUsername())) {
-            userView.displayMessage("Account deleted successfully.\n\nYou have been logged out because your account was deleted.");
-        } else {
-            userView.displayMessage(deleted ? "User deleted successfully." : "Delete failed.");
-        }
-
-        return deleted && usernameToDelete.equals(currentUser.getUsername());
         String usernameToDelete;
 
         if (!currentUser.isAdmin()) {
