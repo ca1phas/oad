@@ -37,23 +37,24 @@ public class UserController {
                     handleUpdatePassword(currentUser);
                     break;
                 case "4":
-                    if (currentUser.isAdmin()){
+                    if (currentUser.isAdmin()) {
                         handleUpdateRole(currentUser);
                     } else {
                         boolean deletedOwnAccount = handleDeleteUser(currentUser);
-                        if (deletedOwnAccount) return true;
+                        if (deletedOwnAccount)
+                            return true;
                         inMenu = false;
                     }
-                    break；
+                    break;
                 case "5":
-                    if (currentUser.isAdmin()){
+                    if (currentUser.isAdmin()) {
                         boolean deletedOther = handleDeleteUser(currentUser);
                     } else {
                         inMenu = false;
                     }
                     break;
                 case "6":
-                    if (currentUser.isAdmin()){
+                    if (currentUser.isAdmin()) {
                         inMenu = false;
                     } else {
                         System.out.print("Invalid option. Try again.");
@@ -70,7 +71,7 @@ public class UserController {
     public void handleUpdateUsername(User currentUser) {
         userView.prompt("Enter new username: ");
         String newUsername = sc.nextLine();
-        
+
         // Reason checks before calling service
         if (newUsername == null || newUsername.isBlank()) {
             userView.displayMessage("Username update failed: Username cannot be empty.");
@@ -86,17 +87,16 @@ public class UserController {
             userView.displayMessage("Username update failed: Permission denied.");
             return;
         }
-    
+
         // Proceed with service call
         boolean success = userService.updateUsername(currentUser.getUsername(), newUsername,
-            currentUser.isAdmin(), currentUser.getUsername()
-        );
+                currentUser.isAdmin(), currentUser.getUsername());
 
         if (success) {
             userView.displayMessage("Username updated successfully.");
         } else {
             userView.displayMessage("Username update failed: Unexpected error occurred.");
-        
+
         }
     }
 
@@ -105,24 +105,23 @@ public class UserController {
         String newPassword = userView.promptPassword("Enter new password: ");
         String confirm = userView.promptPassword("Confirm new password: ");
 
-        if (newPassword == null || newPassword.isBlank() || confirm == null){
+        if (newPassword == null || newPassword.isBlank() || confirm == null) {
             userView.displayMessage("Password update failed. New password cannot be empty or spaces.");
             return;
         }
 
-        if (!newPassword.equals(confirm)){
+        if (!newPassword.equals(confirm)) {
             userView.displayMessage("Password update failed. New password and confirmation do not match.");
             return;
         }
 
         boolean success = userService.updatePassword(
-            currentUser.getUsername(), oldPassword, newPassword, confirm,
-            currentUser.isAdmin(), currentUser.getUsername()
-        );
+                currentUser.getUsername(), oldPassword, newPassword, confirm,
+                currentUser.isAdmin(), currentUser.getUsername());
 
-        if (success){
-            userView.displayMessage(success ? "Password updated successfully." : 
-            "Password update failed. Your old password might be wrong.");
+        if (success) {
+            userView.displayMessage(success ? "Password updated successfully."
+                    : "Password update failed. Your old password might be wrong.");
         }
     }
 
@@ -135,7 +134,8 @@ public class UserController {
         String username = sc.nextLine();
         userView.prompt("Enter new role (ADMIN/USER): ");
         String role = sc.nextLine();
-        boolean success = userService.updateRole(username, model.enums.UserRole.valueOf(role.toUpperCase()), currentUser.isAdmin());
+        boolean success = userService.updateRole(username, model.enums.UserRole.valueOf(role.toUpperCase()),
+                currentUser.isAdmin());
         userView.displayMessage(success ? "Role updated successfully." : "Role update failed.");
     }
 
@@ -152,7 +152,7 @@ public class UserController {
 
             usernameToDelete = currentUser.getUsername(); // auto-set
         } else {
-        // Admin can choose any username to delete
+            // Admin can choose any username to delete
             userView.prompt("Enter username to delete: ");
             usernameToDelete = sc.nextLine();
         }
@@ -160,15 +160,14 @@ public class UserController {
         boolean deleted = userService.deleteUser(usernameToDelete, currentUser.isAdmin(), currentUser.getUsername());
 
         if (deleted && usernameToDelete.equals(currentUser.getUsername())) {
-            userView.displayMessage("Account deleted successfully.\n\nYou have been logged out because your account was deleted.");
+            userView.displayMessage(
+                    "Account deleted successfully.\n\nYou have been logged out because your account was deleted.");
         } else {
             userView.displayMessage(deleted ? "User deleted successfully." : "Delete failed.");
         }
 
         return deleted && usernameToDelete.equals(currentUser.getUsername());
     }
-
-
 
     public void handleUserManagementMenu(User currentUser) {
         if (!currentUser.isAdmin()) {
@@ -183,7 +182,7 @@ public class UserController {
             switch (choice) {
                 case "1":
                     List<User> firstPage = userService.filterSortPaginateUsers(
-                        null, null, "username", true, 1, 10);
+                            null, null, "username", true, 1, 10);
                     userView.displayUsers(firstPage);
                     break;
                 case "2":
@@ -251,10 +250,9 @@ public class UserController {
         String role = sc.nextLine();
 
         boolean created = userService.createUser(
-            username, password, confirm,
-            model.enums.UserRole.valueOf(role.toUpperCase()),
-            currentUser.isAdmin()
-        );
+                username, password, confirm,
+                model.enums.UserRole.valueOf(role.toUpperCase()),
+                currentUser.isAdmin());
         userView.displayMessage(created ? "User created successfully." : "User creation failed.");
     }
 }

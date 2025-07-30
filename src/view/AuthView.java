@@ -72,7 +72,7 @@ public class AuthView {
     }
 
     public String promptConfirmPassword() {
-        String confirm = userView.promptPassword("Confirm password: ")
+        String confirm = userView.promptPassword("Confirm password: ");
 
         return sc.nextLine();
     }
@@ -117,13 +117,13 @@ public class AuthView {
 
         String password = userView.promptPassword("Enter password: ");
 
-        if (username.isBlank() || password.isBlank()){
+        if (username.isBlank() || password.isBlank()) {
             System.out.println("Username and password cannot be empty.");
             return Optional.empty();
         }
 
         if (username.equals("admin") && password.equals("admin")) {
-        return Optional.of(new User("admin", "admin", UserRole.fromString("ADMIN")));
+            return Optional.of(new User("admin", "admin", UserRole.fromString("ADMIN")));
         } else if (username.equals("user") && password.equals("user")) {
             return Optional.of(new User("user", "user", UserRole.fromString("MEMBER")));
         } else {
