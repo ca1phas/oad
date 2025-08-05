@@ -94,6 +94,7 @@ public class UserController {
 
         if (success) {
             userView.displayMessage("Username updated successfully.");
+            currentUser.setUsername(newUsername);
         } else {
             userView.displayMessage("Username update failed: Unexpected error occurred.");
 
