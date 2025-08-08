@@ -42,10 +42,10 @@ public class UserController {
                     } else {
                         boolean deletedOwnAccount = handleDeleteUser(currentUser);
                         if (deletedOwnAccount)
-                            return true;
-                        inMenu = false;
-                    }
-                    break;
+                            System.out.println("You have been logged out because your account was deleted.");
+                            System.exit(0);
+                        }
+                        break;
                 case "5":
                     if (currentUser.isAdmin()) {
                         boolean deletedOther = handleDeleteUser(currentUser);
@@ -94,6 +94,7 @@ public class UserController {
 
         if (success) {
             userView.displayMessage("Username updated successfully.");
+            currentUser.setUsername(newUsername);
         } else {
             userView.displayMessage("Username update failed: Unexpected error occurred.");
 
@@ -162,6 +163,7 @@ public class UserController {
         if (deleted && usernameToDelete.equals(currentUser.getUsername())) {
             userView.displayMessage(
                     "Account deleted successfully.\n\nYou have been logged out because your account was deleted.");
+                    System.exit(0);
         } else {
             userView.displayMessage(deleted ? "User deleted successfully." : "Delete failed.");
         }
@@ -240,19 +242,26 @@ public class UserController {
     }
 
     public void handleAdminCreateUser(User currentUser) {
+        if (!currentUser.isAdmin()){
+            userView.displayMessage("Only admins can create users.");
+            return;
+        }
+
         userView.prompt("Enter new username: ");
         String username = sc.nextLine();
         userView.prompt("Enter password: ");
         String password = sc.nextLine();
         userView.prompt("Confirm password: ");
         String confirm = sc.nextLine();
-        userView.prompt("Enter role (ADMIN/USER): ");
+        userView.prompt("Enter role (ADMIN/MEMBER): ");
         String role = sc.nextLine();
 
-        boolean created = userService.createUser(
-                username, password, confirm,
-                model.enums.UserRole.valueOf(role.toUpperCase()),
-                currentUser.isAdmin());
-        userView.displayMessage(created ? "User created successfully." : "User creation failed.");
+        try {
+            UserRole userRole = UserRole.valueOf(role.toUpperCase());
+            boolean created = userService.createUser(username, password, confirm, userRole, true);
+            userView.displayMessage(created ? "User created successfully." : "User creation failed.");
+        } catch (IllegalArgumentException e){
+            userView.displayMessage("Invalid role entered. Please enter either ADMIN or MEMBER.");
+        }
     }
 }

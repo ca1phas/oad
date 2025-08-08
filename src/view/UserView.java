@@ -17,12 +17,12 @@ public class UserView {
     public void displayAccountMenu(User currentUser) {
         System.out.println("\n=== My Account ===");
         System.out.println("1. View My Details");
-        System.out.println("2. Update Username");
-        System.out.println("3. Update Password");
+        System.out.println("2. Update My Username");
+        System.out.println("3. Update My Password");
 
         if(currentUser.isAdmin()){
-            System.out.println("4. Update Role");
-            System.out.println("5. Delete My Account");
+            System.out.println("4. Update User Role");
+            System.out.println("5. Delete User Account");
             System.out.println("6. Back");
 
         } else {
@@ -78,20 +78,24 @@ public class UserView {
 
     public String promptPassword(String label){
         Console console = System.console();
-        if (console != null){
-            System.out.print(label + " (press [u] to unhide or just press enter to hide): ");
-            String choice = sc.nextLine().trim().toLowerCase();
+        System.out.print(label + " (press [u] to unhide or just press enter to hide): ");
+        String choice = sc.nextLine().trim();
 
-            if (choice.equals("u")){
-                System.out.print(label + ": ");
-                return sc.nextLine();
-            } else {
-                char[] passwordChars = console.readPassword(label + ": ");
-                return passwordChars != null ? new String(passwordChars) : "";
-            }
+        if (choice.toLowerCase().startsWith("u") && choice.length() > 1){
+            return choice.substring(1).trim();
+        }
+
+        if (choice.equalsIgnoreCase("u")){
+            System.out.print(label + ": ");
+            return sc.nextLine().trim();
+        }
+
+        if (console != null){
+            char[] passwordChars = console.readPassword(label + ": ");
+                return passwordChars != null ? new String(passwordChars).trim() : "";
         } else {
             System.out.print(label + ": ");
-            return sc.nextLine();
+            return sc.nextLine().trim();
         }
     }
 

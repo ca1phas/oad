@@ -42,8 +42,14 @@ public class AuthView {
     }
 
     public String promptPassword() {
-        System.out.print("Enter password: ");
+       System.out.print("Enter password: ");
         return sc.nextLine();
+    }
+
+    // Overloaded method:
+    public String promptPassword(String message) {
+        System.out.print(message);
+        return sc.nextLine(); 
     }
 
     public void showUserNotFound() {
@@ -72,17 +78,24 @@ public class AuthView {
     }
 
     public String promptConfirmPassword() {
-        String confirm = userView.promptPassword("Confirm password: ");
+        return promptPassword();
+    }
 
+    // Overloaded method:
+    public String promptConfirmPassword(String message) {
+        System.out.print(message);
         return sc.nextLine();
     }
+
 
     public void showPasswordMismatch() {
         System.out.println("Password and confirmation do not match.");
     }
 
-    public void showUserAlreadyExists() {
-        System.out.println("User already exists.");
+    public String showUserAlreadyExists() {
+        String msg = "User already exists.";
+        System.out.println(msg);
+        return msg;
     }
 
     public void showSignupSuccess() {
@@ -97,6 +110,11 @@ public class AuthView {
         System.out.println("Registration failed: " + reason);
     }
 
+    public void showSignupAndAutoLoginSuccess(User user){
+        System.out.println("Sign-up successful! \nAuto-login successful!\n");
+        System.out.println("Welcome, " + user.getUsername() + "!");
+    }
+
     // === Admin Create User ===
     public void showCreateUserHeader() {
         System.out.println("\n=== Create New User (Admin) ===");
@@ -109,26 +127,5 @@ public class AuthView {
 
     public void showUserCreated() {
         System.out.println("User created successfully.");
-    }
-
-    public Optional<User> promptLogin() {
-        System.out.print("Enter username: ");
-        String username = sc.nextLine();
-
-        String password = userView.promptPassword("Enter password: ");
-
-        if (username.isBlank() || password.isBlank()) {
-            System.out.println("Username and password cannot be empty.");
-            return Optional.empty();
-        }
-
-        if (username.equals("admin") && password.equals("admin")) {
-            return Optional.of(new User("admin", "admin", UserRole.fromString("ADMIN")));
-        } else if (username.equals("user") && password.equals("user")) {
-            return Optional.of(new User("user", "user", UserRole.fromString("MEMBER")));
-        } else {
-            System.out.println("Login failed. Invalid username or password.");
-            return Optional.empty();
-        }
     }
 }
