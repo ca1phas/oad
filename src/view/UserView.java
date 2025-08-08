@@ -14,21 +14,14 @@ public class UserView {
         this.sc = sc;
     }
 
-    public void displayAccountMenu(User currentUser) {
+    public void displayAccountMenu(User user) {
         System.out.println("\n=== My Account ===");
-        System.out.println("1. View My Details");
-        System.out.println("2. Update My Username");
-        System.out.println("3. Update My Password");
-
-        if(currentUser.isAdmin()){
-            System.out.println("4. Update User Role");
-            System.out.println("5. Delete User Account");
-            System.out.println("6. Back");
-
-        } else {
-            System.out.println("4. Delete My Account");
-            System.out.println("5. Back");
-        }
+        System.out.println("Username: " + user.getUsername());
+        System.out.println("Role: " + (user.getRole() == UserRole.ADMIN ? "Admin" : "Member"));
+        System.out.println("1. Update My Username");
+        System.out.println("2. Update My Password");
+        System.out.println("3. Delete My Account");
+        System.out.println("4. Back");
         System.out.print("Enter your choice: ");
     }
 
@@ -38,6 +31,18 @@ public class UserView {
         System.out.println("2. Filter & Sort Users");
         System.out.println("3. View User Details");
         System.out.println("4. Register New User");
+        System.out.println("5. Back");
+        System.out.print("Enter your choice: ");
+    }
+
+    public void displayUserDetailMenu(User user) {
+        System.out.println("\n=== User Details ===");
+        System.out.println("Username: " + user.getUsername());
+        System.out.println("Role: " + (user.getRole() == UserRole.ADMIN ? "Admin" : "Member"));
+        System.out.println("1. Update User Name");
+        System.out.println("2. Update User Password");
+        System.out.println("3. Update User Role");
+        System.out.println("4. Delete User Account");
         System.out.println("5. Back");
         System.out.print("Enter your choice: ");
     }
@@ -65,12 +70,28 @@ public class UserView {
         }
     }
 
-    public void prompt(String message) {
+    public String promptString(String message) {
         System.out.print(message);
+        return sc.nextLine().trim();
+    }
+
+    public int promptInt(String message){
+        while (true) {
+            System.out.print(message);
+            try {
+                return Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e){
+                System.out.println("Invalid input. Please enter a number.");
+            }
+        }
     }
 
     public void displayMessage(String message) {
         System.out.println(message);
+    }
+
+    public void prompt(String message){
+        System.out.print(message);
     }
 
     public void displayUsers(List<User> users) {
@@ -88,21 +109,15 @@ public class UserView {
         }
     }
 
-    public void viewUserDetails(User user) {
-        boolean stayInView = true;
-        while (stayInView){
-            System.out.println("\n=== User Details ===");
-            System.out.println("Username: " + user.getUsername());
-            System.out.println("Role: " + (user.getRole() == UserRole.ADMIN ? "Admin" : "Member"));
-            System.out.println("0. Back");
-            System.out.print("Enter your choice: ");
-
-            String input = sc.nextLine();
-            if(input.equals("0")){
-                stayInView = false;
-            } else{
-                System.out.println("Invalid input. PLease press 0 to go back.");
-            }
-        } 
+    public int viewUserDetails(User user) {
+        System.out.println("\n=== User Details ===");
+        System.out.println("Username: " + user.getUsername());
+        System.out.println("Role: " + (user.getRole() == UserRole.ADMIN ? "Admin" : "Member"));
+        System.out.println("1. Update Username");
+        System.out.println("2. Update User Password");
+        System.out.println("3. Update User Role");
+        System.out.println("4. Delete User Account");
+        System.out.println("5. Back");
+        return promptInt("Enter your choice: ");
     }
 }

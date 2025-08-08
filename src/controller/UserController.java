@@ -8,12 +8,12 @@ import view.UserView;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
-import java.io.Console;
 
 public class UserController {
     private final Scanner sc;
     private final UserService userService;
     private final UserView userView;
+    private User currentUser;
 
     public UserController(Scanner sc) {
         this.sc = sc;
@@ -21,89 +21,108 @@ public class UserController {
         this.userView = new UserView(sc);
     }
 
-    public boolean handleAccountMenu(User currentUser) {
-        boolean inMenu = true;
-        while (inMenu) {
+    public void setCurrentUser(User currentUser){
+        this.currentUser = currentUser;
+    }
+
+    public void handleAccountMenu(User currentUser) {
+        while (true) {
             userView.displayAccountMenu(currentUser);
-            String choice = sc.nextLine();
+            String choice = sc.nextLine().trim();
+
             switch (choice) {
                 case "1":
-                    userView.viewUserDetails(currentUser);
-                    break;
-                case "2":
                     handleUpdateUsername(currentUser);
                     break;
-                case "3":
+                case "2":
                     handleUpdatePassword(currentUser);
                     break;
+                case "3":
+                    if (handleDeleteUser(currentUser, currentUser)) {
+                        System.out.println("Your account has been deleted.");
+                        System.exit(0);
+                    }
+                    break;
                 case "4":
-                    if (currentUser.isAdmin()) {
-                        handleUpdateRole(currentUser);
-                    } else {
-                        boolean deletedOwnAccount = handleDeleteUser(currentUser);
-                        if (deletedOwnAccount)
-                            System.out.println("You have been logged out because your account was deleted.");
-                            System.exit(0);
-                        }
-                        break;
-                case "5":
-                    if (currentUser.isAdmin()) {
-                        boolean deletedOther = handleDeleteUser(currentUser);
-                    } else {
-                        inMenu = false;
-                    }
-                    break;
-                case "6":
-                    if (currentUser.isAdmin()) {
-                        inMenu = false;
-                    } else {
-                        System.out.print("Invalid option. Try again.");
-                    }
-                    break;
+                    System.out.println("Returning to previous menu...");
+                    return;
                 default:
-                    System.out.println("Invalid option. Try again.");
+                    System.out.println("Invalid option.");
                     break;
             }
-        }
-        return false;
+        } 
     }
 
     public void handleUserManagementMenu(User currentUser) {
-        if (!currentUser.isAdmin()) {
-            userView.displayMessage("Access denied: Admin only.");
+        if (!currentUser.isAdmin()){
+            System.out.print("Access denied.");
             return;
         }
-
-        boolean inMenu = true;
-        while (inMenu) {
+        
+        while(true) {
             userView.displayUserManagementMenu();
-            String choice = sc.nextLine();
+            int choice = userView.promptInt("Enter your choice: ");
             switch (choice) {
-                case "1":
+                case 1:
                     handleViewByPage();
                     break;
-                case "2":
+                case 2:
                     handleFilterAndSort();
                     break;
-                case "3":
-                    handleViewOtherUser(currentUser);
+                case 3:
+                    handleViewUserDetails(currentUser);
                     break;
-                case "4":
+                case 4:
                     handleAdminCreateUser(currentUser);
                     break;
-                case "5":
-                    inMenu = false;
-                    break;
+                case 5:
+                    System.out.println("Returning to admin dashboard...");
+                    return;
                 default:
-                    userView.displayMessage("Invalid option. Try again.");
+                    System.out.println("Invalid option.");
                     break;
             }
         }
     }
 
+    public void handleUserDetailView(User currentUser) {
+        String username = userView.promptString("Enter username to view details: ");
+        Optional<User> userOpt = userService.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            System.out.println("User not found.");
+            return;
+        }
+        User selectedUser = userOpt.get();
+        while (true) {
+            userView.displayUserDetailMenu(selectedUser);
+            int choice = userView.promptInt("Enter your choice: ");
+            switch (choice) {
+                case 1:
+                    handleUpdateUsername(selectedUser);
+                    break;
+                case 2: 
+                    handleUpdatePassword(selectedUser);
+                    break;
+                case 3: 
+                    handleUpdateRole(selectedUser);
+                    break;
+                case 4:
+                    if (handleDeleteUser(currentUser,selectedUser)) {
+                        System.out.println("User deleted successfully.");
+                        return;
+                    }
+                    break;
+                case 5:
+                    System.out.println("Returning to user menu...");
+                    return;
+                default:
+                    System.out.println("Invalid option.");
+            }
+        } 
+    }
+
     public void handleUpdateUsername(User currentUser) {
-        userView.prompt("Enter new username: ");
-        String newUsername = sc.nextLine();
+        String newUsername = userView.promptString("Enter new username: ");
 
         // Reason checks before calling service
         if (newUsername == null || newUsername.isBlank()) {
@@ -116,20 +135,15 @@ public class UserController {
             return;
         }
 
-        if (!currentUser.isAdmin() && !currentUser.getUsername().equals(currentUser.getUsername())) {
-            userView.displayMessage("Username update failed: Permission denied.");
-            return;
-        }
-
         // Proceed with service call
         boolean success = userService.updateUsername(currentUser.getUsername(), newUsername,
                 currentUser.isAdmin(), currentUser.getUsername());
 
         if (success) {
+            currentUser.setUsername(newUsername);
             userView.displayMessage("Username updated successfully.");
         } else {
             userView.displayMessage("Username update failed: Unexpected error occurred.");
-
         }
     }
 
@@ -159,35 +173,38 @@ public class UserController {
         }
     }
 
-    public boolean handleDeleteUser(User currentUser) {
-        String usernameToDelete;
-
-        if (!currentUser.isAdmin()) {
+    public boolean handleDeleteUser(User currentUser, User userToDelete) {
+        boolean isSelfDelete = currentUser.getUsername().equals(userToDelete.getUsername());
+        
+        if (isSelfDelete) {
             userView.prompt("Are you sure you want to delete your account? (yes/no): ");
             String confirm = sc.nextLine().trim().toLowerCase();
             if (!confirm.equals("yes")) {
                 userView.displayMessage("Account deletion cancelled.");
                 return false;
             }
-
-            usernameToDelete = currentUser.getUsername(); // auto-set
         } else {
-            // Admin can choose any username to delete
-            userView.prompt("Enter username to delete: ");
-            usernameToDelete = sc.nextLine();
+            if (currentUser.isAdmin() && userToDelete.getUsername().equals(currentUser.getUsername())){
+                userView.displayMessage("Admin cannot delete own account here.");
+                return false;
+            }
         }
 
-        boolean deleted = userService.deleteUser(usernameToDelete, currentUser.isAdmin(), currentUser.getUsername());
-
-        if (deleted && usernameToDelete.equals(currentUser.getUsername())) {
-            userView.displayMessage(
-                    "Account deleted successfully.\n\nYou have been logged out because your account was deleted.");
-                    System.exit(0);
+        boolean deleted = userService.deleteUser(
+            userToDelete.getUsername(),currentUser.isAdmin(), currentUser.getUsername());
+            
+        if (deleted){
+            if (isSelfDelete){
+                userView.displayMessage("Account deleted successfully.\nYou have been logged out.");
+                System.exit(0); 
+            } else {
+                userView.displayMessage("User deleted successfully.");
+            }
+            return true;
         } else {
-            userView.displayMessage(deleted ? "User deleted successfully." : "Delete failed.");
+            userView.displayMessage("Failed to delete account.");
+            return false;
         }
-
-        return deleted && usernameToDelete.equals(currentUser.getUsername());
     }
 
     public void handleUpdateRole(User currentUser) {
@@ -199,9 +216,21 @@ public class UserController {
         String username = sc.nextLine();
         userView.prompt("Enter new role (ADMIN/USER): ");
         String role = sc.nextLine();
-        boolean success = userService.updateRole(username, model.enums.UserRole.valueOf(role.toUpperCase()),
-                currentUser.isAdmin());
-        userView.displayMessage(success ? "Role updated successfully." : "Role update failed. User might not exist.");
+
+        try {
+            UserRole newRole = UserRole.valueOf(role.toUpperCase());
+            boolean success = userService.updateRole(username, newRole, currentUser.isAdmin());
+            if (success){
+                if (username.equals(currentUser.getUsername())){
+                    currentUser.setRole(newRole);
+                }
+                userView.displayMessage("Role updated successfully.");
+            } else {
+                userView.displayMessage("Role update failed. User might not exist.");
+            }
+        } catch (IllegalArgumentException e) {
+            userView.displayMessage("Invalid role entered.");
+        }
     }
 
     public void handleAdminCreateUser(User currentUser) {
@@ -271,14 +300,41 @@ public class UserController {
         handleUserPagination(allUsers);
     }
 
-    public void handleViewOtherUser(User currentUser) {
+    private void handleViewUserDetails(User currentUser) {
         userView.prompt("Enter username to view: ");
         String username = sc.nextLine();
-        Optional<User> selectedUser = userService.findByUsername(username);
-        if (selectedUser.isEmpty()) {
+        Optional<User> userOpt = userService.findByUsername(username);
+        if (userOpt.isEmpty()) {
             userView.displayMessage("User not found.");
-        } else {
-            userView.viewUserDetails(selectedUser.get());
+            return;
+        } 
+
+        User user = userOpt.get();
+
+        while (true){
+            int choice = userView.viewUserDetails(user);
+
+            switch (choice){
+                case 1:
+                    handleUpdateUsername(user);
+                    break;
+                case 2:
+                    handleUpdatePassword(user);
+                    break;
+                case 3:
+                    handleUpdateRole(user);
+                    break;
+                case 4:
+                    if (handleDeleteUser(currentUser, user)){
+                        return;
+                    }
+                    break;
+                case 5:
+                    System.out.println("Returning to user management menu...");
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+            }
         }
     }
 

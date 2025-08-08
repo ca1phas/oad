@@ -64,10 +64,6 @@ public class AuthView {
         System.out.println("Login successful.\n\nWelcome, " + user.getUsername() + "!");
     }
 
-    public void displayLoginSuccess(User user) {
-        System.out.println("Login successful. Welcome, " + user.getUsername() + "!");
-    }
-
     public void displayLoginFailed() {
         System.out.println("Login failed. Invalid username or password.");
     }
@@ -106,10 +102,17 @@ public class AuthView {
     }
 
     public String promptRole() {
-        System.out.print("Enter role (ADMIN/MEMBER): ");
-        return sc.nextLine().trim().toUpperCase();
+        while (true) {
+            System.out.print("Enter role (ADMIN/MEMBER): ");
+            String role = sc.nextLine().trim().toUpperCase();
+            if (role.equals("ADMIN") || role.equals("MEMBER")) {
+                return role;
+            } else {
+                System.out.println("Invalid role. Please enter 'ADMIN' or 'MEMBER'.");
+            }
+        }
     }
-
+    
     public void showUserCreated() {
         System.out.println("User created successfully.");
     }

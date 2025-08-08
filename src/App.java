@@ -48,7 +48,6 @@ public class App {
                     System.out.println("Invalid option. Please enter 1, 2, or 3.");
             }
         }
-
         System.out.println("Thank you for using the Library E-Book Lending & Reservation System. Goodbye!");
         sc.close();
     }
@@ -111,7 +110,6 @@ public class App {
                     System.out.println("Invalid option. Please try again.");
                 }
         }
-
         System.out.println("You have been logged out.\n");
     }
 }
