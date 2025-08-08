@@ -7,7 +7,6 @@ import view.AuthView;
 
 import java.util.Optional;
 import java.util.Scanner;
-import java.io.Console;
 
 public class AuthController {
     private final Scanner sc;
@@ -65,18 +64,16 @@ public class AuthController {
         String username = authView.promptUsername();
         String password = authView.promptPassword();
 
-        // Input validation
         if (username.isBlank() || password.isBlank()) {
             authView.displayMessage("Username and password cannot be empty.");
             return Optional.empty();
         }
 
-        // Attempt login via UserService
         Optional<User> user = userService.login(username, password);
 
-        // Login result handling
         if (user.isPresent()) {
-            authView.showLoginSuccess(user.get());
+            currentUser = user.get();
+            authView.showLoginSuccess(currentUser);
             return user;
         } else {
             authView.showUserNotFound();

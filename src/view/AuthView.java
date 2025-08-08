@@ -87,27 +87,12 @@ public class AuthView {
         return sc.nextLine();
     }
 
-
     public void showPasswordMismatch() {
         System.out.println("Password and confirmation do not match.");
     }
 
-    public String showUserAlreadyExists() {
-        String msg = "User already exists.";
-        System.out.println(msg);
-        return msg;
-    }
-
     public void showSignupSuccess() {
         System.out.println("Sign-up successful! You can now log in.");
-    }
-
-    public void displayRegisterSuccess() {
-        System.out.println("Registration successful. You can now log in.");
-    }
-
-    public void displayRegisterFailed(String reason) {
-        System.out.println("Registration failed: " + reason);
     }
 
     public void showSignupAndAutoLoginSuccess(User user){
@@ -127,5 +112,18 @@ public class AuthView {
 
     public void showUserCreated() {
         System.out.println("User created successfully.");
+    }
+
+    // === Common Success/Failure Display ===
+    public void displayRegisterSuccess() {
+        System.out.println("Registration successful. You can now log in.");
+    }
+
+    public void displayRegisterFailed(String reason) {
+        System.out.println("Registration failed: " + reason);
+    }
+
+    public String showUserAlreadyExists() {
+        return "User already exists.";
     }
 }

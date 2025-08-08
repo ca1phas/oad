@@ -68,6 +68,39 @@ public class UserController {
         return false;
     }
 
+    public void handleUserManagementMenu(User currentUser) {
+        if (!currentUser.isAdmin()) {
+            userView.displayMessage("Access denied: Admin only.");
+            return;
+        }
+
+        boolean inMenu = true;
+        while (inMenu) {
+            userView.displayUserManagementMenu();
+            String choice = sc.nextLine();
+            switch (choice) {
+                case "1":
+                    handleViewByPage();
+                    break;
+                case "2":
+                    handleFilterAndSort();
+                    break;
+                case "3":
+                    handleViewOtherUser(currentUser);
+                    break;
+                case "4":
+                    handleAdminCreateUser(currentUser);
+                    break;
+                case "5":
+                    inMenu = false;
+                    break;
+                default:
+                    userView.displayMessage("Invalid option. Try again.");
+                    break;
+            }
+        }
+    }
+
     public void handleUpdateUsername(User currentUser) {
         userView.prompt("Enter new username: ");
         String newUsername = sc.nextLine();
@@ -120,23 +153,10 @@ public class UserController {
                 currentUser.isAdmin(), currentUser.getUsername());
 
         if (success) {
-            userView.displayMessage(success ? "Password updated successfully."
-                    : "Password update failed. Your old password might be wrong.");
+            userView.displayMessage("Password updated successfully.");
+        } else {
+            userView.displayMessage("Password update failed. Your old password might be wrong.");
         }
-    }
-
-    public void handleUpdateRole(User currentUser) {
-        if (!currentUser.isAdmin()) {
-            userView.displayMessage("Only admins can update roles.");
-            return;
-        }
-        userView.prompt("Enter username to update role: ");
-        String username = sc.nextLine();
-        userView.prompt("Enter new role (ADMIN/USER): ");
-        String role = sc.nextLine();
-        boolean success = userService.updateRole(username, model.enums.UserRole.valueOf(role.toUpperCase()),
-                currentUser.isAdmin());
-        userView.displayMessage(success ? "Role updated successfully." : "Role update failed.");
     }
 
     public boolean handleDeleteUser(User currentUser) {
@@ -170,63 +190,85 @@ public class UserController {
         return deleted && usernameToDelete.equals(currentUser.getUsername());
     }
 
-    public void handleUserManagementMenu(User currentUser) {
+    public void handleUpdateRole(User currentUser) {
         if (!currentUser.isAdmin()) {
-            userView.displayMessage("Access denied: Admin only.");
+            userView.displayMessage("Only admins can update roles.");
+            return;
+        }
+        userView.prompt("Enter username to update role: ");
+        String username = sc.nextLine();
+        userView.prompt("Enter new role (ADMIN/USER): ");
+        String role = sc.nextLine();
+        boolean success = userService.updateRole(username, model.enums.UserRole.valueOf(role.toUpperCase()),
+                currentUser.isAdmin());
+        userView.displayMessage(success ? "Role updated successfully." : "Role update failed. User might not exist.");
+    }
+
+    public void handleAdminCreateUser(User currentUser) {
+        if (!currentUser.isAdmin()){
+            userView.displayMessage("Only admins can create users.");
             return;
         }
 
-        boolean inMenu = true;
-        while (inMenu) {
-            userView.displayUserManagementMenu();
-            String choice = sc.nextLine();
-            switch (choice) {
-                case "1":
-                    List<User> firstPage = userService.filterSortPaginateUsers(
-                            null, null, "username", true, 1, 10);
-                    userView.displayUsers(firstPage);
-                    break;
-                case "2":
-                    handleFilterAndSort();
-                    break;
-                case "3":
-                    handleViewOtherUser(currentUser);
-                    break;
-                case "4":
-                    handleAdminCreateUser(currentUser);
-                    break;
-                case "5":
-                    inMenu = false;
-                    break;
-                default:
-                    userView.displayMessage("Invalid option. Try again.");
-                    break;
+        userView.prompt("Enter new username: ");
+        String username = sc.nextLine();
+
+        String password = userView.promptPassword("Enter password: ");
+        String confirm = userView.promptPassword("Confirm password: ");
+        
+        UserRole userRole = null;
+        while (true){
+            userView.prompt("Enter role (ADMIN/MEMBER): ");
+            String roleInput = sc.nextLine().trim().toUpperCase();
+
+            if (roleInput.equals("ADMIN") || roleInput.equals("MEMBER")){
+                userRole = UserRole.valueOf(roleInput);
+                break;
+            } else {
+                userView.displayMessage("Invalid role entered. Please enter either ADMIN or MEMBER.");
             }
         }
+
+        boolean created = userService.createUser(username, password, confirm, userRole, true);
+        userView.displayMessage(created ? "User created successfully." : "User creation failed.");
+    }
+
+    public void handleViewByPage(){
+        List<User> allUsers = userService.filterSortPaginateUsers(
+            null, null, "username",
+            true, 1, Integer.MAX_VALUE);
+        handleUserPagination(allUsers);
+
     }
 
     public void handleFilterAndSort() {
         userView.prompt("Enter username filter (press enter to skip): ");
-        String usernameFilter = sc.nextLine();
+        String usernameFilter = sc.nextLine().trim();
+        if (usernameFilter.isEmpty()) usernameFilter = null;
 
         userView.prompt("Enter role filter (ADMIN/USER, press enter to skip): ");
-        String roleInput = sc.nextLine();
-        var roleFilter = roleInput.isBlank() ? null : model.enums.UserRole.valueOf(roleInput.toUpperCase());
+        String roleInput = sc.nextLine().trim();
+        UserRole roleFilter = null;
+        if (!roleInput.isEmpty()){
+            try {
+                roleFilter = UserRole.valueOf(roleInput.toUpperCase());
+            } catch (IllegalArgumentException e){
+                System.out.println("Invalid role. Skipping role filter.");
+            }
+        }
 
         userView.prompt("Sort by (username/role): ");
-        String sortField = sc.nextLine();
+        String sortField = sc.nextLine().trim();
+        if (sortField.isEmpty()) sortField = "username";
+
         userView.prompt("Order (asc/desc): ");
-        String sortOrder = sc.nextLine();
+        String sortOrder = sc.nextLine().trim().toLowerCase();
+        boolean ascending = !sortOrder.equals("desc");
 
-        var sorted = userService.filterSortPaginateUsers(
-                usernameFilter,
-                roleFilter,
-                sortField,
-                sortOrder.equalsIgnoreCase("asc"),
-                1,
-                10);
-
-        userView.displayUsers(sorted);
+        List<User> allUsers = userService.filterSortPaginateUsers(
+                usernameFilter,roleFilter,sortField,ascending, 1,Integer.MAX_VALUE);
+        
+        handleUserPagination(allUsers);
     }
 
     public void handleViewOtherUser(User currentUser) {
@@ -240,27 +282,37 @@ public class UserController {
         }
     }
 
-    public void handleAdminCreateUser(User currentUser) {
-        if (!currentUser.isAdmin()){
-            userView.displayMessage("Only admins can create users.");
+    private void handleUserPagination(List<User> users){
+        final int usersPerPage = 10;
+        int totalPages = (int) Math.ceil((double) users.size() / usersPerPage);
+        int currentPage = 1;
+
+        if (users.isEmpty()){
+            System.out.println("No users to display.");
             return;
         }
 
-        userView.prompt("Enter new username: ");
-        String username = sc.nextLine();
-        userView.prompt("Enter password: ");
-        String password = sc.nextLine();
-        userView.prompt("Confirm password: ");
-        String confirm = sc.nextLine();
-        userView.prompt("Enter role (ADMIN/MEMBER): ");
-        String role = sc.nextLine();
+        while (true){
+            List<User> pageUsers = users.stream().skip((currentPage - 1) * usersPerPage)
+            .limit(usersPerPage).toList();
+                        
+            userView.displayUsers(pageUsers);
+            System.out.printf("\nPage (%d/%d)\n", currentPage, totalPages);
+            System.out.printf("Enter page number (1-%d) or 0 to go back: ", totalPages);
 
-        try {
-            UserRole userRole = UserRole.valueOf(role.toUpperCase());
-            boolean created = userService.createUser(username, password, confirm, userRole, true);
-            userView.displayMessage(created ? "User created successfully." : "User creation failed.");
-        } catch (IllegalArgumentException e){
-            userView.displayMessage("Invalid role entered. Please enter either ADMIN or MEMBER.");
+            String input = sc.nextLine().trim();
+            if (input.equals("0")) break;
+
+            try{
+                int selectedPage = Integer.parseInt(input);
+                if (selectedPage >= 1 && selectedPage <= totalPages){
+                    currentPage = selectedPage;
+                 } else {
+                    System.out.println("Invalid page number.");
+                 } 
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
+            }
         }
     }
 }

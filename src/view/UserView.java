@@ -42,40 +42,6 @@ public class UserView {
         System.out.print("Enter your choice: ");
     }
 
-    public void viewUserDetails(User user) {
-        boolean stayInView = true;
-        while (stayInView){
-            System.out.println("\n=== User Details ===");
-            System.out.println("Username: " + user.getUsername());
-            System.out.println("Role: " + (user.getRole() == UserRole.ADMIN ? "Admin" : "Member"));
-            System.out.println("0. Back");
-            System.out.print("Enter your choice: ");
-
-            String input = sc.nextLine();
-            if(input.equals("0")){
-                stayInView = false;
-            } else{
-                System.out.println("Invalid input. PLease press 0 to go back.");
-            }
-        }
-        
-    }
-
-    public void displayUsers(List<User> users) {
-        if (users.isEmpty()) {
-            System.out.println("No users found.");
-            return;
-        }
-
-        System.out.println("\n=== User List ===");
-        System.out.printf("%-20s %-10s\n", "Username", "Role");
-        System.out.println("-------------------- ----------");
-
-        for (User user : users) {
-            System.out.printf("%-20s %-10s\n", user.getUsername(), user.getRole());
-        }
-    }
-
     public String promptPassword(String label){
         Console console = System.console();
         System.out.print(label + " (press [u] to unhide or just press enter to hide): ");
@@ -105,5 +71,38 @@ public class UserView {
 
     public void displayMessage(String message) {
         System.out.println(message);
+    }
+
+    public void displayUsers(List<User> users) {
+        if (users.isEmpty()) {
+            System.out.println("No users found.");
+            return;
+        }
+
+        System.out.println("\n=== User List ===");
+        System.out.printf("%-20s %-10s\n", "Username", "Role");
+        System.out.println("-------------------- ----------");
+
+        for (User user : users) {
+            System.out.printf("%-20s %-10s\n", user.getUsername(), user.getRole());
+        }
+    }
+
+    public void viewUserDetails(User user) {
+        boolean stayInView = true;
+        while (stayInView){
+            System.out.println("\n=== User Details ===");
+            System.out.println("Username: " + user.getUsername());
+            System.out.println("Role: " + (user.getRole() == UserRole.ADMIN ? "Admin" : "Member"));
+            System.out.println("0. Back");
+            System.out.print("Enter your choice: ");
+
+            String input = sc.nextLine();
+            if(input.equals("0")){
+                stayInView = false;
+            } else{
+                System.out.println("Invalid input. PLease press 0 to go back.");
+            }
+        } 
     }
 }
