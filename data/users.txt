@@ -18,4 +18,4 @@ username|password|role
 20|ad24|ad24|member
 21|ad25|ad25|admin
 22|ad26|ad26|member
-23|ad27|ad27|member
+23|ad27|ad27|admin

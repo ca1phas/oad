@@ -104,7 +104,7 @@ public class UserController {
                     handleUpdatePassword(selectedUser);
                     break;
                 case 3: 
-                    handleUpdateRole(selectedUser);
+                    handleUpdateRole(currentUser, selectedUser);
                     break;
                 case 4:
                     if (handleDeleteUser(currentUser,selectedUser)) {
@@ -207,30 +207,39 @@ public class UserController {
         }
     }
 
-    public void handleUpdateRole(User currentUser) {
+    public void handleUpdateRole(User currentUser, User targetUser) {
         if (!currentUser.isAdmin()) {
-            userView.displayMessage("Only admins can update roles.");
+            userView.displayMessage("Role update failed. Only admins can update roles.");
             return;
         }
-        userView.prompt("Enter username to update role: ");
-        String username = sc.nextLine();
-        userView.prompt("Enter new role (ADMIN/USER): ");
-        String role = sc.nextLine();
+        
+        userView.prompt("Enter new role (ADMIN/MEMBER): ");
+        String role = sc.nextLine().trim().toUpperCase();
 
-        try {
-            UserRole newRole = UserRole.valueOf(role.toUpperCase());
-            boolean success = userService.updateRole(username, newRole, currentUser.isAdmin());
-            if (success){
-                if (username.equals(currentUser.getUsername())){
-                    currentUser.setRole(newRole);
-                }
-                userView.displayMessage("Role updated successfully.");
-            } else {
-                userView.displayMessage("Role update failed. User might not exist.");
-            }
-        } catch (IllegalArgumentException e) {
-            userView.displayMessage("Invalid role entered.");
+        if (!role.equals("ADMIN") && !role.equals("MEMBER")){
+            userView.displayMessage("Role update failed. Invalid role entered.");
+            return;
         }
+
+        UserRole newRole = UserRole.valueOf(role);
+        if (targetUser.getRole() == newRole){
+            userView.displayMessage("Role update failed. The user already is " + newRole);
+            return;
+        }
+
+        boolean success = userService.updateRole(
+            targetUser.getUsername(), newRole, currentUser.isAdmin()
+        );
+
+        if (success){
+            UserRole oldRole = targetUser.getRole();
+            targetUser.setRole(newRole);
+            userView.displayMessage("Role update successfully from '" + oldRole + "' to '" + newRole + "'.");
+        } else {
+            userView.displayMessage("Role update failed. Unexpected error occured.");
+        }
+        
+
     }
 
     public void handleAdminCreateUser(User currentUser) {
@@ -322,7 +331,7 @@ public class UserController {
                     handleUpdatePassword(user);
                     break;
                 case 3:
-                    handleUpdateRole(user);
+                    handleUpdateRole(currentUser,user);
                     break;
                 case 4:
                     if (handleDeleteUser(currentUser, user)){
