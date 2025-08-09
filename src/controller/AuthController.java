@@ -9,14 +9,52 @@ import java.util.Optional;
 import java.util.Scanner;
 
 public class AuthController {
-    private final Scanner sc;
     private final UserService userService;
     private final AuthView authView;
+    private User currentUser;
 
     public AuthController(Scanner sc) {
-        this.sc = sc;
         this.userService = new UserService();
         this.authView = new AuthView(sc);
+    }
+
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public Optional<User> handleSignup() {
+        authView.showSignupHeader();
+        String username = authView.promptUsername();
+        String password = authView.promptPassword("Enter password: ");
+        String confirmPassword = authView.promptPassword("Confirm password: ");
+
+        if (!password.equals(confirmPassword)) {
+            authView.showPasswordMismatch();
+            return Optional.empty();
+        }
+
+        if (userService.usernameExists(username)) {
+            authView.displayRegisterFailed(authView.showUserAlreadyExists());
+            return Optional.empty();
+        }
+
+        boolean success = userService.signup(username, password, confirmPassword);
+
+        if (success) {
+            // Auto-Login after Register
+            Optional<User> userOpt = userService.login(username, password);
+            if (userOpt.isPresent()) {
+                currentUser = userOpt.get();
+                authView.showSignupAndAutoLoginSuccess(currentUser);
+                return userOpt;
+            } else {
+                authView.displayRegisterFailed("Signup succeeded, but auto-login failed. Please login manually.");
+            }
+        } else {
+            authView.displayRegisterFailed("Unknown error during registration.");
+        }
+
+        return Optional.empty();
     }
 
     public Optional<User> handleLogin() {
@@ -24,43 +62,20 @@ public class AuthController {
         String username = authView.promptUsername();
         String password = authView.promptPassword();
 
+        if (username.isBlank() || password.isBlank()) {
+            authView.displayMessage("Username and password cannot be empty.");
+            return Optional.empty();
+        }
+
         Optional<User> user = userService.login(username, password);
-        if (user.isEmpty()) {
+
+        if (user.isPresent()) {
+            currentUser = user.get();
+            authView.showLoginSuccess(currentUser);
+            return user;
+        } else {
             authView.showUserNotFound();
             return Optional.empty();
-        }
-
-        if (!user.get().getPassword().equals(password)) {
-            authView.showIncorrectPassword();
-            return Optional.empty();
-        }
-
-        authView.showLoginSuccess(user.get());
-        return user;
-    }
-
-    public void handleSignup() {
-        authView.showSignupHeader();
-        String username = authView.promptUsername();
-        String password = authView.promptPassword();
-        String confirmPassword = authView.promptConfirmPassword();
-
-        if (!password.equals(confirmPassword)) {
-            authView.showPasswordMismatch();
-            return;
-        }
-
-        if (userService.usernameExists(username)) {
-        authView.showUserAlreadyExists();
-        return;
-        }
-
-        boolean success = userService.signup(username, password, confirmPassword);
-
-        if (success) {
-            authView.showSignupSuccess();
-        } else {
-            authView.displayRegisterFailed("Unknown error during registration.");
         }
     }
 

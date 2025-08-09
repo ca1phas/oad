@@ -1,9 +1,7 @@
 package view;
 
 import model.User;
-import model.enums.UserRole;
 
-import java.util.Optional;
 import java.util.Scanner;
 
 public class AuthView {
@@ -46,6 +44,12 @@ public class AuthView {
         return sc.nextLine();
     }
 
+    // Overloaded method:
+    public String promptPassword(String message) {
+        System.out.print(message);
+        return sc.nextLine();
+    }
+
     public void showUserNotFound() {
         System.out.println("User not found.");
     }
@@ -55,11 +59,7 @@ public class AuthView {
     }
 
     public void showLoginSuccess(User user) {
-        System.out.println("Login successful. Welcome, " + user.getUsername() + "!");
-    }
-
-    public void displayLoginSuccess(User user) {
-        System.out.println("Login successful. Welcome, " + user.getUsername() + "!");
+        System.out.println("Login successful.\n\nWelcome, " + user.getUsername() + "!");
     }
 
     public void displayLoginFailed() {
@@ -72,7 +72,12 @@ public class AuthView {
     }
 
     public String promptConfirmPassword() {
-        System.out.print("Confirm password: ");
+        return promptPassword();
+    }
+
+    // Overloaded method:
+    public String promptConfirmPassword(String message) {
+        System.out.print(message);
         return sc.nextLine();
     }
 
@@ -80,20 +85,13 @@ public class AuthView {
         System.out.println("Password and confirmation do not match.");
     }
 
-    public void showUserAlreadyExists() {
-        System.out.println("User already exists.");
-    }
-
     public void showSignupSuccess() {
         System.out.println("Sign-up successful! You can now log in.");
     }
 
-    public void displayRegisterSuccess() {
-        System.out.println("Registration successful. You can now log in.");
-    }
-
-    public void displayRegisterFailed(String reason) {
-        System.out.println("Registration failed: " + reason);
+    public void showSignupAndAutoLoginSuccess(User user) {
+        System.out.println("Sign-up successful! \nAuto-login successful!\n");
+        System.out.println("Welcome, " + user.getUsername() + "!");
     }
 
     // === Admin Create User ===
@@ -102,28 +100,31 @@ public class AuthView {
     }
 
     public String promptRole() {
-        System.out.print("Enter role (ADMIN/MEMBER): ");
-        return sc.nextLine().trim().toUpperCase();
+        while (true) {
+            System.out.print("Enter role (ADMIN/MEMBER): ");
+            String role = sc.nextLine().trim().toUpperCase();
+            if (role.equals("ADMIN") || role.equals("MEMBER")) {
+                return role;
+            } else {
+                System.out.println("Invalid role. Please enter 'ADMIN' or 'MEMBER'.");
+            }
+        }
     }
 
     public void showUserCreated() {
         System.out.println("User created successfully.");
     }
 
-    // === Optional Prompted Login (legacy/demo/testing) ===
-    public Optional<User> promptLogin() {
-        System.out.print("Enter username: ");
-        String username = sc.nextLine();
+    // === Common Success/Failure Display ===
+    public void displayRegisterSuccess() {
+        System.out.println("Registration successful. You can now log in.");
+    }
 
-        System.out.print("Enter password: ");
-        String password = sc.nextLine();
+    public void displayRegisterFailed(String reason) {
+        System.out.println("Registration failed: " + reason);
+    }
 
-        if (username.equals("admin") && password.equals("admin")) {
-        return Optional.of(new User("admin", "admin", UserRole.fromString("ADMIN")));
-        } else if (username.equals("user") && password.equals("user")) {
-        return Optional.of(new User("user", "user", UserRole.fromString("MEMBER")));
-        } else {
-            return Optional.empty();
-        }
+    public String showUserAlreadyExists() {
+        return "User already exists.";
     }
 }
