@@ -1,9 +1,7 @@
 package view;
 
 import model.User;
-import model.enums.UserRole;
 
-import java.util.Optional;
 import java.util.Scanner;
 
 public class AuthView {
@@ -42,14 +40,14 @@ public class AuthView {
     }
 
     public String promptPassword() {
-       System.out.print("Enter password: ");
+        System.out.print("Enter password: ");
         return sc.nextLine();
     }
 
     // Overloaded method:
     public String promptPassword(String message) {
         System.out.print(message);
-        return sc.nextLine(); 
+        return sc.nextLine();
     }
 
     public void showUserNotFound() {
@@ -91,7 +89,7 @@ public class AuthView {
         System.out.println("Sign-up successful! You can now log in.");
     }
 
-    public void showSignupAndAutoLoginSuccess(User user){
+    public void showSignupAndAutoLoginSuccess(User user) {
         System.out.println("Sign-up successful! \nAuto-login successful!\n");
         System.out.println("Welcome, " + user.getUsername() + "!");
     }
@@ -112,7 +110,7 @@ public class AuthView {
             }
         }
     }
-    
+
     public void showUserCreated() {
         System.out.println("User created successfully.");
     }
