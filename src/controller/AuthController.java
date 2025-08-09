@@ -9,18 +9,16 @@ import java.util.Optional;
 import java.util.Scanner;
 
 public class AuthController {
-    private final Scanner sc;
     private final UserService userService;
     private final AuthView authView;
     private User currentUser;
 
     public AuthController(Scanner sc) {
-        this.sc = sc;
         this.userService = new UserService();
         this.authView = new AuthView(sc);
     }
 
-    public User getCurrentUser(){
+    public User getCurrentUser() {
         return currentUser;
     }
 
@@ -45,7 +43,7 @@ public class AuthController {
         if (success) {
             // Auto-Login after Register
             Optional<User> userOpt = userService.login(username, password);
-            if(userOpt.isPresent()){
+            if (userOpt.isPresent()) {
                 currentUser = userOpt.get();
                 authView.showSignupAndAutoLoginSuccess(currentUser);
                 return userOpt;

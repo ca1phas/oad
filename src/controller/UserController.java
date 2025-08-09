@@ -13,16 +13,11 @@ public class UserController {
     private final Scanner sc;
     private final UserService userService;
     private final UserView userView;
-    private User currentUser;
 
     public UserController(Scanner sc) {
         this.sc = sc;
         this.userService = new UserService();
         this.userView = new UserView(sc);
-    }
-
-    public void setCurrentUser(User currentUser){
-        this.currentUser = currentUser;
     }
 
     public void handleAccountMenu(User currentUser) {
@@ -50,16 +45,16 @@ public class UserController {
                     System.out.println("Invalid option.");
                     break;
             }
-        } 
+        }
     }
 
     public void handleUserManagementMenu(User currentUser) {
-        if (!currentUser.isAdmin()){
+        if (!currentUser.isAdmin()) {
             System.out.print("Access denied.");
             return;
         }
-        
-        while(true) {
+
+        while (true) {
             userView.displayUserManagementMenu();
             int choice = userView.promptInt("Enter your choice: ");
             switch (choice) {
@@ -100,14 +95,14 @@ public class UserController {
                 case 1:
                     handleUpdateUsername(selectedUser);
                     break;
-                case 2: 
+                case 2:
                     handleUpdatePassword(selectedUser);
                     break;
-                case 3: 
+                case 3:
                     handleUpdateRole(currentUser, selectedUser);
                     break;
                 case 4:
-                    if (handleDeleteUser(currentUser,selectedUser)) {
+                    if (handleDeleteUser(currentUser, selectedUser)) {
                         System.out.println("User deleted successfully.");
                         return;
                     }
@@ -118,7 +113,7 @@ public class UserController {
                 default:
                     System.out.println("Invalid option.");
             }
-        } 
+        }
     }
 
     public void handleUpdateUsername(User currentUser) {
@@ -175,7 +170,7 @@ public class UserController {
 
     public boolean handleDeleteUser(User currentUser, User userToDelete) {
         boolean isSelfDelete = currentUser.getUsername().equals(userToDelete.getUsername());
-        
+
         if (isSelfDelete) {
             userView.prompt("Are you sure you want to delete your account? (yes/no): ");
             String confirm = sc.nextLine().trim().toLowerCase();
@@ -184,19 +179,19 @@ public class UserController {
                 return false;
             }
         } else {
-            if (currentUser.isAdmin() && userToDelete.getUsername().equals(currentUser.getUsername())){
+            if (currentUser.isAdmin() && userToDelete.getUsername().equals(currentUser.getUsername())) {
                 userView.displayMessage("Admin cannot delete own account here.");
                 return false;
             }
         }
 
         boolean deleted = userService.deleteUser(
-            userToDelete.getUsername(),currentUser.isAdmin(), currentUser.getUsername());
-            
-        if (deleted){
-            if (isSelfDelete){
+                userToDelete.getUsername(), currentUser.isAdmin(), currentUser.getUsername());
+
+        if (deleted) {
+            if (isSelfDelete) {
                 userView.displayMessage("Account deleted successfully.\nYou have been logged out.");
-                System.exit(0); 
+                System.exit(0);
             } else {
                 userView.displayMessage("User deleted successfully.");
             }
@@ -212,38 +207,36 @@ public class UserController {
             userView.displayMessage("Role update failed. Only admins can update roles.");
             return;
         }
-        
+
         userView.prompt("Enter new role (ADMIN/MEMBER): ");
         String role = sc.nextLine().trim().toUpperCase();
 
-        if (!role.equals("ADMIN") && !role.equals("MEMBER")){
+        if (!role.equals("ADMIN") && !role.equals("MEMBER")) {
             userView.displayMessage("Role update failed. Invalid role entered.");
             return;
         }
 
         UserRole newRole = UserRole.valueOf(role);
-        if (targetUser.getRole() == newRole){
+        if (targetUser.getRole() == newRole) {
             userView.displayMessage("Role update failed. The user already is " + newRole);
             return;
         }
 
         boolean success = userService.updateRole(
-            targetUser.getUsername(), newRole, currentUser.isAdmin()
-        );
+                targetUser.getUsername(), newRole, currentUser.isAdmin());
 
-        if (success){
+        if (success) {
             UserRole oldRole = targetUser.getRole();
             targetUser.setRole(newRole);
             userView.displayMessage("Role update successfully from '" + oldRole + "' to '" + newRole + "'.");
         } else {
             userView.displayMessage("Role update failed. Unexpected error occured.");
         }
-        
 
     }
 
     public void handleAdminCreateUser(User currentUser) {
-        if (!currentUser.isAdmin()){
+        if (!currentUser.isAdmin()) {
             userView.displayMessage("Only admins can create users.");
             return;
         }
@@ -253,13 +246,13 @@ public class UserController {
 
         String password = userView.promptPassword("Enter password: ");
         String confirm = userView.promptPassword("Confirm password: ");
-        
+
         UserRole userRole = null;
-        while (true){
+        while (true) {
             userView.prompt("Enter role (ADMIN/MEMBER): ");
             String roleInput = sc.nextLine().trim().toUpperCase();
 
-            if (roleInput.equals("ADMIN") || roleInput.equals("MEMBER")){
+            if (roleInput.equals("ADMIN") || roleInput.equals("MEMBER")) {
                 userRole = UserRole.valueOf(roleInput);
                 break;
             } else {
@@ -271,10 +264,10 @@ public class UserController {
         userView.displayMessage(created ? "User created successfully." : "User creation failed.");
     }
 
-    public void handleViewByPage(){
+    public void handleViewByPage() {
         List<User> allUsers = userService.filterSortPaginateUsers(
-            null, null, "username",
-            true, 1, Integer.MAX_VALUE);
+                null, null, "username",
+                true, 1, Integer.MAX_VALUE);
         handleUserPagination(allUsers);
 
     }
@@ -282,30 +275,32 @@ public class UserController {
     public void handleFilterAndSort() {
         userView.prompt("Enter username filter (press enter to skip): ");
         String usernameFilter = sc.nextLine().trim();
-        if (usernameFilter.isEmpty()) usernameFilter = null;
+        if (usernameFilter.isEmpty())
+            usernameFilter = null;
 
         userView.prompt("Enter role filter (ADMIN/USER, press enter to skip): ");
         String roleInput = sc.nextLine().trim();
         UserRole roleFilter = null;
-        if (!roleInput.isEmpty()){
+        if (!roleInput.isEmpty()) {
             try {
                 roleFilter = UserRole.valueOf(roleInput.toUpperCase());
-            } catch (IllegalArgumentException e){
+            } catch (IllegalArgumentException e) {
                 System.out.println("Invalid role. Skipping role filter.");
             }
         }
 
         userView.prompt("Sort by (username/role): ");
         String sortField = sc.nextLine().trim();
-        if (sortField.isEmpty()) sortField = "username";
+        if (sortField.isEmpty())
+            sortField = "username";
 
         userView.prompt("Order (asc/desc): ");
         String sortOrder = sc.nextLine().trim().toLowerCase();
         boolean ascending = !sortOrder.equals("desc");
 
         List<User> allUsers = userService.filterSortPaginateUsers(
-                usernameFilter,roleFilter,sortField,ascending, 1,Integer.MAX_VALUE);
-        
+                usernameFilter, roleFilter, sortField, ascending, 1, Integer.MAX_VALUE);
+
         handleUserPagination(allUsers);
     }
 
@@ -316,14 +311,14 @@ public class UserController {
         if (userOpt.isEmpty()) {
             userView.displayMessage("User not found.");
             return;
-        } 
+        }
 
         User user = userOpt.get();
 
-        while (true){
+        while (true) {
             int choice = userView.viewUserDetails(user);
 
-            switch (choice){
+            switch (choice) {
                 case 1:
                     handleUpdateUsername(user);
                     break;
@@ -331,10 +326,10 @@ public class UserController {
                     handleUpdatePassword(user);
                     break;
                 case 3:
-                    handleUpdateRole(currentUser,user);
+                    handleUpdateRole(currentUser, user);
                     break;
                 case 4:
-                    if (handleDeleteUser(currentUser, user)){
+                    if (handleDeleteUser(currentUser, user)) {
                         return;
                     }
                     break;
@@ -347,34 +342,35 @@ public class UserController {
         }
     }
 
-    private void handleUserPagination(List<User> users){
+    private void handleUserPagination(List<User> users) {
         final int usersPerPage = 10;
         int totalPages = (int) Math.ceil((double) users.size() / usersPerPage);
         int currentPage = 1;
 
-        if (users.isEmpty()){
+        if (users.isEmpty()) {
             System.out.println("No users to display.");
             return;
         }
 
-        while (true){
+        while (true) {
             List<User> pageUsers = users.stream().skip((currentPage - 1) * usersPerPage)
-            .limit(usersPerPage).toList();
-                        
+                    .limit(usersPerPage).toList();
+
             userView.displayUsers(pageUsers);
             System.out.printf("\nPage (%d/%d)\n", currentPage, totalPages);
             System.out.printf("Enter page number (1-%d) or 0 to go back: ", totalPages);
 
             String input = sc.nextLine().trim();
-            if (input.equals("0")) break;
+            if (input.equals("0"))
+                break;
 
-            try{
+            try {
                 int selectedPage = Integer.parseInt(input);
-                if (selectedPage >= 1 && selectedPage <= totalPages){
+                if (selectedPage >= 1 && selectedPage <= totalPages) {
                     currentPage = selectedPage;
-                 } else {
+                } else {
                     System.out.println("Invalid page number.");
-                 } 
+                }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a valid number.");
             }
