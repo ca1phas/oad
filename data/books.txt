@@ -1,2 +1,99 @@
 id|title|author|genre|releasedDate|filename
-1|Sample|Cas|Non-fiction|2025-07-20|sample
+3|Frankenstein; Or, The Modern Prometheus|Mary Wollstonecraft Shelley (2569)|Fiction|1993-10-01|84_Frankenstein_Or_The_Modern_Prometheus
+5|The Complete Works of William Shakespeare|William Shakespeare (2089)|Play|1994-01-01|100_The_Complete_Works_of_William_Shakespeare
+6|Pride and Prejudice|Jane Austen (1928)|Fiction|1998-06-01|1342_Pride_and_Prejudice
+7|Middlemarch|George Eliot (1864)|Fiction|1994-07-01|145_Middlemarch
+8|Little Women; Or, Meg, Jo, Beth, and Amy|Louisa May Alcott (1826)|Fiction|2011-08-16|37106_Little_Women_Or_Meg_Jo_Beth_and_Amy
+9|The Enchanted April|Elizabeth Von Arnim (1726)|Fiction|2005-07-29|16389_The_Enchanted_April
+10|The Blue Castle: a novel|L. M.  Montgomery (1644)|Fiction|2022-05-03|67979_The_Blue_Castle_a_novel
+11|Cranford|Elizabeth Cleghorn Gaskell (1540)|Fiction|1996-01-01|394_Cranford
+12|Alice's Adventures in Wonderland|Lewis Carroll (1518)|Fiction|2008-06-27|11_Alices_Adventures_in_Wonderland
+13|The Adventures of Ferdinand Count Fathom — Complete|T.  Smollett (1514)|Fiction|2004-09-09|6761_The_Adventures_of_Ferdinand_Count_Fathom__Complete
+14|The Expedition of Humphry Clinker|T.  Smollett (1506)|Fiction|2000-04-01|2160_The_Expedition_of_Humphry_Clinker
+15|History of Tom Jones, a Foundling|Henry Fielding (1445)|Fiction|2004-09-01|6593_History_of_Tom_Jones_a_Foundling
+16|The Adventures of Roderick Random|T.  Smollett (1441)|Fiction|2003-05-01|4085_The_Adventures_of_Roderick_Random
+17|Twenty years after|Alexandre Dumas and Auguste Maquet (1433)|Fiction|1998-03-01|1259_Twenty_years_after
+18|My Life — Volume 1|Richard Wagner (1427)|Fiction|2004-02-01|5197_My_Life__Volume_1
+19|Fables of La Fontaine — a New Edition, with Notes|Jean de La Fontaine (1421)|Fiction|2005-01-01|7241_Fables_of_La_Fontaine__a_New_Edition_with_Notes
+20|Crime and Punishment|Fyodor Dostoyevsky (1091)|Fiction|2006-03-28|2554_Crime_and_Punishment
+21|Simple Sabotage Field Manual|United States. Office of Strategic Services (1083)|Fiction|2008-08-04|26184_Simple_Sabotage_Field_Manual
+22|The Picture of Dorian Gray|Oscar Wilde (937)|Fiction|1994-10-01|174_The_Picture_of_Dorian_Gray
+23|The Strange Case of Dr. Jekyll and Mr. Hyde|Robert Louis Stevenson (928)|Fiction|2008-06-27|43_The_Strange_Case_of_Dr_Jekyll_and_Mr_Hyde
+24|Metamorphosis|Franz Kafka (908)|Fiction|2005-08-17|5200_Metamorphosis
+25|The Brothers Karamazov|Fyodor Dostoyevsky (890)|Fiction|2009-02-12|28054_The_Brothers_Karamazov
+26|A Tale of Two Cities|Charles Dickens (848)|Fiction|1994-01-01|98_A_Tale_of_Two_Cities
+27|Dracula|Bram Stoker (847)|Fiction|1995-10-01|345_Dracula
+28|The Great Gatsby|F. Scott  Fitzgerald (828)|Fiction|2021-01-17|64317_The_Great_Gatsby
+29|Trial|water by Sewell Peaslee Wright (817)|Fiction|2025-08-10|76668_Trial
+30|The Count of Monte Cristo|Alexandre Dumas and Auguste Maquet (793)|Fiction|1998-01-01|1184_The_Count_of_Monte_Cristo
+31|Jane Eyre: An Autobiography|Charlotte Brontë (779)|Fiction|1998-03-01|1260_Jane_Eyre_An_Autobiography
+32|Thus Spake Zarathustra: A Book for All and None|Friedrich Wilhelm Nietzsche (763)|Fiction|1999-12-01|1998_Thus_Spake_Zarathustra_A_Book_for_All_and_None
+33|Doctrina Christiana (759)|Unknown|Fiction|2005-06-23|16119_Doctrina_Christiana_759
+34|The Adventures of Tom Sawyer, Complete|Mark Twain (732)|Fiction|2004-07-01|74_The_Adventures_of_Tom_Sawyer_Complete
+35|The Iliad|Homer (726)|Fiction|2004-07-01|6130_The_Iliad
+36|Adventures of Huckleberry Finn|Mark Twain (701)|Fiction|2004-06-29|76_Adventures_of_Huckleberry_Finn
+37|Beowulf: An Anglo-Saxon Epic Poem (697)|Unknown|Poetry|2005-07-19|16328_Beowulf_An_Anglo-Saxon_Epic_Poem_697
+38|A Doll's House : a play|Henrik Ibsen (691)|Fiction|2001-03-01|2542_A_Dolls_House__a_play
+39|Grimms' Fairy Tales|Jacob Grimm and Wilhelm Grimm (691)|Fiction|2001-04-01|2591_Grimms_Fairy_Tales
+40|War and Peace|graf Leo Tolstoy (690)|Fiction|2001-04-01|2600_War_and_Peace
+41|How to Observe: Morals and Manners|Harriet Martineau (671)|Fiction|2010-10-05|33944_How_to_Observe_Morals_and_Manners
+42|The Adventures of Sherlock Holmes|Arthur Conan Doyle (662)|Fiction|1999-03-01|1661_The_Adventures_of_Sherlock_Holmes
+43|Anne of Green Gables|L. M.  Montgomery (659)|Fiction|2008-06-27|45_Anne_of_Green_Gables
+44|The Stolen Bacillus and Other Incidents|H. G.  Wells (657)|Fiction|2004-06-26|12750_The_Stolen_Bacillus_and_Other_Incidents
+45|White Nights and Other Stories|Fyodor Dostoyevsky (654)|Fiction|2011-05-05|36034_White_Nights_and_Other_Stories
+46|The Importance of Being Earnest: A Trivial Comedy for Serious People|Oscar Wilde (643)|Fiction|1997-03-01|844_The_Importance_of_Being_Earnest_A_Trivial_Comedy_for_Serious_People
+47|Great Expectations|Charles Dickens (621)|Fiction|1998-07-01|1400_Great_Expectations
+48|The divine comedy|Dante Alighieri (613)|Fiction|2005-09-01|8800_The_divine_comedy
+49|The Prince|Niccolò Machiavelli (606)|Fiction|2006-02-11|1232_The_Prince
+50|Tractatus Logico-Philosophicus|Ludwig Wittgenstein (600)|Fiction|2010-10-22|5740_Tractatus_Logico-Philosophicus
+51|Moby Word Lists|Grady Ward (583)|Fiction|2002-05-01|3201_Moby_Word_Lists
+52|Wuthering Heights|Emily Brontë (572)|Fiction|1996-12-01|768_Wuthering_Heights
+53|Don Quijote|Miguel de Cervantes Saavedra (563)|Fiction|1999-12-01|2000_Don_Quijote
+54|Ulysses|James Joyce (557)|Fiction|2003-07-01|4300_Ulysses
+55|Beyond Good and Evil|Friedrich Wilhelm Nietzsche (556)|Fiction|2003-08-01|4363_Beyond_Good_and_Evil
+56|Society as I Have Found It|Ward McAllister (547)|Fiction|2017-08-08|55300_Society_as_I_Have_Found_It
+57|The Yellow Wallpaper|Charlotte Perkins Gilman (537)|Fiction|1999-11-01|1952_The_Yellow_Wallpaper
+58|The Confessions of St. Augustine|Bishop of Hippo Saint Augustine (534)|Fiction|2002-06-01|3296_The_Confessions_of_St_Augustine
+59|A Modest Proposal|Jonathan Swift (534)|Fiction|1997-10-01|1080_A_Modest_Proposal
+60|Right Ho, Jeeves|P. G.  Wodehouse (523)|Fiction|2004-01-01|10554_Right_Ho_Jeeves
+61|Meditations|Emperor of Rome Marcus Aurelius (515)|Fiction|2001-06-01|2680_Meditations
+62|Walden, and On The Duty Of Civil Disobedience|Henry David Thoreau (510)|Fiction|1995-01-01|205_Walden_and_On_The_Duty_Of_Civil_Disobedience
+63|The War of the Worlds|H. G.  Wells (506)|Fiction|2004-10-01|36_The_War_of_the_Worlds
+64|The Kama Sutra of Vatsyayana|Vatsyayana (503)|Fiction|2009-01-18|27827_The_Kama_Sutra_of_Vatsyayana
+65|The Republic|Plato (495)|Fiction|1998-10-01|1497_The_Republic
+66|Leviathan|Thomas Hobbes (493)|Fiction|2002-05-01|3207_Leviathan
+67|The lesser Key of Solomon, Goetia, the book of evil spirits : (488)|Unknown|Fiction|2024-01-11|72679_The_lesser_Key_of_Solomon_Goetia_the_book_of_evil_spirits__488
+68|The Wars of Religion in France 1559-1576|James Westfall Thompson (488)|Fiction|2015-06-23|49266_The_Wars_of_Religion_in_France_1559-1576
+69|Little Women|Louisa May Alcott (483)|Fiction|1996-05-01|514_Little_Women
+70|The King James Version of the Bible (483)|Unknown|Fiction|1989-08-01|10_The_King_James_Version_of_the_Bible_483
+71|On the face of the flood|Mary E.  Ropes (480)|Fiction|2025-08-10|76666_On_the_face_of_the_flood
+72|Moby Multiple Language Lists of Common Words|Grady Ward (479)|Fiction|2002-05-01|3206_Moby_Multiple_Language_Lists_of_Common_Words
+73|Emma|Jane Austen (479)|Fiction|1994-08-01|158_Emma
+74|The Odyssey|Homer (476)|Fiction|1999-04-01|1727_The_Odyssey
+75|The Scarlet Letter|Nathaniel Hawthorne (475)|Fiction|2008-05-05|25344_The_Scarlet_Letter
+76|A Journey to the Centre of the Earth|Jules Verne (458)|Fiction|2006-07-18|18857_A_Journey_to_the_Centre_of_the_Earth
+77|Du côté de chez Swann|Marcel Proust (441)|Fiction|2001-05-01|2650_Du_côté_de_chez_Swann
+78|Society in America, Volume 1 (of 2)|Harriet Martineau (438)|Fiction|2016-07-22|52621_Society_in_America_Volume_1_of_2
+79|The Romance of Lust: A classic Victorian erotic novel|Anonymous (436)|Fiction|2009-10-14|30254_The_Romance_of_Lust_A_classic_Victorian_erotic_novel
+80|Les Misérables|Victor Hugo (436)|Fiction|2008-06-22|135_Les_Misérables
+81|The Wonderful Wizard of Oz|L. Frank  Baum (432)|Fiction|1993-02-01|55_The_Wonderful_Wizard_of_Oz
+82|Heart of Darkness|Joseph Conrad (422)|Fiction|2006-01-09|219_Heart_of_Darkness
+83|In Barbary :|E. Alexander  Powell (417)|Fiction|2025-08-10|76665_In_Barbary
+84|Notes from the Underground|Fyodor Dostoyevsky (414)|Fiction|1996-07-01|600_Notes_from_the_Underground
+85|The Reign of Greed|José Rizal (410)|Fiction|2004-01-01|10676_The_Reign_of_Greed
+86|Anna Karenina|graf Leo Tolstoy (409)|Fiction|1998-07-01|1399_Anna_Karenina
+87|Treasure Island|Robert Louis Stevenson (408)|Fiction|2006-02-26|120_Treasure_Island
+88|Second Treatise of Government|John Locke (404)|Fiction|2005-01-01|7370_Second_Treatise_of_Government
+89|The Mahabharata of Krishna-Dwaipayana Vyasa, Volume 1 (396)|Unknown|Fiction|2005-03-26|15474_The_Mahabharata_of_Krishna-Dwaipayana_Vyasa_Volume_1_396
+90|Frankenstein; Or, The Modern Prometheus|Mary Wollstonecraft Shelley (393)|Fiction|2012-11-23|41445_Frankenstein_Or_The_Modern_Prometheus
+91|Plan of Chicago|Edward H. Bennett and Daniel H. Burnham (393)|Fiction|2025-08-11|76669_Plan_of_Chicago
+92|Heath's Modern Language Series: The Spanish American Reader|Ernesto Nelson (392)|Fiction|2012-05-07|39647_Heaths_Modern_Language_Series_The_Spanish_American_Reader
+93|The penny magazine of the Society for the Diffusion of Useful Knowledge, issue 3, April 14, 1832 (386)|Unknown|Fiction|2025-08-11|76670_The_penny_magazine_of_the_Society_for_the_Diffusion_of_Useful_Knowledge_issue_3_April_14_1832_386
+94|The Prophet|Kahlil Gibran (385)|Fiction|2019-01-01|58585_The_Prophet
+95|No royal road :|Florence E. Burch (376)|Fiction|2025-08-10|76667_No_royal_road
+96|The Time Machine|H. G.  Wells (372)|Fiction|2004-10-02|35_The_Time_Machine
+97|The Works of Edgar Allan Poe — Volume 2|Edgar Allan Poe (370)|Fiction|2000-04-01|2148_The_Works_of_Edgar_Allan_Poe__Volume_2
+98|Carmilla|Joseph Sheridan Le Fanu (369)|Fiction|2003-11-01|10007_Carmilla
+99|Through the Looking-Glass|Lewis Carroll (356)|Fiction|2008-06-25|12_Through_the_Looking-Glass
+100|Peter Pan|J. M.  Barrie (348)|Fiction|2008-06-25|16_Peter_Pan
+101|hi|hi|hi|1999-12-12|sample

@@ -14,3 +14,4 @@ username|password|role
 13|tony_stark|iron123|admin
 14|bruce_wayne|bat123|member
 15|clark_kent|super123|member
+16|3|1|member
