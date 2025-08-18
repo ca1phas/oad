@@ -1,295 +1,63 @@
+// ReservationService.java
 package service;
 
-import model.Book;
 import model.Reservation;
 import model.enums.ReservationStatus;
-import repository.ReservationRepository;
-import util.IDGeneratorUtil;
-import util.PaginationUtil;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class ReservationService {
-    private final ReservationRepository reservationRepository;
+    private final List<Reservation> reservations;
+    private final AtomicInteger idGenerator;
 
     public ReservationService() {
-        this.reservationRepository = new ReservationRepository();
+        this.reservations = new ArrayList<>();
+        this.idGenerator = new AtomicInteger(1);
     }
 
-    // Utility
-    // Check if user has a valid reservation
-    public boolean hasValidReservation(String username, int bookId) {
-        if (username == null || username.isBlank())
-            return false;
+    //  Generate unique ID (for controller usage)
+    public int generateNewId() {
+        return idGenerator.getAndIncrement();
+    }
 
-        return reservationRepository.readAll().stream()
+    //  Add new reservation (controller passes ready object)
+    public boolean addReservation(Reservation reservation) {
+        return reservations.add(reservation);
+    }
+
+    //  Find reservation by ID
+    public Reservation findReservationById(int id) {
+        return reservations.stream()
+                .filter(r -> r.getId() == id)
+                .findFirst()
+                .orElse(null);
+    }
+
+    //  Get reservations by username
+    public List<Reservation> getReservationsByUsername(String username) {
+        return reservations.stream()
                 .filter(r -> r.getUsername().equalsIgnoreCase(username))
-                .filter(r -> r.getBook().getId() == bookId)
-                .anyMatch(r -> r.getStatus() == ReservationStatus.ACTIVE);
+                .collect(Collectors.toList());
     }
 
-    // FR01: Automatically update statuses of reservations
-    public void updateReservationStatusesOnStartup() {
-        List<Reservation> reservations = reservationRepository.readAll();
-        boolean hasChanged = false;
-        LocalDate today = LocalDate.now();
-
-        for (Reservation reservation : reservations) {
-            ReservationStatus currentStatus = reservation.getStatus();
-            LocalDate startDate = reservation.getStartDate();
-            LocalDate endDate = reservation.getEndDate();
-            ReservationStatus newStatus = currentStatus;
-
-            switch (currentStatus) {
-                case APPROVED:
-                    if (!today.isBefore(startDate))
-                        newStatus = ReservationStatus.ACTIVE;
-                    break;
-                case ACTIVE:
-                    if (today.isAfter(endDate))
-                        newStatus = ReservationStatus.EXPIRED;
-                    break;
-                case PENDING:
-                    if (today.isAfter(startDate))
-                        newStatus = ReservationStatus.DENIED;
-                    break;
-                default:
-                    break;
-            }
-
-            if (newStatus != currentStatus) {
-                reservation.setStatus(newStatus);
-                hasChanged = true;
+    //  Cancel reservation (with validation)
+    public boolean cancelReservation(int reservationId, String username) {
+        Reservation res = findReservationById(reservationId);
+        if (res != null && res.getUsername().equalsIgnoreCase(username)) {
+            if (res.getStatus() == ReservationStatus.PENDING ||
+                res.getStatus() == ReservationStatus.APPROVED) {
+                res.setStatus(ReservationStatus.CANCELLED);
+                return true;
             }
         }
-
-        if (hasChanged)
-            reservationRepository.saveAll(reservations);
+        return false;
     }
 
-    // FR26: Reserve book
-    public boolean reserveBook(Book book, String username, LocalDate startDate, LocalDate endDate) {
-        if (book == null || username == null || username.isBlank() || startDate == null || endDate == null) {
-            return false;
-        }
-
-        // Validate user exists
-        UserService userService = new UserService();
-        if (!userService.usernameExists(username))
-            return false;
-
-        // Validate book exists
-        BookService bookService = new BookService();
-        Optional<Book> optionalBook = bookService.viewBook(book.getId());
-        if (optionalBook.isEmpty())
-            return false;
-
-        LocalDate reservationDate = LocalDate.now();
-        if (startDate.isBefore(reservationDate) || endDate.isBefore(startDate))
-            return false;
-
-        int id = IDGeneratorUtil.generateId(reservationRepository.getFilePath());
-        Reservation reservation = new Reservation(
-                id,
-                optionalBook.get(), // use canonical book object
-                username,
-                LocalDateTime.now(),
-                ReservationStatus.PENDING,
-                startDate,
-                endDate);
-
-        reservationRepository.append(reservation);
-        return true;
-    }
-
-    // FR11 & FR12 & FR10: Filter + Sort + Pagination
-    public List<Reservation> filterSortPaginate(String currentUsername, boolean isAdmin,
-            String idFilter, String usernameFilter, String bookTitleFilter,
-            ReservationStatus statusFilter,
-            LocalDate resStart, LocalDate resEnd,
-            LocalDate startStart, LocalDate startEnd,
-            LocalDate endStart, LocalDate endEnd,
-            String sortField, boolean ascending,
-            int page, int pageSize) {
-        List<Reservation> list = reservationRepository.readAll();
-
-        // Access filter
-        if (!isAdmin) {
-            list = list.stream()
-                    .filter(r -> r.getUsername().equalsIgnoreCase(currentUsername))
-                    .collect(Collectors.toList());
-        }
-
-        // Filters
-        if (idFilter != null && !idFilter.isBlank()) {
-            try {
-                int id = Integer.parseInt(idFilter.trim());
-                list = list.stream().filter(r -> r.getId() == id).collect(Collectors.toList());
-            } catch (NumberFormatException ignored) {
-            }
-        }
-
-        if (usernameFilter != null && !usernameFilter.isBlank())
-            list = list.stream()
-                    .filter(r -> r.getUsername().toLowerCase().contains(usernameFilter.toLowerCase()))
-                    .collect(Collectors.toList());
-
-        if (bookTitleFilter != null && !bookTitleFilter.isBlank())
-            list = list.stream()
-                    .filter(r -> Optional
-                            .ofNullable(r.getBook().getTitle())
-                            .map(t -> t.toLowerCase().contains(bookTitleFilter.toLowerCase()))
-                            .orElse(false))
-                    .collect(Collectors.toList());
-
-        if (statusFilter != null)
-            list = list.stream().filter(r -> r.getStatus() == statusFilter).collect(Collectors.toList());
-
-        if (resStart != null)
-            list = list.stream().filter(r -> !r.getReservationDate().toLocalDate().isBefore(resStart))
-                    .collect(Collectors.toList());
-
-        if (resEnd != null)
-            list = list.stream().filter(r -> !r.getReservationDate().toLocalDate().isAfter(resEnd))
-                    .collect(Collectors.toList());
-
-        if (startStart != null)
-            list = list.stream().filter(r -> !r.getStartDate().isBefore(startStart)).collect(Collectors.toList());
-
-        if (startEnd != null)
-            list = list.stream().filter(r -> !r.getStartDate().isAfter(startEnd)).collect(Collectors.toList());
-
-        if (endStart != null)
-            list = list.stream().filter(r -> !r.getEndDate().isBefore(endStart)).collect(Collectors.toList());
-
-        if (endEnd != null)
-            list = list.stream().filter(r -> !r.getEndDate().isAfter(endEnd)).collect(Collectors.toList());
-
-        // Sort
-        Comparator<Reservation> comparator = Comparator.comparing(Reservation::getReservationDate); // default
-        switch (sortField != null ? sortField.toLowerCase() : "") {
-            case "id":
-                comparator = Comparator.comparing(Reservation::getId);
-                break;
-            case "username":
-                comparator = Comparator.comparing(Reservation::getUsername, String.CASE_INSENSITIVE_ORDER);
-                break;
-            case "booktitle":
-                comparator = Comparator.comparing(r -> r.getBook().getTitle(), String.CASE_INSENSITIVE_ORDER);
-                break;
-            case "status":
-                comparator = Comparator.comparing(r -> r.getStatus().name());
-                break;
-            case "reservationdate":
-                comparator = Comparator.comparing(Reservation::getReservationDate);
-                break;
-            case "startdate":
-                comparator = Comparator.comparing(Reservation::getStartDate);
-                break;
-            case "enddate":
-                comparator = Comparator.comparing(Reservation::getEndDate);
-                break;
-        }
-
-        if (!ascending)
-            comparator = comparator.reversed();
-
-        list.sort(comparator);
-
-        return PaginationUtil.paginate(list, page, pageSize);
-    }
-
-    // FR13 & 14: Select & View reservation by ID
-    public Optional<Reservation> selectReservation(int reservationId, String currentUsername, boolean isAdmin) {
-        Optional<Reservation> opt = reservationRepository.findById(reservationId);
-        if (opt.isEmpty())
-            return Optional.empty();
-        if (!isAdmin && !opt.get().getUsername().equalsIgnoreCase(currentUsername))
-            return Optional.empty();
-        return opt;
-    }
-
-    // FR16: Update status
-    public boolean updateStatus(int reservationId, String currentUser, boolean isAdmin, ReservationStatus newStatus) {
-        Optional<Reservation> opt = reservationRepository.findById(reservationId);
-        if (opt.isEmpty())
-            return false;
-
-        Reservation r = opt.get();
-        ReservationStatus currentStatus = r.getStatus();
-
-        if (isAdmin) {
-            if (currentStatus != ReservationStatus.PENDING ||
-                    !(newStatus == ReservationStatus.APPROVED || newStatus == ReservationStatus.DENIED))
-                return false;
-        } else {
-            if (!r.getUsername().equalsIgnoreCase(currentUser))
-                return false;
-            if (currentStatus == ReservationStatus.PENDING && newStatus == ReservationStatus.CANCELLED) {
-                // allowed
-            } else if ((currentStatus == ReservationStatus.APPROVED || currentStatus == ReservationStatus.ACTIVE)
-                    && newStatus == ReservationStatus.RETURNED) {
-                // allowed
-                r.setEndDate(LocalDate.now());
-            } else
-                return false;
-        }
-
-        r.setStatus(newStatus);
-        return reservationRepository.update(r);
-    }
-
-    // FR17: Update start date
-    public boolean updateStartDate(int reservationId, String currentUser, boolean isAdmin, LocalDate newStart) {
-        Optional<Reservation> opt = reservationRepository.findById(reservationId);
-        if (opt.isEmpty())
-            return false;
-
-        Reservation r = opt.get();
-        if (!isAdmin && !r.getUsername().equalsIgnoreCase(currentUser))
-            return false;
-        if (r.getStatus() != ReservationStatus.PENDING)
-            return false;
-
-        if (newStart == null || newStart.isAfter(r.getEndDate())
-                || newStart.isBefore(r.getReservationDate().toLocalDate()))
-            return false;
-
-        r.setStartDate(newStart);
-        return reservationRepository.update(r);
-    }
-
-    // FR18: Update end date
-    public boolean updateEndDate(int reservationId, String currentUser, boolean isAdmin, LocalDate newEnd) {
-        Optional<Reservation> opt = reservationRepository.findById(reservationId);
-        if (opt.isEmpty())
-            return false;
-
-        Reservation r = opt.get();
-        if (!isAdmin && !r.getUsername().equalsIgnoreCase(currentUser))
-            return false;
-        if (r.getStatus() != ReservationStatus.PENDING)
-            return false;
-
-        if (newEnd == null || newEnd.isBefore(r.getStartDate()))
-            return false;
-
-        r.setEndDate(newEnd);
-        return reservationRepository.update(r);
-    }
-
-    // FR19: Delete reservation (admin only)
-    public boolean deleteReservation(int reservationId, boolean isAdmin) {
-        if (!isAdmin)
-            return false;
-
-        Optional<Reservation> opt = reservationRepository.findById(reservationId);
-        if (opt.isEmpty())
-            return false;
-
-        return reservationRepository.deleteByKey(String.valueOf(reservationId));
+    //  Get all reservations
+    public List<Reservation> getAllReservations() {
+        return new ArrayList<>(reservations);
     }
 }

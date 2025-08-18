@@ -2,19 +2,23 @@ import model.User;
 import view.AuthView;
 import controller.AuthController;
 import controller.UserController;
+import controller.BookController;
+import controller.ReservationController;
 
 import java.util.Optional;
 import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        // Initialize the system
         System.out.println("Welcome to the Library E-Book Lending & Reservation System!");
 
         Scanner sc = new Scanner(System.in);
         AuthView authView = new AuthView(sc);
         AuthController authController = new AuthController(sc);
         UserController userController = new UserController(sc);
+        BookController bookController = new BookController(sc); // Added
+        ReservationController reservationController = new ReservationController(sc);
+
 
         boolean running = true;
         while (running) {
@@ -28,15 +32,15 @@ public class App {
                         authView.displayLoginFailed();
                     } else {
                         User currentUser = optionalUser.get();
-                        startUserSession(currentUser, sc, userController);
+                        startUserSession(currentUser, sc, userController, bookController, reservationController);
                     }
                     break;
 
                 case "2": // Register
-                    Optional<User> registeredUser =  authController.handleSignup();
-                    if (registeredUser.isPresent()){
+                    Optional<User> registeredUser = authController.handleSignup();
+                    if (registeredUser.isPresent()) {
                         User currentUser = registeredUser.get();
-                        startUserSession(currentUser,sc,userController);
+                        startUserSession(currentUser, sc, userController, bookController, reservationController);
                     }
                     break;
 
@@ -52,7 +56,7 @@ public class App {
         sc.close();
     }
 
-    private static void startUserSession(User currentUser, Scanner sc, UserController userController) {
+    private static void startUserSession(User currentUser, Scanner sc, UserController userController, BookController bookController, ReservationController reservationController) {
         boolean loggedIn = true;
 
         while (loggedIn) {
@@ -78,17 +82,17 @@ public class App {
                     userController.handleAccountMenu(currentUser);
                     break;
                 case "2":
-                    System.out.println("[My Reservations] feature not yet implemented.");
+                    reservationController.handleMyReservations(currentUser); //name issue
                     break;
                 case "3":
-                    System.out.println("[Books] feature not yet implemented.");
+                    bookController.handleMenu(currentUser.isAdmin(), false); // <-- Books menu
                     break;
                 case "4":
                     if (currentUser.isAdmin()) {
-                        System.out.println("[Reservations] feature not yet implemented.");
+                        reservationController.handleAllReservations(currentUser);  //name issue
                     } else {
                         System.out.println("You have been logged out.");
-                        System.exit(0);
+                        loggedIn = false;
                     }
                     break;
                 case "5":
@@ -101,14 +105,14 @@ public class App {
                 case "6":
                     if (currentUser.isAdmin()) {
                         System.out.println("You have been logged out.");
-                        System.exit(0);
+                        loggedIn = false;
                     } else {
                         System.out.println("Invalid option.");
                     }
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
-                }
+            }
         }
         System.out.println("You have been logged out.\n");
     }
