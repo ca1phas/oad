@@ -7,7 +7,7 @@ id|title|author|genre|releasedDate|filename
 9|The Enchanted April|Elizabeth Von Arnim (1726)|Fiction|2005-07-29|16389_The_Enchanted_April
 10|The Blue Castle: a novel|L. M.  Montgomery (1644)|Fiction|2022-05-03|67979_The_Blue_Castle_a_novel
 11|Cranford|Elizabeth Cleghorn Gaskell (1540)|Fiction|1996-01-01|394_Cranford
-12|Alice's Adventures in Wonderland|Lewis Carroll (1518)|Fiction|2008-06-27|11_Alices_Adventures_in_Wonderland
+12|Alice Adventures in Wonderland|Lewis Carroll (1518)|Fiction|2008-06-27|11_Alices_Adventures_in_Wonderland
 13|The Adventures of Ferdinand Count Fathom — Complete|T.  Smollett (1514)|Fiction|2004-09-09|6761_The_Adventures_of_Ferdinand_Count_Fathom__Complete
 14|The Expedition of Humphry Clinker|T.  Smollett (1506)|Fiction|2000-04-01|2160_The_Expedition_of_Humphry_Clinker
 15|History of Tom Jones, a Foundling|Henry Fielding (1445)|Fiction|2004-09-01|6593_History_of_Tom_Jones_a_Foundling
@@ -96,4 +96,4 @@ id|title|author|genre|releasedDate|filename
 98|Carmilla|Joseph Sheridan Le Fanu (369)|Fiction|2003-11-01|10007_Carmilla
 99|Through the Looking-Glass|Lewis Carroll (356)|Fiction|2008-06-25|12_Through_the_Looking-Glass
 100|Peter Pan|J. M.  Barrie (348)|Fiction|2008-06-25|16_Peter_Pan
-101|hi|hi|hi|1999-12-12|sample
+102|Hi|Hi|Hi|2923-12-21|sample

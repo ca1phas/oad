@@ -7,7 +7,6 @@ import view.BookView;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
 
 public class BookController {
@@ -29,53 +28,37 @@ public class BookController {
             int choice = bookView.promptInt("");
 
             switch (choice) {
-                case 1:
-                    handleViewBook();
-                    break;
-                case 2:
-                    handleListBooks();
-                    break;
-                case 3:
+                case 1 -> handleListBooks(isAdmin, hasReserved);       // View by page
+                case 2 -> handleFilterBooks(isAdmin, hasReserved);     // Filter & sort
+                case 3 -> handleViewBookDetails(isAdmin, hasReserved); // View details
+                case 4 -> {
                     if (isAdmin) handleAddBook();
                     else bookView.showMessage(ADMIN_ONLY_MESSAGE);
-                    break;
-                case 4:
-                    if (isAdmin) handleUpdateBook();
-                    else bookView.showMessage(ADMIN_ONLY_MESSAGE);
-                    break;
-                case 5:
-                    if (isAdmin) handleDeleteBook();
-                    else bookView.showMessage(ADMIN_ONLY_MESSAGE);
-                    break;
-                case 6:
-                    handleFilterBooks();
-                    break;
-                case 7:
-                    handleReadBook(hasReserved);
-                    break;
-                case 0:
-                    return;
-                default:
-                    bookView.showMessage(INVALID_CHOICE_MESSAGE);
+                }
+                case 0 -> { return; }
+                default -> bookView.showMessage(INVALID_CHOICE_MESSAGE);
             }
         }
     }
 
-    private void handleViewBook() {
-        int id = bookView.promptInt("Enter book ID: ");
-        Optional<Book> book = bookService.viewBook(id);
-        bookView.showBookDetails(book.orElse(null));
-    }
-
-    private void handleListBooks() {
-        // Default list: page 1, size 10, sorted by ID ascending
+    // === 1. LIST BOOKS BY PAGE ===
+    private void handleListBooks(boolean isAdmin, boolean hasReserved) {
         List<Book> books = bookService.filterSortPaginateBooks(
-                "", "", "", "", null, null, "id", true, 1, 10
+                "", "", "", "", null, null, "id", true, 1, 100
         );
         bookView.showBookList(books);
+
+        int id = bookView.promptInt("\nEnter Book ID to view details (0 to go back): ");
+        if (id == 0) return;
+
+        bookService.viewBook(id).ifPresentOrElse(
+            b -> handleBookSubMenu(b, isAdmin, hasReserved),
+            () -> bookView.showMessage("Book not found.")
+        );
     }
 
-    private void handleFilterBooks() {
+    // === 2. FILTER & SORT ===
+    private void handleFilterBooks(boolean isAdmin, boolean hasReserved) {
         String idFilter = bookView.prompt("Filter by ID (blank for none): ");
         String titleFilter = bookView.prompt("Filter by Title: ");
         String authorFilter = bookView.prompt("Filter by Author: ");
@@ -99,8 +82,53 @@ public class BookController {
         );
 
         bookView.showBookList(books);
+
+        int id = bookView.promptInt("\nEnter Book ID to view details (0 to go back): ");
+        if (id != 0) {
+            bookService.viewBook(id).ifPresent(b -> handleBookSubMenu(b, isAdmin, hasReserved));
+        }
     }
 
+    // === 3. VIEW SINGLE BOOK DETAILS ===
+    private void handleViewBookDetails(boolean isAdmin, boolean hasReserved) {
+        int id = bookView.promptInt("Enter Book ID to view details (0 to go back): ");
+        if (id == 0) return;
+
+        bookService.viewBook(id).ifPresentOrElse(
+            b -> handleBookSubMenu(b, isAdmin, hasReserved),
+            () -> bookView.showMessage("Book not found.")
+        );
+    }
+
+    // === SUBMENU FOR BOOK DETAILS ===
+    private void handleBookSubMenu(Book book, boolean isAdmin, boolean hasReserved) {
+        while (true) {
+            bookView.showBookDetails(book);
+            bookView.displayBookSubMenu(isAdmin);
+
+            int choice = bookView.promptInt("Choose an option: ");
+            switch (choice) {
+                case 1 -> {
+                    if (isAdmin) {
+                        handleUpdateBook(book.getId());
+                        book = bookService.viewBook(book.getId()).orElse(book);
+                    } else bookView.showMessage(ADMIN_ONLY_MESSAGE);
+                }
+                case 2 -> {
+                    if (isAdmin) {
+                        handleDeleteBook(book.getId());
+                        return; // go back after deletion
+                    } else bookView.showMessage(ADMIN_ONLY_MESSAGE);
+                }
+                case 3 -> handleReadBook(book, hasReserved);
+                case 4 -> handleReserveBook(book, hasReserved);
+                case 0 -> { return; }
+                default -> bookView.showMessage(INVALID_CHOICE_MESSAGE);
+            }
+        }
+    }
+
+    // === 4. CREATE BOOK ===
     private void handleAddBook() {
         String title = bookView.prompt("Enter title: ");
         String author = bookView.prompt("Enter author: ");
@@ -112,8 +140,7 @@ public class BookController {
         bookView.showMessage(success ? "Book added successfully." : "Failed to add book.");
     }
 
-    private void handleUpdateBook() {
-        int id = bookView.promptInt("Enter book ID: ");
+    private void handleUpdateBook(int id) {
         String field = bookView.prompt("Enter field to update (title, author, genre, date, filename): ").toLowerCase();
 
         String newValue = null;
@@ -140,22 +167,11 @@ public class BookController {
         bookView.showMessage(success ? "Updated successfully." : "Update failed.");
     }
 
-    private void handleDeleteBook() {
-        int id = bookView.promptInt("Enter book ID: ");
+    private void handleDeleteBook(int id) {
         bookView.showMessage(bookService.deleteBook(id, true) ? "Deleted successfully." : "Delete failed.");
     }
 
-    private void handleReadBook(boolean hasReserved) {
-        int id = bookView.promptInt("Enter book ID to read: ");
-        Optional<Book> optional = bookService.viewBook(id);
-        if (optional.isEmpty()) {
-            bookView.showMessage("Book not found.");
-            return;
-        }
-
-        Book book = optional.get();
-        String filename = book.getFilename();
-
+    private void handleReadBook(Book book, boolean hasReserved) {
         if (!hasReserved) {
             bookView.showMessage("You must reserve the book first to read it.");
             return;
@@ -163,7 +179,7 @@ public class BookController {
 
         int pageNumber = 1;
         while (true) {
-            List<String> page = bookService.readBook(filename, pageNumber, true);
+            List<String> page = bookService.readBook(book.getFilename(), pageNumber, true);
             if (page.isEmpty()) {
                 bookView.showMessage("No more content.");
                 break;
@@ -177,6 +193,15 @@ public class BookController {
             else if (action.equals("q")) break;
             else bookView.showMessage("Invalid option.");
         }
+    }
+
+    private void handleReserveBook(Book book, boolean hasReserved) {
+        if (hasReserved) {
+            bookView.showMessage("You have already reserved this book.");
+            return;
+        }
+        // just a stub, depends on your reservation system
+        bookView.showMessage("Book reserved successfully.");
     }
 
     private LocalDate promptDate(String message) {
