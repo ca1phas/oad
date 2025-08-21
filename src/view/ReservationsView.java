@@ -49,4 +49,21 @@ public class ReservationsView {
         System.out.print("Enter End Date (yyyy-MM-dd): ");
         return sc.nextLine().trim();
     }
+
+    // NEW: Ask for page number
+    public int getPageNumberInput() {
+        System.out.print("Enter page number: ");
+        try {
+            return Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            return 1;
+        }
+    }
+
+    // NEW: Ask Yes/No
+    public boolean askYesNo(String msg) {
+        System.out.print(msg + " (y/n): ");
+        String input = sc.nextLine().trim().toLowerCase();
+        return input.equals("y") || input.equals("yes");
+    }
 }

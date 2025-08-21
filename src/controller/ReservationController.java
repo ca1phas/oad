@@ -1,164 +1,199 @@
 package controller;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Scanner;
-
 import model.Reservation;
-import model.Book;
 import model.User;
 import model.enums.ReservationStatus;
 import service.ReservationService;
-import service.BookService;
-import view.ReservationsView;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Scanner;
 
 public class ReservationController {
-    private Scanner sc;
-    private ReservationService reservationService;
-    private BookService bookService;
-    private ReservationsView reservationsView;
+    private final ReservationService reservationService;
+    private final Scanner scanner;
+    private final User currentUser;
 
-    public ReservationController(Scanner sc) {
-        this.sc = sc;
-        this.reservationService = new ReservationService();
-        this.bookService = new BookService();
-        this.reservationsView = new ReservationsView(sc);
+    public ReservationController(ReservationService reservationService, User currentUser) {
+        this.reservationService = reservationService;
+        this.scanner = new Scanner(System.in);
+        this.currentUser = currentUser;
     }
 
-    // Main handler for reservation menu
-    public void handleReservationMenu(User currentUser) {
-        boolean back = false;
-
-        while (!back) {
-            reservationsView.displayMenu(currentUser.isAdmin());
-            String choice = sc.nextLine().trim();
+    // main menu
+    public void handleReservationsMenu() {
+        while (true) {
+            System.out.println("\n=== Reservations Menu ===");
+            System.out.println("1. View Reservations (with pagination)");
+            System.out.println("2. Sort Reservations");
+            System.out.println("3. Filter Reservations");
+            System.out.println("4. Select Reservation (enter ID)");
+            System.out.println("0. Back to Main Menu");
+            System.out.print("Enter choice: ");
+            String choice = scanner.nextLine().trim();
 
             switch (choice) {
-                case "1": // User: View own reservations
-                    viewUserReservations(currentUser);
-                    break;
-                case "2": // User: Make new reservation
-                    makeReservation(currentUser);
-                    break;
-                case "3": // User: Cancel own reservation
-                    cancelReservation(currentUser);
-                    break;
-                case "4":
-                    if (currentUser.isAdmin()) {
-                        viewAllReservations(); // Admin only
-                    } else {
-                        back = true; // Go back to main menu
-                    }
-                    break;
-                case "5":
-                    if (currentUser.isAdmin()) {
-                        approveOrDenyReservation(); // Admin only
-                    } else {
-                        reservationsView.showMessage("Invalid option.");
-                    }
-                    break;
-                case "6":
-                    if (currentUser.isAdmin()) {
-                        back = true; // Back to main menu
-                    } else {
-                        reservationsView.showMessage("Invalid option.");
-                    }
-                    break;
-                default:
-                    reservationsView.showMessage("Invalid choice. Please try again.");
+                case "1" -> viewReservationsWithPagination();
+                case "2" -> sortReservations();
+                case "3" -> filterReservations();
+                case "4" -> selectReservation();
+                case "0" -> { return; }
+                default -> System.out.println("Invalid choice.");
             }
         }
     }
 
-    // ================= USER FEATURES =================
+    // FR10 pagination
+    private void viewReservationsWithPagination() {
+        int pageSize = 5;
+        int page = 1;
 
-    // Show reservations of the current user
-    private void viewUserReservations(User currentUser) {
-        List<Reservation> reservations = reservationService.getReservationsByUsername(currentUser.getUsername());
-        if (reservations.isEmpty()) {
-            reservationsView.showMessage("You have no reservations.");
-        } else {
-            reservations.forEach(r -> reservationsView.showMessage(r.toString()));
+        while (true) {
+            List<Reservation> reservations = reservationService.getReservationsByPage(page, pageSize);
+            if (reservations.isEmpty()) {
+                System.out.println("No reservations on this page.");
+            } else {
+                System.out.println("\n--- Reservations Page " + page + " ---");
+                reservations.forEach(System.out::println);
+            }
+
+            System.out.println("\n[n] Next page | [p] Previous page | [q] Quit");
+            String cmd = scanner.nextLine().trim().toLowerCase();
+            if ("n".equals(cmd)) page++;
+            else if ("p".equals(cmd) && page > 1) page--;
+            else if ("q".equals(cmd)) break;
         }
     }
 
-    // Allow user to make a new reservation
-    private void makeReservation(User currentUser) {
-        String bookId = reservationsView.getBookIdInput();
-        Book book = bookService.findBookById(bookId);  // bookservice problem will be fixed later
-            reservationsView.showMessage("Book not found.");
-            return;
-        }
+    // FR11 sort
+    private void sortReservations() {
+        System.out.print("Enter field to sort by (id, book, username, date, status): ");
+        String field = scanner.nextLine().trim().toLowerCase();
+        System.out.print("Enter order (asc/desc): ");
+        String order = scanner.nextLine().trim().toLowerCase();
 
-        String start = reservationsView.getStartDateInput();
-        String end = reservationsView.getEndDateInput();
+        List<Reservation> sorted = reservationService.sortReservations(field, order);
+        sorted.forEach(System.out::println);
+    }
+
+    // FR12 filter
+    private void filterReservations() {
+        System.out.print("Filter by field (id, book, username, status, date): ");
+        String field = scanner.nextLine().trim().toLowerCase();
+        System.out.print("Enter value: ");
+        String value = scanner.nextLine().trim();
+
+        List<Reservation> filtered = reservationService.filterReservations(field, value);
+        filtered.forEach(System.out::println);
+    }
+
+    // FR13  Reservation
+    private void selectReservation() {
         try {
-            LocalDate startDate = LocalDate.parse(start);
-            LocalDate endDate = LocalDate.parse(end);
+            System.out.print("Enter Reservation ID: ");
+            int id = Integer.parseInt(scanner.nextLine().trim());
+            Reservation r = reservationService.findById(id).orElse(null);
 
-            Reservation newReservation = new Reservation(
-                    reservationService.generateNewId(), // Generate unique ID
-                    book,
-                    currentUser.getUsername(),
-                    LocalDateTime.now(),
-                    ReservationStatus.PENDING, // Default status
-                    startDate,
-                    endDate
-            );
+            if (r == null) {
+                System.out.println("Reservation not found.");
+                return;
+            }
 
-            reservationService.addReservation(newReservation);
-            reservationsView.showMessage("Reservation created successfully! Status: PENDING.");
+            handleReservationPage(r);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid ID.");
+        }
+    }
+
+    // === Reservation Page menu (FR14–FR19) ===
+    private void handleReservationPage(Reservation r) {
+        while (true) {
+            System.out.println("\n=== Reservation Page ===");
+            System.out.println(r);
+            System.out.println("1. View Book");
+            System.out.println("2. Update Status");
+            System.out.println("3. Update Start Date");
+            System.out.println("4. Update End Date");
+            System.out.println("5. Delete Reservation");
+            System.out.println("0. Back");
+            System.out.print("Enter choice: ");
+            String choice = scanner.nextLine().trim();
+
+            switch (choice) {
+                case "1" -> viewBook(r);
+                case "2" -> updateStatus(r);
+                case "3" -> updateStartDate(r);
+                case "4" -> updateEndDate(r);
+                case "5" -> deleteReservation(r);
+                case "0" -> { return; }
+                default -> System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    // FR15 view book 
+    private void viewBook(Reservation r) {
+        System.out.println("Book details: " + r.getBook());
+    }
+
+    // FR16 update status 
+    private void updateStatus(Reservation r) {
+        System.out.print("Enter new status: ");
+        String statusStr = scanner.nextLine().trim().toUpperCase();
+
+        try {
+            ReservationStatus status = ReservationStatus.valueOf(statusStr);
+            boolean success = reservationService.updateStatus(r.getId(), status, currentUser);
+            System.out.println(success ? "Status updated." : "Failed to update status.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid status.");
+        }
+    }
+
+    // FR17 update start date
+    private void updateStartDate(Reservation r) {
+        if (r.getStatus() != ReservationStatus.PENDING) {
+            System.out.println("Only PENDING reservations can update start date.");
+            return;
+        }
+        System.out.print("Enter new start date (yyyy-mm-dd): ");
+        String dateStr = scanner.nextLine().trim();
+        try {
+            LocalDate newDate = LocalDate.parse(dateStr);
+            boolean success = reservationService.updateStartDate(r.getId(), newDate, currentUser);
+            System.out.println(success ? "Start date updated." : "Failed to update.");
         } catch (Exception e) {
-            reservationsView.showMessage("Invalid date format. Please use yyyy-MM-dd.");
+            System.out.println("Invalid date.");
         }
     }
 
-    // Cancel an existing reservation (user can only cancel their own)
-    private void cancelReservation(User currentUser) {
-        int id = reservationsView.getReservationIdInput();
-        Reservation res = reservationService.findReservationById(id);
-        if (res == null || !res.getUsername().equals(currentUser.getUsername())) {
-            reservationsView.showMessage("Reservation not found or not yours.");
+    // FR18 update end date
+    private void updateEndDate(Reservation r) {
+        if (r.getStatus() != ReservationStatus.PENDING) {
+            System.out.println("Only PENDING reservations can update end date.");
             return;
         }
-        res.setStatus(ReservationStatus.CANCELLED);
-        reservationsView.showMessage("Reservation " + id + " cancelled.");
-    }
-
-    // ================= ADMIN FEATURES =================
-
-    // Show all reservations in the system
-    private void viewAllReservations() {
-        List<Reservation> reservations = reservationService.getAllReservations();
-        if (reservations.isEmpty()) {
-            reservationsView.showMessage("No reservations in the system.");
-        } else {
-            reservations.forEach(r -> reservationsView.showMessage(r.toString()));
+        System.out.print("Enter new end date (yyyy-mm-dd): ");
+        String dateStr = scanner.nextLine().trim();
+        try {
+            LocalDate newDate = LocalDate.parse(dateStr);
+            boolean success = reservationService.updateEndDate(r.getId(), newDate, currentUser);
+            System.out.println(success ? "End date updated." : "Failed to update.");
+        } catch (Exception e) {
+            System.out.println("Invalid date.");
         }
     }
 
-    // Admin can approve or deny a reservation
-    private void approveOrDenyReservation() {
-        int id = reservationsView.getReservationIdInput();
-        Reservation res = reservationService.findReservationById(id);
-        if (res == null) {
-            reservationsView.showMessage("Reservation not found.");
+    // FR19 delete reservation
+    private void deleteReservation(Reservation r) {
+        if (!currentUser.isAdmin()) {
+            System.out.println("Access denied. Only admin can delete reservations.");
             return;
         }
-
-        reservationsView.showMessage("Current status: " + res.getStatus());
-        System.out.print("Approve (A) / Deny (D): ");
-        String decision = sc.nextLine().trim().toUpperCase();
-
-        if (decision.equals("A")) {
-            res.setStatus(ReservationStatus.APPROVED);
-            reservationsView.showMessage("Reservation " + id + " approved.");
-        } else if (decision.equals("D")) {
-            res.setStatus(ReservationStatus.DENIED);
-            reservationsView.showMessage("Reservation " + id + " denied.");
-        } else {
-            reservationsView.showMessage("Invalid input. Action cancelled.");
+        System.out.print("Are you sure? (yes/no): ");
+        if ("yes".equalsIgnoreCase(scanner.nextLine().trim())) {
+            boolean success = reservationService.deleteReservation(r.getId());
+            System.out.println(success ? "Reservation deleted." : "Failed to delete.");
         }
     }
 }

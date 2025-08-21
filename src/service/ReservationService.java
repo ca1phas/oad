@@ -1,63 +1,129 @@
-// ReservationService.java
 package service;
 
 import model.Reservation;
+import model.User;
 import model.enums.ReservationStatus;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ReservationService {
-    private final List<Reservation> reservations;
-    private final AtomicInteger idGenerator;
+    private final List<Reservation> reservations = new ArrayList<>();
 
-    public ReservationService() {
-        this.reservations = new ArrayList<>();
-        this.idGenerator = new AtomicInteger(1);
+    
+
+    public List<Reservation> getAllReservations() {
+        return new ArrayList<>(reservations);
     }
 
-    //  Generate unique ID (for controller usage)
-    public int generateNewId() {
-        return idGenerator.getAndIncrement();
+    public Optional<Reservation> findById(int id) {
+        return reservations.stream().filter(r -> r.getId() == id).findFirst();
     }
 
-    //  Add new reservation (controller passes ready object)
-    public boolean addReservation(Reservation reservation) {
-        return reservations.add(reservation);
+    public void addReservation(Reservation r) {
+        reservations.add(r);
     }
 
-    //  Find reservation by ID
-    public Reservation findReservationById(int id) {
+    public boolean deleteReservation(int id) {
+        return reservations.removeIf(r -> r.getId() == id);
+    }
+
+    // --- FR10 page ---
+    public List<Reservation> getReservationsByPage(int page, int pageSize) {
+        int start = (page - 1) * pageSize;
+        if (start >= reservations.size()) return Collections.emptyList();
         return reservations.stream()
-                .filter(r -> r.getId() == id)
-                .findFirst()
-                .orElse(null);
-    }
-
-    //  Get reservations by username
-    public List<Reservation> getReservationsByUsername(String username) {
-        return reservations.stream()
-                .filter(r -> r.getUsername().equalsIgnoreCase(username))
+                .skip(start)
+                .limit(pageSize)
                 .collect(Collectors.toList());
     }
 
-    //  Cancel reservation (with validation)
-    public boolean cancelReservation(int reservationId, String username) {
-        Reservation res = findReservationById(reservationId);
-        if (res != null && res.getUsername().equalsIgnoreCase(username)) {
-            if (res.getStatus() == ReservationStatus.PENDING ||
-                res.getStatus() == ReservationStatus.APPROVED) {
-                res.setStatus(ReservationStatus.CANCELLED);
-                return true;
+    // --- FR11 Sort reservations ---
+    public List<Reservation> sortReservations(String field, String order) {
+        Comparator<Reservation> comparator;
+
+        switch (field) {
+            case "id" -> comparator = Comparator.comparingInt(Reservation::getId);
+            case "book" -> comparator = Comparator.comparing(r -> r.getBook().getTitle(), String.CASE_INSENSITIVE_ORDER);
+            case "username" -> comparator = Comparator.comparing(Reservation::getUsername, String.CASE_INSENSITIVE_ORDER);
+            case "date" -> comparator = Comparator.comparing(Reservation::getReservationDate);
+            case "status" -> comparator = Comparator.comparing(r -> r.getStatus().name());
+            default -> {
+                System.out.println("Invalid sort field.");
+                return reservations;
             }
         }
-        return false;
+
+        if ("desc".equalsIgnoreCase(order)) comparator = comparator.reversed();
+        return reservations.stream().sorted(comparator).collect(Collectors.toList());
     }
 
-    //  Get all reservations
-    public List<Reservation> getAllReservations() {
-        return new ArrayList<>(reservations);
+    // --- FR12 filter ---
+    public List<Reservation> filterReservations(String field, String value) {
+        return reservations.stream().filter(r -> {
+            switch (field) {
+                case "id" -> {
+                    try { return r.getId() == Integer.parseInt(value); }
+                    catch (NumberFormatException e) { return false; }
+                }
+                case "book" -> { return r.getBook().getTitle().equalsIgnoreCase(value); }
+                case "username" -> { return r.getUsername().equalsIgnoreCase(value); }
+                case "status" -> { return r.getStatus().name().equalsIgnoreCase(value); }
+                case "date" -> { return r.getReservationDate().toLocalDate().toString().equals(value); }
+                default -> { return false; }
+            }
+        }).collect(Collectors.toList());
+    }
+
+    // --- FR16 updatestatus ---
+    public boolean updateStatus(int id, ReservationStatus newStatus, User currentUser) {
+        Optional<Reservation> opt = findById(id);
+        if (opt.isEmpty()) return false;
+
+        Reservation r = opt.get();
+
+        
+        if (!currentUser.isAdmin() && !r.getUsername().equals(currentUser.getUsername())) {
+            System.out.println("Access denied: You can only update your own reservations.");
+            return false;
+        }
+
+        r.setStatus(newStatus);
+        return true;
+    }
+
+    // --- FR17 update startDate ---
+    public boolean updateStartDate(int id, LocalDate newDate, User currentUser) {
+        Optional<Reservation> opt = findById(id);
+        if (opt.isEmpty()) return false;
+
+        Reservation r = opt.get();
+        if (r.getStatus() != ReservationStatus.PENDING) return false;
+
+        if (!currentUser.isAdmin() && !r.getUsername().equals(currentUser.getUsername())) {
+            System.out.println("Access denied: You can only update your own reservations.");
+            return false;
+        }
+
+        r.setStartDate(newDate);
+        return true;
+    }
+
+    // --- FR18 update endDate ---
+    public boolean updateEndDate(int id, LocalDate newDate, User currentUser) {
+        Optional<Reservation> opt = findById(id);
+        if (opt.isEmpty()) return false;
+
+        Reservation r = opt.get();
+        if (r.getStatus() != ReservationStatus.PENDING) return false;
+
+        if (!currentUser.isAdmin() && !r.getUsername().equals(currentUser.getUsername())) {
+            System.out.println("Access denied: You can only update your own reservations.");
+            return false;
+        }
+
+        r.setEndDate(newDate);
+        return true;
     }
 }
