@@ -19,7 +19,7 @@ public class BookController {
     private static final String ADMIN_ONLY_MESSAGE = "Only admins can perform this action.";
     private static final String INVALID_CHOICE_MESSAGE = "Invalid choice.";
     private static final String INVALID_DATE_MESSAGE = "Invalid date format. Please use yyyy-mm-dd.";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-mm-dd");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public BookController(Scanner sc) {
         this.bookService = new BookService();
@@ -301,6 +301,7 @@ public class BookController {
             try {
                 return LocalDate.parse(bookView.prompt(message), DATE_FORMATTER);
             } catch (DateTimeParseException e) {
+                System.out.println(e);
                 bookView.showMessage(INVALID_DATE_MESSAGE);
             }
         }
