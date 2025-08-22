@@ -37,8 +37,10 @@ public class BookController {
                 case 2 -> handleFilterBooks(isAdmin, hasReserved);
                 case 3 -> handleViewBookDetails(isAdmin, hasReserved);
                 case 4 -> {
-                    if (isAdmin) handleAddBook();
-                    else bookView.showMessage(ADMIN_ONLY_MESSAGE);
+                    if (isAdmin)
+                        handleAddBook();
+                    else
+                        bookView.showMessage(ADMIN_ONLY_MESSAGE);
                 }
                 case 0 -> {
                     return;
@@ -48,53 +50,53 @@ public class BookController {
         }
     }
 
-// === 1. LIST BOOKS WITH PAGINATION ===
-private void handleListBooksByPage(boolean isAdmin, boolean hasReserved) {
-    List<Book> allBooks = bookService.filterSortPaginateBooks(
-            "", "", "", "", null, null, "id", true, 1, Integer.MAX_VALUE);
+    // === 1. LIST BOOKS WITH PAGINATION ===
+    private void handleListBooksByPage(boolean isAdmin, boolean hasReserved) {
+        List<Book> allBooks = bookService.filterSortPaginateBooks(
+                "", "", "", "", null, null, "id", true, 1, Integer.MAX_VALUE);
 
-    if (allBooks.isEmpty()) {
-        bookView.showMessage("No books found.");
-        return;
-    }
-
-    final int pageSize = 5;
-    int pageNumber = 0;
-    int totalPages = (int) Math.ceil((double) allBooks.size() / pageSize);
-
-    while (true) {
-        int start = pageNumber * pageSize;
-        int end = Math.min(start + pageSize, allBooks.size());
-        List<Book> pageOfBooks = allBooks.subList(start, end);
-
-        bookView.showBookListPage(pageOfBooks, pageNumber + 1, totalPages);
-        
-        // This line now correctly separates navigation from other actions
-        int choice = bookView.promptInt("Choose an option: ");
-
-        if (choice == 0) {
-            bookView.showMessage("Returning to 📚 BOOKS (HOME PAGE)...");
+        if (allBooks.isEmpty()) {
+            bookView.showMessage("No books found.");
             return;
-        } else if (choice == 1 && pageNumber > 0) {
-            pageNumber--;
-        } else if (choice == 2 && pageNumber < totalPages - 1) {
-            pageNumber++;
-        } else {
-            bookView.showMessage(INVALID_CHOICE_MESSAGE);
+        }
+
+        final int pageSize = 5;
+        int pageNumber = 0;
+        int totalPages = (int) Math.ceil((double) allBooks.size() / pageSize);
+
+        while (true) {
+            int start = pageNumber * pageSize;
+            int end = Math.min(start + pageSize, allBooks.size());
+            List<Book> pageOfBooks = allBooks.subList(start, end);
+
+            bookView.showBookListPage(pageOfBooks, pageNumber + 1, totalPages);
+
+            // This line now correctly separates navigation from other actions
+            int choice = bookView.promptInt("Choose an option: ");
+
+            if (choice == 0) {
+                bookView.showMessage("Returning to 📚 BOOKS (HOME PAGE)...");
+                return;
+            } else if (choice == 1 && pageNumber > 0) {
+                pageNumber--;
+            } else if (choice == 2 && pageNumber < totalPages - 1) {
+                pageNumber++;
+            } else {
+                bookView.showMessage(INVALID_CHOICE_MESSAGE);
+            }
         }
     }
-}
 
-// === 3. VIEW SINGLE BOOK ===
-private void handleViewBookDetails(boolean isAdmin, boolean hasReserved) {
-    int id = bookView.promptInt("Enter Book ID to view details (0 to go back): ");
-    if (id == 0) return;
+    // === 3. VIEW SINGLE BOOK ===
+    private void handleViewBookDetails(boolean isAdmin, boolean hasReserved) {
+        int id = bookView.promptInt("Enter Book ID to view details (0 to go back): ");
+        if (id == 0)
+            return;
 
-    bookService.viewBook(id).ifPresentOrElse(
-            b -> handleBookSubMenu(b, isAdmin, hasReserved),
-            () -> bookView.showMessage("Book not found.")
-    );
-}
+        bookService.viewBook(id).ifPresentOrElse(
+                b -> handleBookSubMenu(b, isAdmin, hasReserved),
+                () -> bookView.showMessage("Book not found."));
+    }
 
     // === 2. FILTER & SORT BOOKS ===
     private void handleFilterBooks(boolean isAdmin, boolean hasReserved) {
@@ -116,11 +118,11 @@ private void handleViewBookDetails(boolean isAdmin, boolean hasReserved) {
         int pageNumber = Math.max(1, bookView.promptInt("Page number: "));
         int pageSize = Math.max(1, bookView.promptInt("Page size: "));
 
-        // The partial ID filter is now handled by the service layer, no manual filtering needed here.
+        // The partial ID filter is now handled by the service layer, no manual
+        // filtering needed here.
         List<Book> books = bookService.filterSortPaginateBooks(
                 idFilter, titleFilter, authorFilter, genreFilter,
-                startDate, endDate, sortField, ascending, pageNumber, pageSize
-        );
+                startDate, endDate, sortField, ascending, pageNumber, pageSize);
 
         if (books.isEmpty()) {
             bookView.showMessage("No books found matching the criteria.");
@@ -148,7 +150,6 @@ private void handleViewBookDetails(boolean isAdmin, boolean hasReserved) {
         };
     }
 
-
     // === SUBMENU FOR BOOK ===
     private void handleBookSubMenu(Book book, boolean isAdmin, boolean hasReserved) {
         while (true) {
@@ -161,14 +162,16 @@ private void handleViewBookDetails(boolean isAdmin, boolean hasReserved) {
                     if (isAdmin) {
                         handleUpdateBook(book.getId());
                         book = bookService.viewBook(book.getId()).orElse(book);
-                    } else bookView.showMessage(ADMIN_ONLY_MESSAGE);
+                    } else
+                        bookView.showMessage(ADMIN_ONLY_MESSAGE);
                 }
                 case 2 -> {
                     if (isAdmin) {
                         if (handleDeleteBook(book.getId())) {
                             return; // Exit the submenu after successful deletion
                         }
-                    } else bookView.showMessage(ADMIN_ONLY_MESSAGE);
+                    } else
+                        bookView.showMessage(ADMIN_ONLY_MESSAGE);
                 }
                 case 3 -> handleReadBook(book);
                 case 4 -> handleReserveBook(book, hasReserved);
@@ -181,35 +184,35 @@ private void handleViewBookDetails(boolean isAdmin, boolean hasReserved) {
     }
 
     // === 4. CRUD OPERATIONS ===
-private void handleAddBook() {
-    String title = bookView.prompt("Enter title: ");
-    String author = bookView.prompt("Enter author: ");
-    String genre = bookView.prompt("Enter genre: ");
-    
-    // Correctly handle date input with a loop until valid input is provided
-    LocalDate releaseDate;
-    while (true) {
-        String dateString = bookView.prompt("Enter release date (yyyy-mm-dd): ");
-        releaseDate = DateTimeUtil.parseDate(dateString);
-        if (releaseDate != null) {
-            break; // Exit the loop if the date is successfully parsed
-        }
-        // DateTimeUtil.parseDate already prints the error message, so no need for another one here.
-    }
-    
-    String filename = bookView.prompt("Enter filename (without .txt): ");
+    private void handleAddBook() {
+        String title = bookView.prompt("Enter title: ");
+        String author = bookView.prompt("Enter author: ");
+        String genre = bookView.prompt("Enter genre: ");
 
-    try {
-        if (bookService.addBook(title, author, genre, releaseDate, filename)) {
-            bookView.showMessage("Book added successfully.");
-        } else {
-            bookView.showMessage("Failed to add book. File '" + filename + ".txt' not found in books directory.");
+        // Correctly handle date input with a loop until valid input is provided
+        LocalDate releaseDate;
+        while (true) {
+            String dateString = bookView.prompt("Enter release date (yyyy-mm-dd): ");
+            releaseDate = DateTimeUtil.parseDate(dateString);
+            if (releaseDate != null) {
+                break; // Exit the loop if the date is successfully parsed
+            }
+            // DateTimeUtil.parseDate already prints the error message, so no need for
+            // another one here.
         }
-    } catch (Exception e) {
-        bookView.showMessage("Failed to add book. Error: " + e.getMessage());
-    }
-}
 
+        String filename = bookView.prompt("Enter filename (without .txt): ");
+
+        try {
+            if (bookService.addBook(title, author, genre, releaseDate, filename)) {
+                bookView.showMessage("Book added successfully.");
+            } else {
+                bookView.showMessage("Failed to add book. File '" + filename + ".txt' not found in books directory.");
+            }
+        } catch (Exception e) {
+            bookView.showMessage("Failed to add book. Error: " + e.getMessage());
+        }
+    }
 
     private void handleUpdateBook(int id) {
         String field = bookView.prompt("Enter field to update (title, author, genre, date, filename): ").toLowerCase();
@@ -265,10 +268,12 @@ private void handleAddBook() {
                 }
 
                 bookView.showBookContent(page, pageNumber);
-                int action = bookView.promptInt("Navigation - 1: Next | 2: Previous | 0: Exit: ");
+                int action = bookView.promptInt("Navigation\n 1: Next \n 2: Previous \n 0: Exit\n Option: ");
 
-                if (action == 1) pageNumber++;
-                else if (action == 2 && pageNumber > 1) pageNumber--;
+                if (action == 1)
+                    pageNumber++;
+                else if (action == 2 && pageNumber > 1)
+                    pageNumber--;
                 else if (action == 0) {
                     bookView.showMessage("Exiting book reader...");
                     break;
@@ -302,7 +307,8 @@ private void handleAddBook() {
     }
 
     private LocalDate parseDate(String dateStr) {
-        if (dateStr == null || dateStr.isBlank()) return null;
+        if (dateStr == null || dateStr.isBlank())
+            return null;
         try {
             return LocalDate.parse(dateStr, DATE_FORMATTER);
         } catch (DateTimeParseException e) {

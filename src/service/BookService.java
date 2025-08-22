@@ -6,6 +6,7 @@ import util.IDGeneratorUtil;
 import util.PaginationUtil;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -41,13 +42,13 @@ public class BookService {
         if (!hasReserved)
             return Collections.emptyList();
 
-        Path filePath = Path.of("books", filename+".txt");
+        Path filePath = Path.of("books", filename + ".txt");
         if (!Files.exists(filePath))
             return Collections.emptyList();
 
         int pageSize = 20;
         try {
-            List<String> lines = Files.readAllLines(filePath);
+            List<String> lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
             return PaginationUtil.paginate(lines, pageNumber, pageSize);
         } catch (IOException e) {
             return Collections.emptyList();
@@ -115,17 +116,16 @@ public class BookService {
         if (!isAdmin) {
             return false;
         }
-    
+
         Optional<Book> optional = bookRepository.findById(bookId);
         if (optional.isEmpty()) {
             return false;
         }
-    
+
         Book book = optional.get();
         book.setFilename(newFilename);
         return bookRepository.update(book);
     }
-
 
     // FR33: Delete book
     public boolean deleteBook(int bookId, boolean isAdmin) {

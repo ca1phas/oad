@@ -4,6 +4,7 @@ import controller.AuthController;
 import controller.UserController;
 import controller.BookController;
 
+import java.io.PrintStream;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -53,11 +54,19 @@ public class App {
         sc.close();
     }
 
-    private static void startUserSession(User currentUser, Scanner sc, UserController userController, BookController bookController) {
+    private static void startUserSession(User currentUser, Scanner sc, UserController userController,
+            BookController bookController) {
         boolean loggedIn = true;
 
+        try {
+            System.setOut(new PrintStream(System.out, true, "UTF-8"));
+        } catch (java.io.UnsupportedEncodingException e) {
+            System.err.println("UTF-8 encoding not supported. Using default encoding.");
+        }
+
         while (loggedIn) {
-            System.out.println("\n[Logged in as: " + currentUser.getUsername() + " | Role: " + currentUser.getRole() + "]");
+            System.out.println(
+                    "\n[Logged in as: " + currentUser.getUsername() + " | Role: " + currentUser.getRole() + "]");
             System.out.println("\nPlease select an option:");
             System.out.println("1. My Account");
             System.out.println("2. My Reservations");
