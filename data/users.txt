@@ -15,3 +15,6 @@ username|password|role
 14|bruce_wayne|bat123|member
 15|clark_kent|super123|member
 16|3|1|member
+17|||member
+18|balls|balls|member
+19|2|2|member

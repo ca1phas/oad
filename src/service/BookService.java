@@ -41,7 +41,7 @@ public class BookService {
         if (!hasReserved)
             return Collections.emptyList();
 
-        Path filePath = Path.of("books", filename);
+        Path filePath = Path.of("books", filename+".txt");
         if (!Files.exists(filePath))
             return Collections.emptyList();
 
@@ -112,21 +112,20 @@ public class BookService {
 
     // FR32: Update filename
     public boolean updateFilename(int bookId, String newFilename, boolean isAdmin) {
-        if (!isAdmin)
+        if (!isAdmin) {
             return false;
-
-        Path filePath = Path.of("books", newFilename);
-        if (!Files.exists(filePath))
-            return false;
-
+        }
+    
         Optional<Book> optional = bookRepository.findById(bookId);
-        if (optional.isEmpty())
+        if (optional.isEmpty()) {
             return false;
-
+        }
+    
         Book book = optional.get();
         book.setFilename(newFilename);
         return bookRepository.update(book);
     }
+
 
     // FR33: Delete book
     public boolean deleteBook(int bookId, boolean isAdmin) {
@@ -153,7 +152,7 @@ public class BookService {
         // Filtering
         if (idFilter != null && !idFilter.isBlank())
             books = books.stream()
-                    .filter(b -> String.valueOf(b.getId()).equalsIgnoreCase(idFilter))
+                    .filter(b -> String.valueOf(b.getId()).contains(idFilter))
                     .collect(Collectors.toList());
 
         if (titleFilter != null && !titleFilter.isBlank())
@@ -182,24 +181,14 @@ public class BookService {
                     .collect(Collectors.toList());
 
         // Sorting
-        Comparator<Book> comparator = Comparator.comparing(Book::getTitle);
-        switch (sortField == null ? "" : sortField.toLowerCase()) {
-            case "id":
-                comparator = Comparator.comparing(Book::getId);
-                break;
-            case "title":
-                comparator = Comparator.comparing(Book::getTitle);
-                break;
-            case "author":
-                comparator = Comparator.comparing(Book::getAuthor);
-                break;
-            case "genre":
-                comparator = Comparator.comparing(Book::getGenre);
-                break;
-            case "releaseddate":
-                comparator = Comparator.comparing(Book::getReleasedDate);
-                break;
-        }
+        Comparator<Book> comparator = switch (sortField == null ? "" : sortField.toLowerCase()) {
+            case "title" -> Comparator.comparing(Book::getTitle);
+            case "author" -> Comparator.comparing(Book::getAuthor);
+            case "genre" -> Comparator.comparing(Book::getGenre);
+            case "releaseddate" -> Comparator.comparing(Book::getReleasedDate);
+            default -> Comparator.comparing(Book::getId);
+        };
+
         if (!ascending)
             comparator = comparator.reversed();
 

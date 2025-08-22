@@ -1,7 +1,6 @@
 package view;
 
 import model.Book;
-
 import java.util.List;
 import java.util.Scanner;
 
@@ -12,30 +11,33 @@ public class BookView {
         this.sc = sc;
     }
 
-    // === MAIN BOOK MENU (HOME PAGE) ===
+    // === MAIN MENU ===
     public void displayBookMenu() {
-        System.out.println("\n=== Books (Home Page) ===");
+        System.out.println("        BOOKS (HOME PAGE) ");
         System.out.println("1. View Books by Page");
         System.out.println("2. Filter & Sort Books");
         System.out.println("3. View Book Details");
-        System.out.println("4. Create New Book");
-        System.out.println("0. Back");
-        System.out.print("Enter choice: ");
+        System.out.println("4. Create New Book (Admin Only)");
+        System.out.println("0. Back to Main Menu");
+        System.out.print("Enter your choice: ");
     }
 
-    // === SUBMENU FOR A SINGLE BOOK ===
+    // === SUBMENU ===
     public void displayBookSubMenu(boolean isAdmin) {
-        System.out.println("\n=== Book Options ===");
+
+        System.out.println("        BOOK OPTIONS ");
+
         if (isAdmin) {
-            System.out.println("1. Update Book");
-            System.out.println("2. Delete Book");
+            System.out.println("1. Update Book (Admin)");
+            System.out.println("2. Delete Book (Admin)");
         }
         System.out.println("3. Read Book");
         System.out.println("4. Reserve Book");
         System.out.println("0. Back");
+
     }
 
-    // === INPUT HELPERS ===
+    // === INPUT ===
     public String prompt(String message) {
         System.out.print(message);
         return sc.nextLine().trim();
@@ -50,70 +52,86 @@ public class BookView {
         }
     }
 
-    // === DISPLAY LIST OF BOOKS WITH PAGINATION ===
-    public void showBookList(List<Book> books) {
+    // === BOOK LIST ===
+    public void showBookListPage(List<Book> books, int currentPage, int totalPages) {
         if (books.isEmpty()) {
-            System.out.println("No books found.");
+            System.out.println("\n No books found for this page.");
             return;
         }
 
-        final int pageSize = 5; // Number of books per page
-        int page = 0;
-        int totalPages = (int) Math.ceil((double) books.size() / pageSize);
+        System.out.printf("                    = BOOK LIBRARY - PAGE %d OF %d =%n", currentPage, totalPages);
 
-        while (true) {
-            int start = page * pageSize;
-            int end = Math.min(start + pageSize, books.size());
-
-            System.out.println("\n=== Book List (Page " + (page + 1) + " of " + totalPages + ") ===");
-            for (int i = start; i < end; i++) {
-                Book book = books.get(i);
-                System.out.printf(
-                        "ID: %d\nTitle: %s\nAuthor: %s\nGenre: %s\nReleased: %s\n----------------------\n",
-                        book.getId(), book.getTitle(), book.getAuthor(),
-                        book.getGenre(), book.getReleasedDate()
-                );
-            }
-
-            System.out.println("1. Previous Page | 2. Next Page | 0. Exit");
-            int choice = promptInt("Choose option: ");
-
-            if (choice == 1 && page > 0) {
-                page--;
-            } else if (choice == 2 && page < totalPages - 1) {
-                page++;
-            } else if (choice == 0) {
-                break;
-            } else {
-                System.out.println("Invalid choice.");
-            }
+        for (int i = 0; i < books.size(); i++) {
+            Book book = books.get(i);
+            System.out.printf("%-3d │ ID: %-4d │ %-30s │ %-20s │ %-12s │ %s%n",
+                    (i + 1),
+                    book.getId(),
+                    truncate(book.getTitle(), 30),
+                    truncate(book.getAuthor(), 20),
+                    truncate(book.getGenre(), 12),
+                    book.getReleasedDate()
+            );
         }
+
+        System.out.print(" Navigation: ");
+        if (currentPage > 1) System.out.print("1️ Previous │ ");
+        if (currentPage < totalPages) System.out.print("2️ Next │ ");
+        System.out.println("0️ Back to Books (Home)");
     }
 
-    // === DISPLAY SINGLE BOOK DETAILS ===
+    // === BOOK DETAILS ===
     public void showBookDetails(Book book) {
         if (book == null) {
-            System.out.println("Book not found.");
+            System.out.println("\n Book not found.");
+            return;
+        }
+
+        System.out.println("                    = BOOK DETAILS =");
+
+        System.out.printf(" ID: %d%n", book.getId());
+        System.out.printf(" Title: %s%n", book.getTitle());
+        System.out.printf(" Author: %s%n", book.getAuthor());
+        System.out.printf(" Genre: %s%n", book.getGenre());
+        System.out.printf(" Released: %s%n", book.getReleasedDate());
+        System.out.printf(" Filename: %s.txt%n", book.getFilename());
+
+    }
+
+    // === BOOK READER ===
+    public void showBookContent(List<String> content, int pageNumber) {
+        System.out.printf("                     READING - PAGE %d %n", pageNumber);
+
+        if (content == null || content.isEmpty()) {
+            System.out.println(" No content available on this page.");
         } else {
-            System.out.println("\n=== Book Details ===");
-            System.out.println("ID: " + book.getId());
-            System.out.println("Title: " + book.getTitle());
-            System.out.println("Author: " + book.getAuthor());
-            System.out.println("Genre: " + book.getGenre());
-            System.out.println("Released: " + book.getReleasedDate());
-            System.out.println("Filename: " + book.getFilename());
+            content.forEach(line -> System.out.println("  " + line));
+        }
+
+    }
+
+    public void showBookContent(List<String> content) {
+        showBookContent(content, 1);
+    }
+
+    // === MESSAGE ===
+    public void showMessage(String message) {
+        String msg = message.toLowerCase();
+        if (msg.contains("success") || msg.contains("added") || msg.contains("updated") || msg.contains("reserved")) {
+            System.out.println(" " + message);
+        } else if (msg.contains("error") || msg.contains("failed") || msg.contains("not found") || msg.contains("invalid")) {
+            System.out.println(" " + message);
+        } else if (msg.contains("cancelled") || msg.contains("exiting") || msg.contains("returning")) {
+            System.out.println("ℹ " + message);
+        } else {
+            System.out.println(" " + message);
         }
     }
 
-    // === DISPLAY BOOK CONTENT (FOR READING) ===
-    public void showBookContent(List<String> content) {
-        System.out.println("\n=== Book Content ===");
-        content.forEach(System.out::println);
-        System.out.println("====================\n");
-    }
-
-    // === GENERIC MESSAGE ===
-    public void showMessage(String message) {
-        System.out.println(message);
+    // === HELPER ===
+    private String truncate(String str, int maxLength) {
+        if (str == null) return "";
+        return str.length() <= maxLength
+                ? String.format("%-" + maxLength + "s", str)
+                : str.substring(0, maxLength - 3) + "...";
     }
 }
