@@ -6,8 +6,6 @@ import util.DateTimeUtil;
 import view.BookView;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,11 +13,9 @@ public class BookController {
     private final BookService bookService;
     private final BookView bookView;
 
-    // Constants
     private static final String ADMIN_ONLY_MESSAGE = "Only admins can perform this action.";
     private static final String INVALID_CHOICE_MESSAGE = "Invalid choice.";
     private static final String INVALID_DATE_MESSAGE = "Invalid date format. Please use yyyy-mm-dd.";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public BookController(Scanner sc) {
         this.bookService = new BookService();
@@ -37,14 +33,10 @@ public class BookController {
                 case 2 -> handleFilterBooks(isAdmin, hasReserved);
                 case 3 -> handleViewBookDetails(isAdmin, hasReserved);
                 case 4 -> {
-                    if (isAdmin)
-                        handleAddBook();
-                    else
-                        bookView.showMessage(ADMIN_ONLY_MESSAGE);
+                    if (isAdmin) handleAddBook();
+                    else bookView.showMessage(ADMIN_ONLY_MESSAGE);
                 }
-                case 0 -> {
-                    return;
-                } // Exit to main menu
+                case 0 -> { return; }
                 default -> bookView.showMessage(INVALID_CHOICE_MESSAGE);
             }
         }
@@ -61,41 +53,23 @@ public class BookController {
         }
 
         final int pageSize = 5;
-        int pageNumber = 0;
+        int pageNumber = 1;
         int totalPages = (int) Math.ceil((double) allBooks.size() / pageSize);
 
         while (true) {
-            int start = pageNumber * pageSize;
+            int start = (pageNumber - 1) * pageSize;
             int end = Math.min(start + pageSize, allBooks.size());
             List<Book> pageOfBooks = allBooks.subList(start, end);
 
-            bookView.showBookListPage(pageOfBooks, pageNumber + 1, totalPages);
+            // Show table + navigation inside view
+            bookView.showBookListPage(pageOfBooks, pageNumber, totalPages);
 
-            // This line now correctly separates navigation from other actions
             int choice = bookView.promptInt("Choose an option: ");
-
-            if (choice == 0) {
-                bookView.showMessage("Returning to 📚 BOOKS (HOME PAGE)...");
-                return;
-            } else if (choice == 1 && pageNumber > 0) {
-                pageNumber--;
-            } else if (choice == 2 && pageNumber < totalPages - 1) {
-                pageNumber++;
-            } else {
-                bookView.showMessage(INVALID_CHOICE_MESSAGE);
-            }
+            if (choice == 0) break;
+            else if (choice == 1 && pageNumber > 1) pageNumber--;
+            else if (choice == 2 && pageNumber < totalPages) pageNumber++;
+            else bookView.showMessage(INVALID_CHOICE_MESSAGE);
         }
-    }
-
-    // === 3. VIEW SINGLE BOOK ===
-    private void handleViewBookDetails(boolean isAdmin, boolean hasReserved) {
-        int id = bookView.promptInt("Enter Book ID to view details (0 to go back): ");
-        if (id == 0)
-            return;
-
-        bookService.viewBook(id).ifPresentOrElse(
-                b -> handleBookSubMenu(b, isAdmin, hasReserved),
-                () -> bookView.showMessage("Book not found."));
     }
 
     // === 2. FILTER & SORT BOOKS ===
@@ -114,32 +88,32 @@ public class BookController {
             sortField = "id";
         }
 
-        boolean ascending = bookView.prompt("Ascending? (y/n): ").equalsIgnoreCase("y");
-        int pageNumber = Math.max(1, bookView.promptInt("Page number: "));
-        int pageSize = Math.max(1, bookView.promptInt("Page size: "));
-
-        // The partial ID filter is now handled by the service layer, no manual
-        // filtering needed here.
-        List<Book> books = bookService.filterSortPaginateBooks(
-                idFilter, titleFilter, authorFilter, genreFilter,
-                startDate, endDate, sortField, ascending, pageNumber, pageSize);
-
-        if (books.isEmpty()) {
-            bookView.showMessage("No books found matching the criteria.");
-            return;
-        }
-
-        // Get total results for correct pagination info
+        boolean ascending = true;
+        int pageNumber = 1;
+        int pageSize = 5;
         int totalResults = bookService.filterSortPaginateBooks(
                 idFilter, titleFilter, authorFilter, genreFilter,
                 startDate, endDate, sortField, ascending, 1, Integer.MAX_VALUE).size();
         int totalPages = (int) Math.ceil((double) totalResults / pageSize);
 
-        bookView.showBookListPage(books, pageNumber, totalPages);
+        while (true) {
+            List<Book> books = bookService.filterSortPaginateBooks(
+                    idFilter, titleFilter, authorFilter, genreFilter,
+                    startDate, endDate, sortField, ascending, pageNumber, pageSize);
 
-        int id = bookView.promptInt("");
-        if (id != 0) {
-            bookService.viewBook(id).ifPresent(b -> handleBookSubMenu(b, isAdmin, hasReserved));
+            if (books.isEmpty()) {
+                bookView.showMessage("No books found matching the criteria.");
+                return;
+            }
+
+            // Show table + navigation inside view
+            bookView.showBookListPage(books, pageNumber, totalPages);
+
+            int choice = bookView.promptInt("Choose an option: ");
+            if (choice == 0) break;
+            else if (choice == 1 && pageNumber > 1) pageNumber--;
+            else if (choice == 2 && pageNumber < totalPages) pageNumber++;
+            else bookView.showMessage(INVALID_CHOICE_MESSAGE);
         }
     }
 
@@ -148,6 +122,16 @@ public class BookController {
             case "id", "title", "author", "genre", "releaseddate" -> true;
             default -> false;
         };
+    }
+
+    // === 3. VIEW SINGLE BOOK ===
+    private void handleViewBookDetails(boolean isAdmin, boolean hasReserved) {
+        int id = bookView.promptInt("Enter Book ID to view details (0 to go back): ");
+        if (id == 0) return;
+
+        bookService.viewBook(id).ifPresentOrElse(
+                b -> handleBookSubMenu(b, isAdmin, hasReserved),
+                () -> bookView.showMessage("Book not found."));
     }
 
     // === SUBMENU FOR BOOK ===
@@ -162,53 +146,49 @@ public class BookController {
                     if (isAdmin) {
                         handleUpdateBook(book.getId());
                         book = bookService.viewBook(book.getId()).orElse(book);
-                    } else
-                        bookView.showMessage(ADMIN_ONLY_MESSAGE);
+                    } else bookView.showMessage(ADMIN_ONLY_MESSAGE);
                 }
                 case 2 -> {
-                    if (isAdmin) {
-                        if (handleDeleteBook(book.getId())) {
-                            return; // Exit the submenu after successful deletion
-                        }
-                    } else
-                        bookView.showMessage(ADMIN_ONLY_MESSAGE);
+                    if (isAdmin && handleDeleteBook(book.getId())) return;
+                    else if (!isAdmin) bookView.showMessage(ADMIN_ONLY_MESSAGE);
                 }
                 case 3 -> handleReadBook(book);
                 case 4 -> handleReserveBook(book, hasReserved);
-                case 0 -> {
-                    return;
-                }
+                case 0 -> { return; }
                 default -> bookView.showMessage(INVALID_CHOICE_MESSAGE);
             }
         }
     }
 
-    // === 4. CRUD OPERATIONS ===
+    // === CRUD OPERATIONS ===
     private void handleAddBook() {
         String title = bookView.prompt("Enter title: ");
         String author = bookView.prompt("Enter author: ");
         String genre = bookView.prompt("Enter genre: ");
 
-        // Correctly handle date input with a loop until valid input is provided
         LocalDate releaseDate;
         while (true) {
             String dateString = bookView.prompt("Enter release date (yyyy-mm-dd): ");
-            releaseDate = DateTimeUtil.parseDate(dateString);
-            if (releaseDate != null) {
-                break; // Exit the loop if the date is successfully parsed
+            try {
+                releaseDate = DateTimeUtil.parseDate(dateString);
+                break;
+            } catch (Exception e) {
+                bookView.showMessage(INVALID_DATE_MESSAGE);
             }
-            // DateTimeUtil.parseDate already prints the error message, so no need for
-            // another one here.
         }
 
-        String filename = bookView.prompt("Enter filename (without .txt): ");
+        String filename;
+        while (true) {
+            filename = bookView.prompt("Enter filename (without .txt): ");
+            if (isValidFilename(filename)) break;
+            bookView.showMessage("Invalid filename. Use only letters, numbers, _, - and no : ? * < > |");
+        }
 
         try {
-            if (bookService.addBook(title, author, genre, releaseDate, filename)) {
+            if (bookService.addBook(title, author, genre, releaseDate, filename))
                 bookView.showMessage("Book added successfully.");
-            } else {
-                bookView.showMessage("Failed to add book. File '" + filename + ".txt' not found in books directory.");
-            }
+            else
+                bookView.showMessage("Failed to add book. File '" + filename + ".txt' not found.");
         } catch (Exception e) {
             bookView.showMessage("Failed to add book. Error: " + e.getMessage());
         }
@@ -220,11 +200,22 @@ public class BookController {
         LocalDate newDate = null;
 
         if (field.equals("date")) {
-            newDate = promptDate("Enter new release date (yyyy-mm-dd): ");
+            while (true) {
+                try {
+                    newDate = DateTimeUtil.parseDate(bookView.prompt("Enter new release date (yyyy-mm-dd): "));
+                    break;
+                } catch (Exception e) {
+                    bookView.showMessage(INVALID_DATE_MESSAGE);
+                }
+            }
         } else {
             newValue = bookView.prompt("Enter new value: ");
-            if (field.equals("filename") && newValue.endsWith(".txt")) {
-                newValue = newValue.substring(0, newValue.length() - 4);
+            if (field.equals("filename")) {
+                while (!isValidFilename(newValue)) {
+                    bookView.showMessage("Invalid filename. Use only letters, numbers, _, - and no : ? * < > |");
+                    newValue = bookView.prompt("Enter new filename: ");
+                }
+                if (newValue.endsWith(".txt")) newValue = newValue.substring(0, newValue.length() - 4);
             }
         }
 
@@ -234,10 +225,7 @@ public class BookController {
             case "genre" -> bookService.updateGenre(id, newValue, true);
             case "date" -> bookService.updateReleaseDate(id, newDate, true);
             case "filename" -> bookService.updateFilename(id, newValue, true);
-            default -> {
-                bookView.showMessage("Invalid field.");
-                yield false;
-            }
+            default -> { bookView.showMessage("Invalid field."); yield false; }
         };
 
         bookView.showMessage(success ? "Updated successfully." : "Update failed.");
@@ -268,18 +256,13 @@ public class BookController {
                 }
 
                 bookView.showBookContent(page, pageNumber);
-                int action = bookView.promptInt("Navigation\n 1: Next \n 2: Previous \n 0: Exit\n Option: ");
+                System.out.println("Navigation:\n 1: Next \n 2: Previous \n 0: Exit");
+                int action = bookView.promptInt("Option: ");
 
-                if (action == 1)
-                    pageNumber++;
-                else if (action == 2 && pageNumber > 1)
-                    pageNumber--;
-                else if (action == 0) {
-                    bookView.showMessage("Exiting book reader...");
-                    break;
-                } else {
-                    bookView.showMessage("Invalid option.");
-                }
+                if (action == 1) pageNumber++;
+                else if (action == 2 && pageNumber > 1) pageNumber--;
+                else if (action == 0) { bookView.showMessage("Exiting book reader..."); break; }
+                else bookView.showMessage("Invalid option.");
             } catch (Exception e) {
                 bookView.showMessage("Error reading book: " + e.getMessage());
                 break;
@@ -288,33 +271,22 @@ public class BookController {
     }
 
     private void handleReserveBook(Book book, boolean hasReserved) {
-        if (hasReserved) {
-            bookView.showMessage("You already reserved a book. Only one reservation allowed.");
-        } else {
-            bookView.showMessage("Book '" + book.getTitle() + "' reserved successfully!");
-        }
+        if (hasReserved) bookView.showMessage("You already reserved a book. Only one reservation allowed.");
+        else bookView.showMessage("Book '" + book.getTitle() + "' reserved successfully!");
     }
 
     // === HELPERS ===
-    private LocalDate promptDate(String message) {
-        while (true) {
-            try {
-                return LocalDate.parse(bookView.prompt(message), DATE_FORMATTER);
-            } catch (DateTimeParseException e) {
-                System.out.println(e);
-                bookView.showMessage(INVALID_DATE_MESSAGE);
-            }
-        }
-    }
-
     private LocalDate parseDate(String dateStr) {
-        if (dateStr == null || dateStr.isBlank())
-            return null;
+        if (dateStr == null || dateStr.isBlank()) return null;
         try {
-            return LocalDate.parse(dateStr, DATE_FORMATTER);
-        } catch (DateTimeParseException e) {
+            return DateTimeUtil.parseDate(dateStr);
+        } catch (Exception e) {
             bookView.showMessage(INVALID_DATE_MESSAGE + " You entered: '" + dateStr + "'");
             return null;
         }
+    }
+
+    private boolean isValidFilename(String filename) {
+        return filename.matches("[a-zA-Z0-9_-]+");
     }
 }
