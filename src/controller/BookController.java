@@ -5,15 +5,11 @@ import service.BookService;
 import util.DateTimeUtil;
 import view.BookView;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Stream;
+
 
 public class BookController {
     private final BookService bookService;
@@ -22,7 +18,6 @@ public class BookController {
     private static final String ADMIN_ONLY_MESSAGE = "Only admins can perform this action.";
     private static final String INVALID_CHOICE_MESSAGE = "Invalid choice.";
     private static final String INVALID_DATE_MESSAGE = "Invalid date format. Please use yyyy-mm-dd.";
-    private static final int PAGE_SIZE = 20;
 
     public BookController(Scanner sc) {
         this.bookService = new BookService();
@@ -69,17 +64,14 @@ public class BookController {
             List<Book> pageOfBooks = allBooks.subList(start, end);
 
             bookView.showBookListPage(pageOfBooks, pageNumber, totalPages);
+            
 
-            if (totalPages == 1) {
-                int choice = bookView.promptInt("Choose an option:\n0: Back to Books (Home)\n");
-                if (choice == 0) break;
-            } else {
-                int choice = bookView.promptInt("Choose an option: ");
-                if (choice == 0) break;
-                else if (choice == 1 && pageNumber > 1) pageNumber--;
-                else if (choice == 2 && pageNumber < totalPages) pageNumber++;
-                else bookView.showMessage(INVALID_CHOICE_MESSAGE);
-            }
+            int choice = bookView.promptInt("Choose an option: ");
+
+            if (choice == 0) break;
+            else if (choice == 1 && pageNumber > 1) pageNumber--;
+            else if (choice == 2 && pageNumber < totalPages) pageNumber++;
+            else bookView.showMessage(INVALID_CHOICE_MESSAGE);
         }
     }
 
@@ -120,16 +112,13 @@ public class BookController {
 
             bookView.showBookListPage(books, pageNumber, totalPages);
             
-            if (totalPages == 1) {
-                int choice = bookView.promptInt("Choose an option:\n0: Exit\n");
-                if (choice == 0) break;
-            } else {
-                int choice = bookView.promptInt("Choose an option: ");
-                if (choice == 0) break;
-                else if (choice == 1 && pageNumber > 1) pageNumber--;
-                else if (choice == 2 && pageNumber < totalPages) pageNumber++;
-                else bookView.showMessage(INVALID_CHOICE_MESSAGE);
-            }
+
+            int choice = bookView.promptInt("Choose an option: ");
+            
+            if (choice == 0) break;
+            else if (choice == 1 && pageNumber > 1) pageNumber--;
+            else if (choice == 2 && pageNumber < totalPages) pageNumber++;
+            else bookView.showMessage(INVALID_CHOICE_MESSAGE);
         }
     }
 
@@ -276,7 +265,7 @@ public class BookController {
 
                 System.out.println("Navigation:");
                 boolean hasPrevious = pageNumber > 1;
-                boolean hasNext = hasNextPage(book.getFilename(), pageNumber);
+                boolean hasNext = bookService.hasNextPage(book.getFilename(), pageNumber);
 
                 if (!hasPrevious && !hasNext) {
                     System.out.println(" 0: Exit");
@@ -324,21 +313,5 @@ public class BookController {
 
     private boolean isValidFilename(String filename) {
         return filename.matches("[a-zA-Z0-9_-]+");
-    }
-
-    // CHECK THIS CODE CASIMIR CAUSE IT MIGHT BELONG TO BOOKSERVICE
-    private boolean hasNextPage(String filename, int currentPage) {
-        Path filePath = Paths.get("books", filename + ".txt");
-        if (!Files.exists(filePath)) {
-            return false;
-        }
-
-        try (Stream<String> lines = Files.lines(filePath, StandardCharsets.UTF_8)) {
-            long totalLines = lines.count();
-            int totalPages = (int) Math.ceil((double) totalLines / PAGE_SIZE);
-            return currentPage < totalPages;
-        } catch (IOException e) {
-            return false;
-        }
     }
 }

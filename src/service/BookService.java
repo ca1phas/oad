@@ -9,12 +9,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BookService {
     private final BookRepository bookRepository;
+    private static final int PAGE_SIZE = 20;
 
     public BookService() {
         this.bookRepository = new BookRepository();
@@ -31,7 +34,6 @@ public class BookService {
         bookRepository.append(book);
         return true;
     }
-    
 
     // FR 15 & FR23 & FR25: View book details (& Select book)
     public Optional<Book> viewBook(int id) {
@@ -46,11 +48,10 @@ public class BookService {
         Path filePath = Path.of("books", filename + ".txt");
         if (!Files.exists(filePath))
             return Collections.emptyList();
-
-        int pageSize = 20;
+        
         try {
             List<String> lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
-            return PaginationUtil.paginate(lines, pageNumber, pageSize);
+            return PaginationUtil.paginate(lines, pageNumber, PAGE_SIZE);
         } catch (IOException e) {
             return Collections.emptyList();
         }
@@ -195,5 +196,21 @@ public class BookService {
 
         books.sort(comparator);
         return PaginationUtil.paginate(books, pageNumber, pageSize);
+    }
+    
+    // Checks if a book file has content on the next page.
+    public boolean hasNextPage(String filename, int currentPage) {
+        Path filePath = Paths.get("books", filename + ".txt");
+        if (!Files.exists(filePath)) {
+            return false;
+        }
+
+        try (Stream<String> lines = Files.lines(filePath, StandardCharsets.UTF_8)) {
+            long totalLines = lines.count();
+            int totalPages = (int) Math.ceil((double) totalLines / PAGE_SIZE);
+            return currentPage < totalPages;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
