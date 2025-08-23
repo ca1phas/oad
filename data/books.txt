@@ -1,5 +1,5 @@
 id|title|author|genre|releasedDate|filename
-1|Moby Dick; Or, The Whale by Herman Melville|28 by Herman Melville|Fiction|2001-07-01|2701_Moby_Dick_Or,_The_Whale_by_Herman_Melville
+1|Moby Dick; Or, The Whale by Herman Melville|28 by Herman Melville|Fiction|2001-07-01|2701_Moby_Dick;_Or,_The_Whale_by_Herman_Melville
 2|Frankenstein; Or, The Modern Prometheus by Mary Wollstonecraft Shelley|30 by Mary Wollstonecraft Shelley|Fiction|1993-10-01|84_Frankenstein;_Or,_The_Modern_Prometheus_by_Mary_Wollstonecraft_Shelley
 3|Romeo and Juliet by William Shakespeare|336 by William Shakespeare|Fiction|1998-11-01|1513_Romeo_and_Juliet_by_William_Shakespeare
 4|A Room with a View by E. M. Forster|15 by E. M. Forster|Fiction|2001-05-01|2641_A_Room_with_a_View_by_E._M._Forster

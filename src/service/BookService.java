@@ -31,6 +31,7 @@ public class BookService {
         bookRepository.append(book);
         return true;
     }
+    
 
     // FR 15 & FR23 & FR25: View book details (& Select book)
     public Optional<Book> viewBook(int id) {

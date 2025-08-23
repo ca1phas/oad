@@ -5,9 +5,15 @@ import service.BookService;
 import util.DateTimeUtil;
 import view.BookView;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 public class BookController {
     private final BookService bookService;
@@ -16,6 +22,7 @@ public class BookController {
     private static final String ADMIN_ONLY_MESSAGE = "Only admins can perform this action.";
     private static final String INVALID_CHOICE_MESSAGE = "Invalid choice.";
     private static final String INVALID_DATE_MESSAGE = "Invalid date format. Please use yyyy-mm-dd.";
+    private static final int PAGE_SIZE = 20;
 
     public BookController(Scanner sc) {
         this.bookService = new BookService();
@@ -26,7 +33,7 @@ public class BookController {
     public void handleMenu(boolean isAdmin, boolean hasReserved) {
         while (true) {
             bookView.displayBookMenu();
-            int choice = bookView.promptInt("");
+            int choice = bookView.promptInt("Enter your choice: ");
 
             switch (choice) {
                 case 1 -> handleListBooksByPage(isAdmin, hasReserved);
@@ -61,14 +68,18 @@ public class BookController {
             int end = Math.min(start + pageSize, allBooks.size());
             List<Book> pageOfBooks = allBooks.subList(start, end);
 
-            // Show table + navigation inside view
             bookView.showBookListPage(pageOfBooks, pageNumber, totalPages);
 
-            int choice = bookView.promptInt("Choose an option: ");
-            if (choice == 0) break;
-            else if (choice == 1 && pageNumber > 1) pageNumber--;
-            else if (choice == 2 && pageNumber < totalPages) pageNumber++;
-            else bookView.showMessage(INVALID_CHOICE_MESSAGE);
+            if (totalPages == 1) {
+                int choice = bookView.promptInt("Choose an option:\n0: Back to Books (Home)\n");
+                if (choice == 0) break;
+            } else {
+                int choice = bookView.promptInt("Choose an option: ");
+                if (choice == 0) break;
+                else if (choice == 1 && pageNumber > 1) pageNumber--;
+                else if (choice == 2 && pageNumber < totalPages) pageNumber++;
+                else bookView.showMessage(INVALID_CHOICE_MESSAGE);
+            }
         }
     }
 
@@ -87,8 +98,9 @@ public class BookController {
             bookView.showMessage("Invalid sort field. Using 'id' as default.");
             sortField = "id";
         }
+        
+        boolean ascending = bookView.prompt("Sort descending? (y/n): ").equalsIgnoreCase("n");
 
-        boolean ascending = true;
         int pageNumber = 1;
         int pageSize = 5;
         int totalResults = bookService.filterSortPaginateBooks(
@@ -106,14 +118,18 @@ public class BookController {
                 return;
             }
 
-            // Show table + navigation inside view
             bookView.showBookListPage(books, pageNumber, totalPages);
-
-            int choice = bookView.promptInt("Choose an option: ");
-            if (choice == 0) break;
-            else if (choice == 1 && pageNumber > 1) pageNumber--;
-            else if (choice == 2 && pageNumber < totalPages) pageNumber++;
-            else bookView.showMessage(INVALID_CHOICE_MESSAGE);
+            
+            if (totalPages == 1) {
+                int choice = bookView.promptInt("Choose an option:\n0: Exit\n");
+                if (choice == 0) break;
+            } else {
+                int choice = bookView.promptInt("Choose an option: ");
+                if (choice == 0) break;
+                else if (choice == 1 && pageNumber > 1) pageNumber--;
+                else if (choice == 2 && pageNumber < totalPages) pageNumber++;
+                else bookView.showMessage(INVALID_CHOICE_MESSAGE);
+            }
         }
     }
 
@@ -248,21 +264,41 @@ public class BookController {
         while (true) {
             try {
                 List<String> page = bookService.readBook(book.getFilename(), pageNumber, true);
+
                 if (page == null || page.isEmpty()) {
                     bookView.showMessage(pageNumber == 1
                             ? "Book is empty or file '" + book.getFilename() + ".txt' not found."
                             : "End of book reached.");
                     break;
                 }
-
+                
                 bookView.showBookContent(page, pageNumber);
-                System.out.println("Navigation:\n 1: Next \n 2: Previous \n 0: Exit");
+
+                System.out.println("Navigation:");
+                boolean hasPrevious = pageNumber > 1;
+                boolean hasNext = hasNextPage(book.getFilename(), pageNumber);
+
+                if (!hasPrevious && !hasNext) {
+                    System.out.println(" 0: Exit");
+                } else {
+                    if (hasPrevious) System.out.println(" 1: Previous");
+                    if (hasNext) System.out.println(" 2: Next");
+                    System.out.println(" 0: Exit");
+                }
+                
                 int action = bookView.promptInt("Option: ");
 
-                if (action == 1) pageNumber++;
-                else if (action == 2 && pageNumber > 1) pageNumber--;
-                else if (action == 0) { bookView.showMessage("Exiting book reader..."); break; }
-                else bookView.showMessage("Invalid option.");
+                if (action == 1 && hasPrevious) {
+                    pageNumber--;
+                } else if (action == 2 && hasNext) {
+                    pageNumber++;
+                } else if (action == 0) {
+                    bookView.showMessage("Exiting book reader...");
+                    break;
+                } else {
+                    bookView.showMessage("Invalid option.");
+                }
+
             } catch (Exception e) {
                 bookView.showMessage("Error reading book: " + e.getMessage());
                 break;
@@ -288,5 +324,21 @@ public class BookController {
 
     private boolean isValidFilename(String filename) {
         return filename.matches("[a-zA-Z0-9_-]+");
+    }
+
+    // CHECK THIS CODE CASIMIR CAUSE IT MIGHT BELONG TO BOOKSERVICE
+    private boolean hasNextPage(String filename, int currentPage) {
+        Path filePath = Paths.get("books", filename + ".txt");
+        if (!Files.exists(filePath)) {
+            return false;
+        }
+
+        try (Stream<String> lines = Files.lines(filePath, StandardCharsets.UTF_8)) {
+            long totalLines = lines.count();
+            int totalPages = (int) Math.ceil((double) totalLines / PAGE_SIZE);
+            return currentPage < totalPages;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
