@@ -2,9 +2,8 @@ import model.User;
 import view.AuthView;
 import controller.AuthController;
 import controller.UserController;
-import controller.BookController;
-import controller.ReservationController;
 
+import java.io.PrintStream;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -16,9 +15,6 @@ public class App {
         AuthView authView = new AuthView(sc);
         AuthController authController = new AuthController(sc);
         UserController userController = new UserController(sc);
-        BookController bookController = new BookController(sc); // Added
-        ReservationController reservationController = new ReservationController(sc);
-
 
         boolean running = true;
         while (running) {
@@ -32,7 +28,7 @@ public class App {
                         authView.displayLoginFailed();
                     } else {
                         User currentUser = optionalUser.get();
-                        startUserSession(currentUser, sc, userController, bookController, reservationController);
+                        startUserSession(currentUser, sc, userController);
                     }
                     break;
 
@@ -40,7 +36,7 @@ public class App {
                     Optional<User> registeredUser = authController.handleSignup();
                     if (registeredUser.isPresent()) {
                         User currentUser = registeredUser.get();
-                        startUserSession(currentUser, sc, userController, bookController, reservationController);
+                        startUserSession(currentUser,sc,userController);
                     }
                     break;
 
@@ -56,11 +52,18 @@ public class App {
         sc.close();
     }
 
-    private static void startUserSession(User currentUser, Scanner sc, UserController userController, BookController bookController, ReservationController reservationController) {
+    private static void startUserSession(User currentUser, Scanner sc, UserController userController) {
         boolean loggedIn = true;
 
+        try {
+            System.setOut(new PrintStream(System.out, true, "UTF-8"));
+        } catch (java.io.UnsupportedEncodingException e) {
+            System.err.println("UTF-8 encoding not supported. Using default encoding.");
+        }
+
         while (loggedIn) {
-            System.out.println("\n[Logged in as: " + currentUser.getUsername() + " | Role: " + currentUser.getRole() + "]");
+            System.out.println(
+                    "\n[Logged in as: " + currentUser.getUsername() + " | Role: " + currentUser.getRole() + "]");
             System.out.println("\nPlease select an option:");
             System.out.println("1. My Account");
             System.out.println("2. My Reservations");

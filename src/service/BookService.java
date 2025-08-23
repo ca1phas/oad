@@ -6,14 +6,18 @@ import util.IDGeneratorUtil;
 import util.PaginationUtil;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BookService {
     private final BookRepository bookRepository;
+    private static final int PAGE_SIZE = 20;
 
     public BookService() {
         this.bookRepository = new BookRepository();
@@ -41,14 +45,13 @@ public class BookService {
         if (!hasReserved)
             return Collections.emptyList();
 
-        Path filePath = Path.of("books", filename);
+        Path filePath = Path.of("books", filename + ".txt");
         if (!Files.exists(filePath))
             return Collections.emptyList();
-
-        int pageSize = 20;
+        
         try {
-            List<String> lines = Files.readAllLines(filePath);
-            return PaginationUtil.paginate(lines, pageNumber, pageSize);
+            List<String> lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
+            return PaginationUtil.paginate(lines, pageNumber, PAGE_SIZE);
         } catch (IOException e) {
             return Collections.emptyList();
         }
@@ -112,16 +115,14 @@ public class BookService {
 
     // FR32: Update filename
     public boolean updateFilename(int bookId, String newFilename, boolean isAdmin) {
-        if (!isAdmin)
+        if (!isAdmin) {
             return false;
-
-        Path filePath = Path.of("books", newFilename);
-        if (!Files.exists(filePath))
-            return false;
+        }
 
         Optional<Book> optional = bookRepository.findById(bookId);
-        if (optional.isEmpty())
+        if (optional.isEmpty()) {
             return false;
+        }
 
         Book book = optional.get();
         book.setFilename(newFilename);
@@ -153,7 +154,7 @@ public class BookService {
         // Filtering
         if (idFilter != null && !idFilter.isBlank())
             books = books.stream()
-                    .filter(b -> String.valueOf(b.getId()).equalsIgnoreCase(idFilter))
+                    .filter(b -> String.valueOf(b.getId()).contains(idFilter))
                     .collect(Collectors.toList());
 
         if (titleFilter != null && !titleFilter.isBlank())
@@ -182,28 +183,34 @@ public class BookService {
                     .collect(Collectors.toList());
 
         // Sorting
-        Comparator<Book> comparator = Comparator.comparing(Book::getTitle);
-        switch (sortField == null ? "" : sortField.toLowerCase()) {
-            case "id":
-                comparator = Comparator.comparing(Book::getId);
-                break;
-            case "title":
-                comparator = Comparator.comparing(Book::getTitle);
-                break;
-            case "author":
-                comparator = Comparator.comparing(Book::getAuthor);
-                break;
-            case "genre":
-                comparator = Comparator.comparing(Book::getGenre);
-                break;
-            case "releaseddate":
-                comparator = Comparator.comparing(Book::getReleasedDate);
-                break;
-        }
+        Comparator<Book> comparator = switch (sortField == null ? "" : sortField.toLowerCase()) {
+            case "title" -> Comparator.comparing(Book::getTitle);
+            case "author" -> Comparator.comparing(Book::getAuthor);
+            case "genre" -> Comparator.comparing(Book::getGenre);
+            case "releaseddate" -> Comparator.comparing(Book::getReleasedDate);
+            default -> Comparator.comparing(Book::getId);
+        };
+
         if (!ascending)
             comparator = comparator.reversed();
 
         books.sort(comparator);
         return PaginationUtil.paginate(books, pageNumber, pageSize);
+    }
+    
+    // Checks if a book file has content on the next page.
+    public boolean hasNextPage(String filename, int currentPage) {
+        Path filePath = Paths.get("books", filename + ".txt");
+        if (!Files.exists(filePath)) {
+            return false;
+        }
+
+        try (Stream<String> lines = Files.lines(filePath, StandardCharsets.UTF_8)) {
+            long totalLines = lines.count();
+            int totalPages = (int) Math.ceil((double) totalLines / PAGE_SIZE);
+            return currentPage < totalPages;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

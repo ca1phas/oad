@@ -39,3 +39,10 @@ In `src` folder:
 Meanwhile, the compiled output files will be generated in the `bin` folder by default.
 
 > If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+
+## Powershell with Correct Encoding
+
+While reading the book, some characters may not be rendered acurrately inside the terminal due to incorrect encoding scheme of the terminal.
+
+To ensure the best user experience, before running the problem, kindly type:
+Type `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8`
