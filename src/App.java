@@ -1,10 +1,8 @@
 import model.User;
-import service.ReservationService;
 import view.AuthView;
-import view.ReservationsView;
 import controller.AuthController;
 import controller.UserController;
-import controller.ReservationController;
+import controller.BookController;
 
 import java.io.PrintStream;
 import java.util.Optional;
@@ -16,12 +14,9 @@ public class App {
 
         Scanner sc = new Scanner(System.in);
         AuthView authView = new AuthView(sc);
-        ReservationService reservationService = new ReservationService();
-        ReservationsView reservationsView = new ReservationsView(sc);
         AuthController authController = new AuthController(sc);
         UserController userController = new UserController(sc);
-        ReservationController reservationController = new ReservationController(reservationService, reservationsView);
-
+        BookController bookController = new BookController(sc); // Added
 
         boolean running = true;
         while (running) {
@@ -35,7 +30,7 @@ public class App {
                         authView.displayLoginFailed();
                     } else {
                         User currentUser = optionalUser.get();
-                        startUserSession(currentUser, sc, userController, reservationController);
+                        startUserSession(currentUser, sc, userController, bookController);
                     }
                     break;
 
@@ -43,7 +38,7 @@ public class App {
                     Optional<User> registeredUser = authController.handleSignup();
                     if (registeredUser.isPresent()) {
                         User currentUser = registeredUser.get();
-                        startUserSession(currentUser, sc, userController, reservationController);
+                        startUserSession(currentUser, sc, userController, bookController);
                     }
                     break;
 
@@ -59,7 +54,8 @@ public class App {
         sc.close();
     }
 
-    private static void startUserSession(User currentUser, Scanner sc, UserController userController, ReservationController reservationController) {
+    private static void startUserSession(User currentUser, Scanner sc, UserController userController,
+            BookController bookController) {
         boolean loggedIn = true;
 
         try {
@@ -92,14 +88,14 @@ public class App {
                     userController.handleAccountMenu(currentUser);
                     break;
                 case "2":
-                    reservationController.handleReservationsMenu(currentUser);
+                    System.out.println("[My Reservations] feature not yet implemented.");
                     break;
                 case "3":
                     bookController.handleMenu(currentUser.isAdmin(), false); // <-- Books menu
                     break;
                 case "4":
                     if (currentUser.isAdmin()) {
-                        reservationController.handleReservationsMenu(currentUser);  
+                        System.out.println("[Reservations] feature not yet implemented.");
                     } else {
                         System.out.println("You have been logged out.");
                         loggedIn = false;
