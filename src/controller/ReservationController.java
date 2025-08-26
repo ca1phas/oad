@@ -3,11 +3,10 @@ package controller;
 import model.Reservation;
 import model.User;
 import model.enums.ReservationStatus;
-import service.BookService;
 import service.ReservationService;
-import view.ReservationsView;
-import view.BookView;
 import util.DateTimeUtil;
+import util.PaginationUtil;
+import view.ReservationsView;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,201 +17,192 @@ public class ReservationController {
     private final Scanner sc;
     private final ReservationService reservationService;
     private final ReservationsView reservationsView;
-    private final BookController bookController;
 
     public ReservationController(Scanner sc, ReservationService reservationService, ReservationsView reservationsView) {
         this.sc = sc;
         this.reservationService = reservationService;
         this.reservationsView = reservationsView;
-        this.bookController = new BookController(new BookService(), new BookView(sc));
     }
 
-    public void handleReservationsMenu(User currentUser) {
-        while (true) {
-            reservationsView.displayMainMenu(currentUser.isAdmin());
-            String choice = reservationsView.promptString("").trim();
-            switch (choice) {
-                case "1" -> handleViewSortFilter(currentUser);
-                case "2" -> handleSelectReservation(currentUser);
-                case "0" -> { return; }
-                default -> reservationsView.showMessage("Invalid choice.");
+    // ===== FR01: 自动更新预约状态 =====
+    public void updateStatusesOnStartup() {
+        reservationService.updateReservationStatusesOnStartup();
+    }
+
+public void handleReservationsMenu(User currentUser) {
+    while (true) {
+        reservationsView.displayMainMenu(currentUser.isAdmin());
+        String choice = reservationsView.promptString("");
+
+        switch (choice) {
+            case "1" -> handleViewSortFilter(currentUser);     // FR10~FR12
+            case "2" -> handleSelectReservation(currentUser);  // FR13
+            case "3" -> { 
+                if (!currentUser.isAdmin()) {
+                    createReservation(currentUser);            // FR26
+                } else {
+                    reservationsView.showMessage("Invalid choice for admin.");
+                }
             }
+            case "0" -> { return; }
+            default -> reservationsView.showMessage("Invalid choice.");
         }
     }
+}
 
-    // New method to handle user-specific reservations menu
-    public void handleMyReservations(User currentUser) {
-        reservationsView.showMessage("--- My Reservations ---");
-        handleViewSortFilter(currentUser);
-    }
-
+       // ===== FR10 + FR11 + FR12: 查看 + 排序 + 过滤 + 分页 =====
     private void handleViewSortFilter(User currentUser) {
-        String idFilter = reservationsView.promptString("Enter reservation ID to filter by (leave blank to skip): ");
-        String usernameFilter = currentUser.isAdmin() ? reservationsView.promptString("Enter username to filter by (leave blank to skip): ") : currentUser.getUsername();
-        String bookTitleFilter = reservationsView.promptString("Enter book title to filter by (leave blank to skip): ");
-        String statusStr = reservationsView.promptString("Enter status to filter by (leave blank to skip): ");
+        String idFilter = reservationsView.promptString("Filter by ID: ");
+        String usernameFilter = currentUser.isAdmin()
+                ? reservationsView.promptString("Filter by username: ")
+                : currentUser.getUsername();
+        String bookTitleFilter = reservationsView.promptString("Filter by book title: ");
+        String statusStr = reservationsView.promptString("Filter by status: ");
         ReservationStatus statusFilter = null;
         if (!statusStr.isBlank()) {
-            try {
-                statusFilter = ReservationStatus.valueOf(statusStr.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                reservationsView.showMessage("Invalid status, skipping this filter.");
-            }
+            try { statusFilter = ReservationStatus.valueOf(statusStr.toUpperCase()); }
+            catch (Exception e) { reservationsView.showMessage("Invalid status filter."); }
         }
-        
-        LocalDate resStart = parseDateSafe(reservationsView.getDateInput("Enter reservation start date range"));
-        LocalDate resEnd = parseDateSafe(reservationsView.getDateInput("Enter reservation end date range"));
-        LocalDate startStart = parseDateSafe(reservationsView.getDateInput("Enter checkout start date range"));
-        LocalDate startEnd = parseDateSafe(reservationsView.getDateInput("Enter checkout end date range"));
-        LocalDate endStart = parseDateSafe(reservationsView.getDateInput("Enter checkout end date range"));
-        LocalDate endEnd = parseDateSafe(reservationsView.getDateInput("Enter checkout end date range"));
-
-        String sortField = reservationsView.promptString("Enter sort field (leave blank to skip): ");
-        boolean ascending = reservationsView.askYesNo("Sort in ascending order?");
+        String sortField = reservationsView.promptString("Sort field (id, username, booktitle, status, reservationdate, startdate, enddate): ");
+        boolean ascending = reservationsView.askYesNo("Sort ascending?");
 
         int page = 1;
         int pageSize = 10;
-
-        while (true) {
+        boolean quit = false;
+        while (!quit) {
             List<Reservation> reservations = reservationService.filterSortPaginate(
-                currentUser.getUsername(), currentUser.isAdmin(),
-                idFilter, usernameFilter, bookTitleFilter, statusFilter,
-                resStart, resEnd,
-                startStart, startEnd,
-                endStart, endEnd,
-                sortField, ascending,
-                page, pageSize
+                    currentUser.getUsername(), currentUser.isAdmin(),
+                    idFilter, usernameFilter, bookTitleFilter, statusFilter,
+                    null, null, null, null, null, null,
+                    sortField, ascending, page, pageSize
             );
-
-            reservationsView.displayReservations(reservations);
-            if (reservations.isEmpty()) {
-                reservationsView.showMessage("No matching reservations found on this page.");
-            }
-            
-            String cmd = reservationsView.promptString("[n] Next page | [p] Previous page | [r] Reset filters/sort | [q] Quit: ");
-            if ("n".equalsIgnoreCase(cmd)) {
-                page++;
-            } else if ("p".equalsIgnoreCase(cmd) && page > 1) {
-                page--;
-            } else if ("r".equalsIgnoreCase(cmd)) {
-                handleViewSortFilter(currentUser);
-                return;
-            } else if ("q".equalsIgnoreCase(cmd)) {
-                break;
+            int totalPages = PaginationUtil.getTotalPages(
+                    reservationService.filterSortPaginate(
+                            currentUser.getUsername(), currentUser.isAdmin(),
+                            idFilter, usernameFilter, bookTitleFilter, statusFilter,
+                            null, null, null, null, null, null,
+                            sortField, ascending, 1, Integer.MAX_VALUE
+                    ).size(),
+                    pageSize
+            );
+            reservationsView.displayReservations(reservations, page, totalPages);
+            String cmd = reservationsView.promptString("[2]Next | [1]Prev | [0] Quit: ");
+            switch (cmd.toLowerCase()) {
+                case "2" -> { if (page < totalPages) page++; }
+                case "1" -> { if (page > 1) page--; }
+                case "0" -> quit = true;
             }
         }
     }
 
+    // ===== FR13: 选择预约 =====
     private void handleSelectReservation(User currentUser) {
         int id = reservationsView.promptInt("Enter Reservation ID: ");
-        if (id == -1) {
-            reservationsView.showMessage("Operation cancelled.");
-            return;
-        }
-
         Optional<Reservation> rOpt = reservationService.selectReservation(id, currentUser.getUsername(), currentUser.isAdmin());
-
         if (rOpt.isPresent()) {
             handleReservationPage(rOpt.get(), currentUser);
         } else {
-            reservationsView.showMessage("Reservation not found or you don't have permission to view it.");
+            reservationsView.showMessage("Reservation not found or no permission.");
         }
     }
-    
-    // Displays details and sub-menu for a specific reservation
+
+    // ===== FR14~FR19: Reservation详情页 =====
     private void handleReservationPage(Reservation r, User currentUser) {
         while (true) {
-            reservationsView.displayDetailsMenu(r, currentUser); 
+            reservationsView.displayDetailsMenu(r, currentUser);
             String choice = sc.nextLine().trim();
             switch (choice) {
-                case "1" -> {
-                    if (r.getBook() != null) {
-                        bookController.handleBookMenu(r.getBook().getId(), currentUser);
-                    } else {
-                        reservationsView.showMessage("No book associated with this reservation.");
-                    }
-                }
-                case "2" -> updateStatus(r, currentUser);
-                case "3" -> updateStartDate(r, currentUser);
-                case "4" -> updateEndDate(r, currentUser);
-                case "5" -> {
-                    if (deleteReservation(r, currentUser)) {
-                        return;
-                    }
-                }
+                case "1" -> viewAssociatedBook(r);          // FR15
+                case "2" -> updateStatus(r, currentUser);   // FR16
+                case "3" -> updateStartDate(r, currentUser);// FR17
+                case "4" -> updateEndDate(r, currentUser);  // FR18
+                case "5" -> { if (deleteReservation(r, currentUser)) return; } // FR19
                 case "0" -> { return; }
                 default -> reservationsView.showMessage("Invalid choice.");
             }
         }
     }
 
-    // Handles updating the reservation status
+    // ===== FR15: 查看关联书籍 =====
+    private void viewAssociatedBook(Reservation r) {
+        if (r.getBook() != null) {
+            System.out.println("\nBook ID: " + r.getBook().getId());
+            System.out.println("Title: " + r.getBook().getTitle());
+            System.out.println("Author: " + r.getBook().getAuthor());
+        } else {
+            reservationsView.showMessage("No book linked to this reservation.");
+        }
+    }
+
+    // ===== FR16: 更新状态 =====
     private void updateStatus(Reservation r, User currentUser) {
         String statusStr = reservationsView.getStatusInput();
         try {
             ReservationStatus newStatus = ReservationStatus.valueOf(statusStr.toUpperCase());
-            boolean success = reservationService.updateStatus(r.getId(), currentUser.getUsername(), currentUser.isAdmin(), newStatus);
-            reservationsView.showMessage(success ? "Status updated successfully." : "Update failed. Check permissions or status transitions.");
-        } catch (IllegalArgumentException e) {
+            boolean success = reservationService.updateStatus(
+                    r.getId(), currentUser.getUsername(), currentUser.isAdmin(), newStatus
+            );
+            reservationsView.showMessage(success ? "Status updated." : "Update failed.");
+        } catch (Exception e) {
             reservationsView.showMessage("Invalid status.");
         }
     }
 
-    // Handles updating the reservation start date
+    // ===== FR17: 更新开始日期 =====
     private void updateStartDate(Reservation r, User currentUser) {
         String dateStr = reservationsView.getDateInput("Enter new start date");
-        if (dateStr.isBlank()) {
-            reservationsView.showMessage("Operation cancelled.");
-            return;
-        }
         try {
-            LocalDate newDate = DateTimeUtil.parseDate(dateStr);
-            boolean success = reservationService.updateStartDate(r.getId(), currentUser.getUsername(), currentUser.isAdmin(), newDate);
-            reservationsView.showMessage(success ? "Start date updated successfully." : "Update failed. Check reservation status or date validity.");
+            LocalDate newStart = DateTimeUtil.parseDate(dateStr);
+            boolean success = reservationService.updateStartDate(
+                    r.getId(), currentUser.getUsername(), currentUser.isAdmin(), newStart
+            );
+            reservationsView.showMessage(success ? "Start date updated." : "Update failed.");
         } catch (Exception e) {
-            reservationsView.showMessage("Invalid date format.");
+            reservationsView.showMessage("Invalid date.");
         }
     }
 
-    // Handles updating the reservation end date
+    // ===== FR18: 更新结束日期 =====
     private void updateEndDate(Reservation r, User currentUser) {
         String dateStr = reservationsView.getDateInput("Enter new end date");
-        if (dateStr.isBlank()) {
-            reservationsView.showMessage("Operation cancelled.");
-            return;
-        }
         try {
-            LocalDate newDate = DateTimeUtil.parseDate(dateStr);
-            boolean success = reservationService.updateEndDate(r.getId(), currentUser.getUsername(), currentUser.isAdmin(), newDate);
-            reservationsView.showMessage(success ? "End date updated successfully." : "Update failed. Check reservation status or date validity.");
+            LocalDate newEnd = DateTimeUtil.parseDate(dateStr);
+            boolean success = reservationService.updateEndDate(
+                    r.getId(), currentUser.getUsername(), currentUser.isAdmin(), newEnd
+            );
+            reservationsView.showMessage(success ? "End date updated." : "Update failed.");
         } catch (Exception e) {
-            reservationsView.showMessage("Invalid date format.");
+            reservationsView.showMessage("Invalid date.");
         }
     }
-    
+
+    // ===== FR19: 删除预约 =====
     private boolean deleteReservation(Reservation r, User currentUser) {
         if (!currentUser.isAdmin()) {
-            reservationsView.showMessage("Permission denied. Only an admin can delete a reservation.");
+            reservationsView.showMessage("Only admins can delete reservations.");
             return false;
         }
-        if (reservationsView.askYesNo("Are you sure you want to delete this reservation?")) {
-            boolean success = reservationService.deleteReservation(r.getId(), currentUser.isAdmin());
-            reservationsView.showMessage(success ? "Reservation deleted." : "Deletion failed.");
-            return success;
-        }
-        return false;
+        boolean confirm = reservationsView.askYesNo("Confirm delete?");
+        if (!confirm) return false;
+        boolean success = reservationService.deleteReservation(r.getId(), true);
+        reservationsView.showMessage(success ? "Deleted." : "Delete failed.");
+        return success;
     }
-    
-    // Helper method to safely parse dates, avoiding crashes on bad input
-    private LocalDate parseDateSafe(String dateStr) {
-        if (dateStr == null || dateStr.isBlank()) {
-            return null;
-        }
+
+    // ===== FR26: 预订书籍 =====
+    private void createReservation(User currentUser) {
+        int bookId = reservationsView.promptInt("Enter Book ID: ");
+        String startStr = reservationsView.getDateInput("Enter start date");
+        String endStr = reservationsView.getDateInput("Enter end date");
         try {
-            return DateTimeUtil.parseDate(dateStr);
+            LocalDate start = DateTimeUtil.parseDate(startStr);
+            LocalDate end = DateTimeUtil.parseDate(endStr);
+            boolean success = reservationService.reserveBook(null, currentUser.getUsername(), start, end);
+            reservationsView.showMessage(success ? "Reservation created." : "Failed to create.");
         } catch (Exception e) {
-            reservationsView.showMessage("Invalid date format, skipping filter.");
-            return null;
+            reservationsView.showMessage("Invalid date.");
         }
     }
+
 }
+

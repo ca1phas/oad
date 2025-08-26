@@ -20,12 +20,11 @@ public class App {
         AuthController authController = new AuthController(sc);
         UserController userController = new UserController(sc);
         BookController bookController = new BookController(sc);
-        
-        
         ReservationService reservationService = new ReservationService();
         ReservationsView reservationsView = new ReservationsView(sc);
-       
         ReservationController reservationController = new ReservationController(sc, reservationService, reservationsView);
+ 
+
 
         boolean running = true;
         while (running) {
@@ -99,7 +98,7 @@ public class App {
                     userController.handleAccountMenu(currentUser);
                     break;
                 case "2":    
-                    reservationController.handleMyReservations(currentUser);
+                    reservationController.handleReservationsMenu(currentUser);
                     break;
                 case "3":
                     bookController.handleMenu(currentUser.isAdmin(), false);
