@@ -1,11 +1,13 @@
 import model.User;
+import service.BookService;
+import service.ReservationService;
 import view.AuthView;
-import view.ReservationsView; 
+import view.ReservationsView;
 import controller.AuthController;
 import controller.UserController;
 import controller.BookController;
 import controller.ReservationController; 
-import service.ReservationService; 
+
 
 import java.io.PrintStream;
 import java.util.Optional;
@@ -17,12 +19,17 @@ public class App {
 
         Scanner sc = new Scanner(System.in);
         AuthView authView = new AuthView(sc);
+        ReservationsView reservationsView = new ReservationsView(sc);
+
         AuthController authController = new AuthController(sc);
         UserController userController = new UserController(sc);
         BookController bookController = new BookController(sc);
+        
+        BookService bookService = new BookService();
         ReservationService reservationService = new ReservationService();
-        ReservationsView reservationsView = new ReservationsView(sc);
-        ReservationController reservationController = new ReservationController(sc, reservationService, reservationsView);
+        
+        ReservationController reservationController = new ReservationController(reservationService, bookService, reservationsView);
+
  
 
 
@@ -97,9 +104,9 @@ public class App {
                 case "1":
                     userController.handleAccountMenu(currentUser);
                     break;
-                case "2":    
+               case "2":
                     reservationController.handleReservationsMenu(currentUser);
-                    break;
+                break;
                 case "3":
                     bookController.handleMenu(currentUser.isAdmin(), false);
                     break;
@@ -107,9 +114,10 @@ public class App {
                     if (currentUser.isAdmin()) {                        
                         reservationController.handleReservationsMenu(currentUser);
                     } else {
-                        System.out.println("You have been logged out.");
-                        loggedIn = false;
-                    }
+                    System.out.println("You have been logged out.");
+                    loggedIn = false;
+                 }
+                   
                     break;
                 case "5":
                     if (currentUser.isAdmin()) {

@@ -14,38 +14,37 @@ public class ReservationsView {
         this.sc = sc;
     }
 
-    // ===== FR10~FR13, FR26: 主菜单 =====
+    // ===== FR10~FR13, FR26: Main Menu =====
     public void displayMainMenu(boolean isAdmin) {
         System.out.println("\n===== Reservation Management Menu =====");
         System.out.println("1. View " + (isAdmin ? "All" : "My") + " Reservations"); // FR10~FR12
-        System.out.println("2. Select a Reservation to View Details");                                                // FR13
+        System.out.println("2. Select a Reservation to View Details");            // FR13
         if (!isAdmin) {
-            System.out.println("3. Reserve a Book");                                                                    // FR26
+            System.out.println("3. Reserve a Book");                               // FR26
         }
         System.out.println("0. Return to Main Menu");
         System.out.print("Enter your choice: ");
     }
 
-    // ===== FR14: Reservation 详情页菜单 =====
+    // ===== FR14: Reservation Details Menu =====
     public void displayDetailsMenu(Reservation r, User currentUser) {
         System.out.println("\n===== Reservation Details Menu =====");
-        System.out.println("1. View Associated Book");                                                                  // FR15
+        System.out.println("1. View Associated Book");                             // FR15
 
-        // 用户本人或管理员可以更新
         if (currentUser.isAdmin() || r.getUsername().equalsIgnoreCase(currentUser.getUsername())) {
-            System.out.println("2. Update Status");                                                                     // FR16
-            System.out.println("3. Update Start Date");                                                                 // FR17
-            System.out.println("4. Update End Date");                                                                   // FR18
+            System.out.println("2. Update Status");                                // FR16
+            System.out.println("3. Update Start Date");                            // FR17
+            System.out.println("4. Update End Date");                              // FR18
         }
-        // 仅管理员可删除
+
         if (currentUser.isAdmin()) {
-            System.out.println("5. Delete Reservation");                                                                // FR19
+            System.out.println("5. Delete Reservation");                           // FR19
         }
         System.out.println("0. Return to Previous Menu");
         System.out.print("Enter your choice: ");
     }
 
-    // ===== FR10~FR12: 列表展示（分页/排序/过滤后） =====
+    // ===== FR10~FR12: Display Reservations List =====
     public void displayReservations(List<Reservation> reservations, int page, int totalPages) {
         if (reservations.isEmpty()) {
             System.out.println("No reservations found.");
@@ -60,7 +59,7 @@ public class ReservationsView {
                     res.getId(),
                     res.getUsername(),
                     res.getBook() != null ? res.getBook().getTitle() : "N/A",
-                    res.getStatus(),
+                    res.getStatus().name(), // <-- force uppercase
                     DateTimeUtil.formatDate(res.getReservationDate().toLocalDate()),
                     res.getStartDate() != null ? DateTimeUtil.formatDate(res.getStartDate()) : "N/A",
                     res.getEndDate() != null ? DateTimeUtil.formatDate(res.getEndDate()) : "N/A"
@@ -68,19 +67,19 @@ public class ReservationsView {
         }
     }
 
-    // ===== FR14: Reservation 详情展示 =====
+    // ===== FR14: Display Reservation Details =====
     public void displayReservationDetails(Reservation r) {
         System.out.println("\n===== Reservation Details =====");
         System.out.println("ID: " + r.getId());
         System.out.println("Username: " + r.getUsername());
         System.out.println("Book Title: " + (r.getBook() != null ? r.getBook().getTitle() : "N/A"));
-        System.out.println("Status: " + r.getStatus());
+        System.out.println("Status: " + r.getStatus().name()); // <-- force uppercase
         System.out.println("Reservation Date: " + DateTimeUtil.formatDate(r.getReservationDate().toLocalDate()));
         System.out.println("Start Date: " + (r.getStartDate() != null ? DateTimeUtil.formatDate(r.getStartDate()) : "N/A"));
         System.out.println("End Date: " + (r.getEndDate() != null ? DateTimeUtil.formatDate(r.getEndDate()) : "N/A"));
     }
 
-    // ===== 共用方法 =====
+    // ===== Common Methods =====
     public void showMessage(String message) {
         System.out.println(message);
     }
@@ -95,7 +94,7 @@ public class ReservationsView {
             System.out.print(message);
             String input = sc.nextLine().trim();
             if (input.isBlank()) {
-                return -1; // Controller 必须处理 -1 作为跳过
+                return -1; // Controller must handle -1 as skip
             }
             try {
                 return Integer.parseInt(input);
