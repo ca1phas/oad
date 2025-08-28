@@ -45,27 +45,39 @@ public class ReservationsView {
     }
 
     // ===== FR10~FR12: Display Reservations List =====
-    public void displayReservations(List<Reservation> reservations, int page, int totalPages) {
-        if (reservations.isEmpty()) {
-            System.out.println("No reservations found.");
+        public void displayReservations(List<Reservation> reservations, int page, int totalPages) {
+            if (reservations.isEmpty()) {
+                System.out.println("No reservations found.");
             return;
         }
-        System.out.println("\n=== Reservation List (Page " + page + " of " + totalPages + ") ===");
-        System.out.printf("%-5s %-15s %-25s %-15s %-20s %-15s %-15s%n",
-                "ID", "Username", "Book Title", "Status", "Reservation Date", "Start Date", "End Date");
-        System.out.println("-------------------------------------------------------------------------------------------------------------");
-        for (Reservation res : reservations) {
-            System.out.printf("%-5d %-15s %-25s %-15s %-20s %-15s %-15s%n",
-                    res.getId(),
-                    res.getUsername(),
-                    res.getBook() != null ? res.getBook().getTitle() : "N/A",
-                    res.getStatus().name(), // <-- force uppercase
-                    DateTimeUtil.formatDate(res.getReservationDate().toLocalDate()),
-                    res.getStartDate() != null ? DateTimeUtil.formatDate(res.getStartDate()) : "N/A",
-                    res.getEndDate() != null ? DateTimeUtil.formatDate(res.getEndDate()) : "N/A"
-            );
-        }
+
+                System.out.println("\n=== Reservation List (Page " + page + " of " + totalPages + ") ===");
+                System.out.printf("| %-3s | %-12s | %-25s | %-10s | %-12s | %-12s | %-12s |%n",
+            "ID", "Username", "Book Title", "Status", "Res. Date", "Start Date", "End Date");
+                System.out.println("-------------------------------------------------------------------------------------------------------------");
+
+            for (Reservation res : reservations) {
+                System.out.printf("| %-3d | %-12s | %-25s | %-10s | %-12s | %-12s | %-12s |%n",
+                res.getId(),
+                res.getUsername(),
+                truncate(res.getBook() != null ? res.getBook().getTitle() : "N/A", 25),
+                res.getStatus().name(),
+                DateTimeUtil.formatDate(res.getReservationDate().toLocalDate()),
+                res.getStartDate() != null ? DateTimeUtil.formatDate(res.getStartDate()) : "N/A",
+                res.getEndDate() != null ? DateTimeUtil.formatDate(res.getEndDate()) : "N/A"
+                );
     }
+             System.out.println("-------------------------------------------------------------------------------------------------------------");
+}
+
+// 截断过长书名
+private String truncate(String text, int maxLength) {
+    if (text.length() <= maxLength) {
+        return text;
+    }
+    return text.substring(0, maxLength - 3) + "...";
+}
+
 
     // ===== FR14: Display Reservation Details =====
     public void displayReservationDetails(Reservation r) {

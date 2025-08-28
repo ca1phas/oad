@@ -20,11 +20,12 @@ public class ReservationController {
         this.reservationService = reservationService;
         this.bookService = bookService;
         this.view = view;
-        
-        // FR01 removed: no automatic status update on startup
+
+        // FR01: update statuses on startup
+        this.reservationService.updateReservationStatusesOnStartup();
     }
 
-    // ===== Main menu =====
+    // Main menu
     public void handleReservationsMenu(User currentUser) {
         boolean isAdmin = currentUser.isAdmin();
         boolean running = true;
@@ -34,61 +35,42 @@ public class ReservationController {
             int choice = view.promptInt("Your choice: ");
 
             switch (choice) {
-                case 1: // View reservations list
+                case 1:
                     List<Reservation> reservations = reservationService.filterSortPaginate(
-                            currentUser.getUsername(),
-                            isAdmin,
-                            null, null, null, null,
-                            null, null, null, null, null, null,
-                            "id", true,
-                            1, 10
-                    );
+                            currentUser.getUsername(), isAdmin,
+                            "id", null, null, null, null, null, null, null, null, null, null, true, 1, 10);
                     view.displayReservations(reservations, 1, 1);
                     break;
-
-                case 2: // Select a reservation to view details
+                case 2:
                     int resId = view.promptInt("Enter reservation ID: ");
                     Optional<Reservation> opt = reservationService.selectReservation(resId, currentUser.getUsername(), isAdmin);
-                    if (opt.isPresent()) {
-                        Reservation r = opt.get();
-                        handleReservationDetails(r, currentUser);
-                    } else {
-                        view.showMessage("Reservation not found or not accessible.");
-                    }
+                    if (opt.isPresent()) handleReservationDetails(opt.get(), currentUser);
+                    else view.showMessage("Reservation not found or not accessible.");
                     break;
-
-                case 3: // Reserve a book (only user, not admin)
+                case 3:
                     if (!isAdmin) {
                         int bookId = view.promptInt("Enter book ID to reserve: ");
                         var bookOpt = bookService.viewBook(bookId);
-                        if (bookOpt.isEmpty()) {
-                            view.showMessage("Book not found.");
-                            break;
-                        }
-                        String startStr = view.getDateInput("Enter start date");
-                        String endStr = view.getDateInput("Enter end date");
-                        try {
-                            LocalDate start = LocalDate.parse(startStr);
-                            LocalDate end = LocalDate.parse(endStr);
-                            boolean ok = reservationService.reserveBook(bookOpt.get(), currentUser.getUsername(), start, end);
-                            view.showMessage(ok ? "Reservation created!" : "Failed to reserve book.");
-                        } catch (Exception e) {
-                            view.showMessage("Invalid date format.");
+                        if (bookOpt.isEmpty()) view.showMessage("Book not found.");
+                        else {
+                            try {
+                                LocalDate start = LocalDate.parse(view.getDateInput("Enter start date"));
+                                LocalDate end = LocalDate.parse(view.getDateInput("Enter end date"));
+                                boolean ok = reservationService.reserveBook(bookOpt.get(), currentUser.getUsername(), start, end);
+                                view.showMessage(ok ? "Reservation created!" : "Failed to reserve book.");
+                            } catch (Exception e) {
+                                view.showMessage("Invalid date format.");
+                            }
                         }
                     }
                     break;
-
-                case 0:
-                    running = false;
-                    break;
-
-                default:
-                    view.showMessage("Invalid choice.");
+                case 0: running = false; break;
+                default: view.showMessage("Invalid choice.");
             }
         }
     }
 
-    // ===== Reservation details menu =====
+    // Reservation details menu
     private void handleReservationDetails(Reservation r, User currentUser) {
         boolean isAdmin = currentUser.isAdmin();
         boolean running = true;
@@ -96,58 +78,42 @@ public class ReservationController {
         while (running) {
             view.displayReservationDetails(r);
             view.displayDetailsMenu(r, currentUser);
-
             int choice = view.promptInt("Your choice: ");
+
             switch (choice) {
-                case 1: // View associated book
-                    if (r.getBook() != null) {
-                        System.out.println("Associated Book: " + r.getBook().getTitle());
-                    } else {
-                        view.showMessage("No book found for this reservation.");
-                    }
+                case 1:
+                    System.out.println("Associated Book: " + (r.getBook() != null ? r.getBook().getTitle() : "N/A"));
                     break;
-                case 2: // Update status
-                    String statusStr = view.getStatusInput();
+                case 2:
                     try {
-                        ReservationStatus newStatus = ReservationStatus.valueOf(statusStr.toUpperCase());
+                        ReservationStatus newStatus = ReservationStatus.valueOf(view.getStatusInput().toUpperCase());
                         boolean ok = reservationService.updateStatus(r.getId(), currentUser.getUsername(), isAdmin, newStatus);
                         view.showMessage(ok ? "Status updated." : "Failed to update status.");
-                    } catch (IllegalArgumentException e) {
-                        view.showMessage("Invalid status.");
-                    }
+                    } catch (IllegalArgumentException e) { view.showMessage("Invalid status."); }
                     break;
-                case 3: // Update start date
-                    String startStr = view.getDateInput("Enter new start date");
+                case 3:
                     try {
-                        LocalDate start = LocalDate.parse(startStr);
+                        LocalDate start = LocalDate.parse(view.getDateInput("Enter new start date"));
                         boolean ok = reservationService.updateStartDate(r.getId(), currentUser.getUsername(), isAdmin, start);
                         view.showMessage(ok ? "Start date updated." : "Failed to update start date.");
-                    } catch (Exception e) {
-                        view.showMessage("Invalid date format.");
-                    }
+                    } catch (Exception e) { view.showMessage("Invalid date format."); }
                     break;
-                case 4: // Update end date
-                    String endStr = view.getDateInput("Enter new end date");
+                case 4:
                     try {
-                        LocalDate end = LocalDate.parse(endStr);
+                        LocalDate end = LocalDate.parse(view.getDateInput("Enter new end date"));
                         boolean ok = reservationService.updateEndDate(r.getId(), currentUser.getUsername(), isAdmin, end);
                         view.showMessage(ok ? "End date updated." : "Failed to update end date.");
-                    } catch (Exception e) {
-                        view.showMessage("Invalid date format.");
-                    }
+                    } catch (Exception e) { view.showMessage("Invalid date format."); }
                     break;
-                case 5: // Delete reservation (admin only)
+                case 5:
                     if (isAdmin) {
                         boolean ok = reservationService.deleteReservation(r.getId(), true);
                         view.showMessage(ok ? "Reservation deleted." : "Failed to delete reservation.");
                         running = false;
                     }
                     break;
-                case 0:
-                    running = false;
-                    break;
-                default:
-                    view.showMessage("Invalid choice.");
+                case 0: running = false; break;
+                default: view.showMessage("Invalid choice.");
             }
         }
     }
