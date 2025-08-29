@@ -70,7 +70,7 @@ public class ReservationsView {
              System.out.println("-------------------------------------------------------------------------------------------------------------");
 }
 
-// 截断过长书名
+// Truncate text to fit within maxLength, adding "..." if truncated
 private String truncate(String text, int maxLength) {
     if (text.length() <= maxLength) {
         return text;
@@ -118,10 +118,16 @@ private String truncate(String text, int maxLength) {
 
     public String getDateInput(String prompt) {
         return promptString(prompt + " (yyyy-mm-dd, leave blank to skip): ");
-    }
+        }
 
-    public String getStatusInput() {
-        return promptString("Enter new status (PENDING, APPROVED, DENIED, CANCELLED, ACTIVE, RETURNED): ");
+    public String getStatusInput(User currentUser) {
+        if (currentUser.isAdmin()) {
+            System.out.println("You may update status to: PENDING to APPROVED, or PENDINGto DENIED");
+        return promptString("Enter new status (APPROVED, DENIED): ");
+                } else {
+            System.out.println("You may update status to: PENDING to CANCELLED, or APPROVED/ACTIVE to RETURNED");
+        return promptString("Enter new status (CANCELLED, RETURNED): ");
+        }
     }
 
     public boolean askYesNo(String msg) {

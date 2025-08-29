@@ -86,7 +86,7 @@ public class ReservationController {
                     break;
                 case 2:
                     try {
-                        ReservationStatus newStatus = ReservationStatus.valueOf(view.getStatusInput().toUpperCase());
+                        ReservationStatus newStatus = ReservationStatus.valueOf(view.getStatusInput(currentUser).toUpperCase());
                         boolean ok = reservationService.updateStatus(r.getId(), currentUser.getUsername(), isAdmin, newStatus);
                         view.showMessage(ok ? "Status updated." : "Failed to update status.");
                     } catch (IllegalArgumentException e) { view.showMessage("Invalid status."); }

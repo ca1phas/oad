@@ -8,7 +8,6 @@ import controller.UserController;
 import controller.BookController;
 import controller.ReservationController; 
 
-
 import java.io.PrintStream;
 import java.util.Optional;
 import java.util.Scanner;
@@ -30,9 +29,6 @@ public class App {
         
         ReservationController reservationController = new ReservationController(reservationService, bookService, reservationsView);
 
- 
-
-
         boolean running = true;
         while (running) {
             authView.displayWelcome();
@@ -45,7 +41,6 @@ public class App {
                         authView.displayLoginFailed();
                     } else {
                         User currentUser = optionalUser.get();
-                        
                         startUserSession(currentUser, sc, userController, bookController, reservationController);
                     }
                     break;
@@ -54,7 +49,6 @@ public class App {
                     Optional<User> registeredUser = authController.handleSignup();
                     if (registeredUser.isPresent()) {
                         User currentUser = registeredUser.get();
-                        
                         startUserSession(currentUser, sc, userController, bookController, reservationController);
                     }
                     break;
@@ -86,7 +80,11 @@ public class App {
                     "\n[Logged in as: " + currentUser.getUsername() + " | Role: " + currentUser.getRole() + "]");
             System.out.println("\nPlease select an option:");
             System.out.println("1. My Account");
-            System.out.println("2. My Reservations");
+
+            if (!currentUser.isAdmin()) { 
+                System.out.println("2. My Reservations");  // 只有普通用户能看到
+            }
+
             System.out.println("3. Books");
 
             if (currentUser.isAdmin()) {
@@ -104,21 +102,28 @@ public class App {
                 case "1":
                     userController.handleAccountMenu(currentUser);
                     break;
-               case "2":
-                    reservationController.handleReservationsMenu(currentUser);
-                break;
+
+                case "2":
+                    if (!currentUser.isAdmin()) {   // 只有普通用户能进
+                        reservationController.handleReservationsMenu(currentUser);
+                    } else {
+                        System.out.println("Invalid option.");
+                    }
+                    break;
+
                 case "3":
                     bookController.handleMenu(currentUser.isAdmin(), false);
                     break;
+
                 case "4":
                     if (currentUser.isAdmin()) {                        
                         reservationController.handleReservationsMenu(currentUser);
                     } else {
-                    System.out.println("You have been logged out.");
-                    loggedIn = false;
-                 }
-                   
+                        System.out.println("You have been logged out.");
+                        loggedIn = false;
+                    }
                     break;
+
                 case "5":
                     if (currentUser.isAdmin()) {
                         userController.handleUserManagementMenu(currentUser);
@@ -126,6 +131,7 @@ public class App {
                         System.out.println("Invalid option.");
                     }
                     break;
+
                 case "6":
                     if (currentUser.isAdmin()) {
                         System.out.println("You have been logged out.");
@@ -134,6 +140,7 @@ public class App {
                         System.out.println("Invalid option.");
                     }
                     break;
+
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
