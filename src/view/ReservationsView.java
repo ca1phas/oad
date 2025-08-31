@@ -29,7 +29,7 @@ public class ReservationsView {
     // ===== FR14: Reservation Details Menu =====
     public void displayDetailsMenu(Reservation r, User currentUser) {
         System.out.println("\n===== Reservation Details Menu =====");
-        System.out.println("1. View Associated Book");                             // FR15
+        System.out.println("1. View Book");                             // FR15
 
         if (currentUser.isAdmin() || r.getUsername().equalsIgnoreCase(currentUser.getUsername())) {
             System.out.println("2. Update Status");                                // FR16

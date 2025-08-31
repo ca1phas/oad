@@ -112,7 +112,7 @@ public class App {
                     break;
 
                 case "3":
-                    bookController.handleMenu(currentUser.isAdmin(), false);
+                    bookController.handleMenu(currentUser.isAdmin(), false, currentUser);
                     break;
 
                 case "4":

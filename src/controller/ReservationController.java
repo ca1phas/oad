@@ -124,38 +124,59 @@ public class ReservationController {
                 case 1:
                     System.out.println("Associated Book: " + (r.getBook() != null ? r.getBook().getTitle() : "N/A"));
                     break;
-                case 2:
+                case 2: // update status
                     try {
                         ReservationStatus newStatus = ReservationStatus.valueOf(view.getStatusInput(currentUser).toUpperCase());
                         boolean ok = reservationService.updateStatus(r.getId(), currentUser.getUsername(), isAdmin, newStatus);
-                        view.showMessage(ok ? "Status updated." : "Failed to update status.");
+                        if (ok) {
+                            view.showMessage("Status updated successfully!");
+                            handlePaginatedReservations(currentUser, isAdmin); 
+                            running = false; 
+                        } else {
+                            view.showMessage("Failed to update status.");
+                        }
                     } catch (IllegalArgumentException e) {
                         view.showMessage("Invalid status.");
                     }
                     break;
-                case 3:
+                case 3: // update start date
                     try {
                         LocalDate start = LocalDate.parse(view.getDateInput("Enter new start date"));
                         boolean ok = reservationService.updateStartDate(r.getId(), currentUser.getUsername(), isAdmin, start);
-                        view.showMessage(ok ? "Start date updated." : "Failed to update start date.");
+                        if (ok) {
+                            view.showMessage("Start date updated successfully!");
+                            handlePaginatedReservations(currentUser, isAdmin);
+                            running = false;
+                        } else {
+                            view.showMessage("Failed to update start date.");
+                        }
                     } catch (Exception e) {
                         view.showMessage("Invalid date format.");
                     }
                     break;
-                case 4:
+                case 4: // update end date
                     try {
                         LocalDate end = LocalDate.parse(view.getDateInput("Enter new end date"));
                         boolean ok = reservationService.updateEndDate(r.getId(), currentUser.getUsername(), isAdmin, end);
-                        view.showMessage(ok ? "End date updated." : "Failed to update end date.");
+                        if (ok) {
+                            view.showMessage("End date updated successfully!");
+                            handlePaginatedReservations(currentUser, isAdmin); 
+                            running = false;
+                        } else {
+                            view.showMessage("Failed to update end date.");
+                        }
                     } catch (Exception e) {
                         view.showMessage("Invalid date format.");
                     }
                     break;
-                case 5:
+                case 5: // delete reservation (admin only)
                     if (isAdmin) {
                         boolean ok = reservationService.deleteReservation(r.getId(), true);
-                        view.showMessage(ok ? "Reservation deleted." : "Failed to delete reservation.");
-                        running = false;
+                        view.showMessage(ok ? "Reservation deleted successfully!" : "Failed to delete reservation.");
+                        if (ok) {
+                            handlePaginatedReservations(currentUser, isAdmin); 
+                            running = false;
+                        }
                     }
                     break;
                 case 0:
