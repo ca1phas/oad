@@ -82,7 +82,7 @@ public class App {
             System.out.println("1. My Account");
 
             if (!currentUser.isAdmin()) { 
-                System.out.println("2. My Reservations");  // 只有普通用户能看到
+                System.out.println("2. My Reservations");  
             }
 
             System.out.println("3. Books");
@@ -104,7 +104,7 @@ public class App {
                     break;
 
                 case "2":
-                    if (!currentUser.isAdmin()) {   // 只有普通用户能进
+                    if (!currentUser.isAdmin()) {   
                         reservationController.handleReservationsMenu(currentUser);
                     } else {
                         System.out.println("Invalid option.");

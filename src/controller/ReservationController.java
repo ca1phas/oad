@@ -6,6 +6,7 @@ import model.enums.ReservationStatus;
 import service.ReservationService;
 import service.BookService;
 import view.ReservationsView;
+import util.PaginationUtil;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,10 +37,7 @@ public class ReservationController {
 
             switch (choice) {
                 case 1:
-                    List<Reservation> reservations = reservationService.filterSortPaginate(
-                            currentUser.getUsername(), isAdmin,
-                            "id", null, null, null, null, null, null, null, null, null, null, true, 1, 10);
-                    view.displayReservations(reservations, 1, 1);
+                    handlePaginatedReservations(currentUser, isAdmin);
                     break;
                 case 2:
                     int resId = view.promptInt("Enter reservation ID: ");
@@ -64,8 +62,50 @@ public class ReservationController {
                         }
                     }
                     break;
-                case 0: running = false; break;
-                default: view.showMessage("Invalid choice.");
+                case 0:
+                    running = false;
+                    break;
+                default:
+                    view.showMessage("Invalid choice.");
+            }
+        }
+    }
+
+    // Handle paginated reservations (5 per page)
+    private void handlePaginatedReservations(User currentUser, boolean isAdmin) {
+        int page = 1;
+        int pageSize = 5;
+        boolean running = true;
+
+        List<Reservation> allReservations = reservationService.filterSortPaginate(
+                currentUser.getUsername(), isAdmin,
+                "id", null, null, null, null, null, null, null, null, null, null,
+                true, 1, Integer.MAX_VALUE // fetch all, then paginate manually
+        );
+
+        int totalPages = PaginationUtil.getTotalPages(allReservations.size(), pageSize);
+
+        while (running) {
+            List<Reservation> paginated = PaginationUtil.paginate(allReservations, page, pageSize);
+            view.displayReservations(paginated, page, totalPages);
+
+            view.showMessage("[1] Previous | [2] Next | [0] Back");
+            int choice = view.promptInt("Your choice: ");
+
+            switch (choice) {
+                case 1:
+                    if (page > 1) page--;
+                    else view.showMessage("Already at first page.");
+                    break;
+                case 2:
+                    if (page < totalPages) page++;
+                    else view.showMessage("Already at last page.");
+                    break;
+                case 0:
+                    running = false;
+                    break;
+                default:
+                    view.showMessage("Invalid choice.");
             }
         }
     }
@@ -89,21 +129,27 @@ public class ReservationController {
                         ReservationStatus newStatus = ReservationStatus.valueOf(view.getStatusInput(currentUser).toUpperCase());
                         boolean ok = reservationService.updateStatus(r.getId(), currentUser.getUsername(), isAdmin, newStatus);
                         view.showMessage(ok ? "Status updated." : "Failed to update status.");
-                    } catch (IllegalArgumentException e) { view.showMessage("Invalid status."); }
+                    } catch (IllegalArgumentException e) {
+                        view.showMessage("Invalid status.");
+                    }
                     break;
                 case 3:
                     try {
                         LocalDate start = LocalDate.parse(view.getDateInput("Enter new start date"));
                         boolean ok = reservationService.updateStartDate(r.getId(), currentUser.getUsername(), isAdmin, start);
                         view.showMessage(ok ? "Start date updated." : "Failed to update start date.");
-                    } catch (Exception e) { view.showMessage("Invalid date format."); }
+                    } catch (Exception e) {
+                        view.showMessage("Invalid date format.");
+                    }
                     break;
                 case 4:
                     try {
                         LocalDate end = LocalDate.parse(view.getDateInput("Enter new end date"));
                         boolean ok = reservationService.updateEndDate(r.getId(), currentUser.getUsername(), isAdmin, end);
                         view.showMessage(ok ? "End date updated." : "Failed to update end date.");
-                    } catch (Exception e) { view.showMessage("Invalid date format."); }
+                    } catch (Exception e) {
+                        view.showMessage("Invalid date format.");
+                    }
                     break;
                 case 5:
                     if (isAdmin) {
@@ -112,8 +158,11 @@ public class ReservationController {
                         running = false;
                     }
                     break;
-                case 0: running = false; break;
-                default: view.showMessage("Invalid choice.");
+                case 0:
+                    running = false;
+                    break;
+                default:
+                    view.showMessage("Invalid choice.");
             }
         }
     }

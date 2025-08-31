@@ -129,9 +129,4 @@ private String truncate(String text, int maxLength) {
         return promptString("Enter new status (CANCELLED, RETURNED): ");
         }
     }
-
-    public boolean askYesNo(String msg) {
-        String input = promptString(msg + " (y/n): ").toLowerCase();
-        return input.equals("y") || input.equals("yes");
-    }
 }
