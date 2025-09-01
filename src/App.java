@@ -2,6 +2,7 @@ import model.User;
 import service.BookService;
 import service.ReservationService;
 import view.AuthView;
+import view.BookView;
 import view.ReservationsView;
 import controller.AuthController;
 import controller.UserController;
@@ -18,7 +19,8 @@ public class App {
 
         Scanner sc = new Scanner(System.in);
         AuthView authView = new AuthView(sc);
-        ReservationsView reservationsView = new ReservationsView(sc);
+        BookView bookView = new BookView(sc);
+        ReservationsView reservationsView = new ReservationsView();
 
         AuthController authController = new AuthController(sc);
         UserController userController = new UserController(sc);
@@ -27,7 +29,7 @@ public class App {
         BookService bookService = new BookService();
         ReservationService reservationService = new ReservationService();
         
-        ReservationController reservationController = new ReservationController(reservationService, bookService, reservationsView);
+        ReservationController reservationController = new ReservationController(reservationService, bookService, reservationsView, bookView);
 
         boolean running = true;
         while (running) {
@@ -79,12 +81,8 @@ public class App {
             System.out.println(
                     "\n[Logged in as: " + currentUser.getUsername() + " | Role: " + currentUser.getRole() + "]");
             System.out.println("\nPlease select an option:");
-            System.out.println("1. My Account");
-
-            if (!currentUser.isAdmin()) { 
-                System.out.println("2. My Reservations");  
-            }
-
+            System.out.println("1. My Account");          
+            System.out.println("2. My Reservations");  
             System.out.println("3. Books");
 
             if (currentUser.isAdmin()) {
@@ -102,15 +100,9 @@ public class App {
                 case "1":
                     userController.handleAccountMenu(currentUser);
                     break;
-
                 case "2":
-                    if (!currentUser.isAdmin()) {   
-                        reservationController.handleReservationsMenu(currentUser);
-                    } else {
-                        System.out.println("Invalid option.");
-                    }
-                    break;
-
+                    reservationController.handleReservationsMenu(currentUser);
+                break;
                 case "3":
                     bookController.handleMenu(currentUser.isAdmin(), false, currentUser);
                     break;

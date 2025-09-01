@@ -316,7 +316,7 @@ private void reserveBook(User currentUser, int bookId) {
         LocalDate startDate = LocalDate.parse(startStr);
         LocalDate endDate = LocalDate.parse(endStr);
 
-        // ✅ 调用 reservationService.reserveBook（保持和 service 一致）
+        
         boolean success = reservationService.reserveBook(
                 bookOpt.get(), currentUser.getUsername(), startDate, endDate);
 

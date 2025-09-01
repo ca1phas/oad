@@ -2,131 +2,120 @@ package view;
 
 import model.Reservation;
 import model.User;
-import util.DateTimeUtil;
+//import model.enums.ReservationStatus;
 
+//import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
 public class ReservationsView {
-    private final Scanner sc;
+    private final Scanner scanner = new Scanner(System.in);
 
-    public ReservationsView(Scanner sc) {
-        this.sc = sc;
-    }
-
-    // ===== FR10~FR13, FR26: Main Menu =====
+    // ------------------- Main Menu -------------------
     public void displayMainMenu(boolean isAdmin) {
-        System.out.println("\n===== Reservation Management Menu =====");
-        System.out.println("1. View " + (isAdmin ? "All" : "My") + " Reservations"); // FR10~FR12
-        System.out.println("2. Select a Reservation to View Details");            // FR13
-        if (!isAdmin) {
-            System.out.println("3. Reserve a Book");                               // FR26
-        }
-        System.out.println("0. Return to Main Menu");
-        System.out.print("Enter your choice: ");
+        System.out.println("\n=== Reservations Menu ===");
+        System.out.println("1. List Reservations");
+        System.out.println("2. Select Reservation Detail");
+        System.out.println("3. Reserve a Book");
+        System.out.println("0. Back");
     }
 
-    // ===== FR14: Reservation Details Menu =====
-    public void displayDetailsMenu(Reservation r, User currentUser) {
-        System.out.println("\n===== Reservation Details Menu =====");
-        System.out.println("1. View Book");                             // FR15
+    // ------------------- Paginated Table -------------------
+    public void displayReservationsTable(List<Reservation> reservations, int page, int totalPages) {
+        System.out.println("\n=== Reservation List (Page " + page + " of " + totalPages + ") ===");
+        System.out.printf("| %-4s | %-12s | %-25s | %-10s | %-11s | %-11s | %-11s |\n",
+                "ID", "Username", "Book Title", "Status", "Res. Date", "Start Date", "End Date");
+        System.out.println("-------------------------------------------------------------------------------------------------------------");
 
-        if (currentUser.isAdmin() || r.getUsername().equalsIgnoreCase(currentUser.getUsername())) {
-            System.out.println("2. Update Status");                                // FR16
-            System.out.println("3. Update Start Date");                            // FR17
-            System.out.println("4. Update End Date");                              // FR18
+        for (Reservation r : reservations) {
+            String title = r.getBook().getTitle();
+            if (title.length() > 24) title = title.substring(0, 21) + "...";
+            System.out.printf("| %-4d | %-12s | %-25s | %-10s | %-11s | %-11s | %-11s |\n",
+                    r.getId(),
+                    r.getUsername(),
+                    title,
+                    r.getStatus(),
+                    r.getReservationDate(),
+                    r.getStartDate(),
+                    r.getEndDate()
+            );
         }
-
-        if (currentUser.isAdmin()) {
-            System.out.println("5. Delete Reservation");                           // FR19
-        }
-        System.out.println("0. Return to Previous Menu");
-        System.out.print("Enter your choice: ");
+        System.out.println("-------------------------------------------------------------------------------------------------------------");
     }
 
-    // ===== FR10~FR12: Display Reservations List =====
-        public void displayReservations(List<Reservation> reservations, int page, int totalPages) {
-            if (reservations.isEmpty()) {
-                System.out.println("No reservations found.");
-            return;
-        }
 
-                System.out.println("\n=== Reservation List (Page " + page + " of " + totalPages + ") ===");
-                System.out.printf("| %-3s | %-12s | %-25s | %-10s | %-12s | %-12s | %-12s |%n",
-            "ID", "Username", "Book Title", "Status", "Res. Date", "Start Date", "End Date");
-                System.out.println("-------------------------------------------------------------------------------------------------------------");
-
-            for (Reservation res : reservations) {
-                System.out.printf("| %-3d | %-12s | %-25s | %-10s | %-12s | %-12s | %-12s |%n",
-                res.getId(),
-                res.getUsername(),
-                truncate(res.getBook() != null ? res.getBook().getTitle() : "N/A", 25),
-                res.getStatus().name(),
-                DateTimeUtil.formatDate(res.getReservationDate().toLocalDate()),
-                res.getStartDate() != null ? DateTimeUtil.formatDate(res.getStartDate()) : "N/A",
-                res.getEndDate() != null ? DateTimeUtil.formatDate(res.getEndDate()) : "N/A"
-                );
+public void displayDetailsMenu(Reservation r, User currentUser) {
+    if (currentUser.isAdmin()) {
+        System.out.println("--- Reservation Actions ---");
+        System.out.println("1. View Book Title");
+        System.out.println("2. Update Status");
+        System.out.println("3. Update Start Date");
+        System.out.println("4. Update End Date");
+        System.out.println("5. Delete Reservation");
+        System.out.println("0. Back");
+    } else {
+        System.out.println("--- Reservation Actions ---");
+        System.out.println("1. View Book Title");
+        System.out.println("2. Update Start Date");
+        System.out.println("3. Update End Date");
+        System.out.println("0. Back");
     }
-             System.out.println("-------------------------------------------------------------------------------------------------------------");
+}
+// ------------------- Single Reservation Detail -------------------
+public void displayReservationDetails(Reservation r) {
+    System.out.println("=== Reservation Detail ===");
+    System.out.println("ID: " + r.getId());
+    System.out.println("Username: " + r.getUsername());
+    System.out.println("Book Title: " + (r.getBook() != null ? r.getBook().getTitle() : "N/A"));
+    System.out.println("Status: " + r.getStatus());
+    System.out.println("Reservation Date: " + r.getReservationDate());
+    System.out.println("Start Date: " + r.getStartDate());
+    System.out.println("End Date: " + r.getEndDate());
+    System.out.println("-----------------------------------------\n");
 }
 
-// Truncate text to fit within maxLength, adding "..." if truncated
-private String truncate(String text, int maxLength) {
-    if (text.length() <= maxLength) {
-        return text;
-    }
-    return text.substring(0, maxLength - 3) + "...";
-}
 
 
-    // ===== FR14: Display Reservation Details =====
-    public void displayReservationDetails(Reservation r) {
-        System.out.println("\n===== Reservation Details =====");
-        System.out.println("ID: " + r.getId());
-        System.out.println("Username: " + r.getUsername());
-        System.out.println("Book Title: " + (r.getBook() != null ? r.getBook().getTitle() : "N/A"));
-        System.out.println("Status: " + r.getStatus().name()); // <-- force uppercase
-        System.out.println("Reservation Date: " + DateTimeUtil.formatDate(r.getReservationDate().toLocalDate()));
-        System.out.println("Start Date: " + (r.getStartDate() != null ? DateTimeUtil.formatDate(r.getStartDate()) : "N/A"));
-        System.out.println("End Date: " + (r.getEndDate() != null ? DateTimeUtil.formatDate(r.getEndDate()) : "N/A"));
+    // ------------------- Sort & Filter -------------------
+    public String[] getSortAndFilterOptions() {
+        scanner.nextLine(); // consume newline
+        System.out.print("Sort by (id/username/status/resdate/startdate/enddate): ");
+        String sortBy = scanner.nextLine();
+        System.out.print("Ascending? (true/false): ");
+        String ascending = scanner.nextLine();
+        System.out.print("Filter by (username/status/booktitle) or leave empty: ");
+        String filterBy = scanner.nextLine();
+        String filterValue = "";
+        if (!filterBy.isBlank()) {
+            System.out.print("Filter value: ");
+            filterValue = scanner.nextLine();
+        }
+        return new String[]{sortBy, ascending, filterBy, filterValue};
     }
 
-    // ===== Common Methods =====
-    public void showMessage(String message) {
-        System.out.println(message);
-    }
-
-    public String promptString(String message) {
-        System.out.print(message);
-        return sc.nextLine().trim();
-    }
-
+    // ------------------- Prompt / Input Helpers -------------------
     public int promptInt(String message) {
-        while (true) {
-            System.out.print(message);
-            String input = sc.nextLine().trim();
-            if (input.isBlank()) {
-                return -1; // Controller must handle -1 as skip
-            }
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
-            }
+        System.out.print(message);
+        while (!scanner.hasNextInt()) {
+            System.out.print("Invalid input. " + message);
+            scanner.next();
         }
+        int value = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+        return value;
     }
 
-    public String getDateInput(String prompt) {
-        return promptString(prompt + " (yyyy-mm-dd, leave blank to skip): ");
-        }
+    public String getDateInput(String message) {
+        System.out.print(message + " (YYYY-MM-DD): ");
+        return scanner.nextLine();
+    }
 
-    public String getStatusInput(User currentUser) {
-        if (currentUser.isAdmin()) {
-            System.out.println("You may update status to: PENDING to APPROVED, or PENDINGto DENIED");
-        return promptString("Enter new status (APPROVED, DENIED): ");
-                } else {
-            System.out.println("You may update status to: PENDING to CANCELLED, or APPROVED/ACTIVE to RETURNED");
-        return promptString("Enter new status (CANCELLED, RETURNED): ");
-        }
+    public String getStatusInput(User user) {
+        System.out.print("Enter new status (ACTIVE/CANCELLED/COMPLETED/PENDING/DENIED): ");
+        return scanner.nextLine();
+    }
+
+    public void showMessage(String msg) {
+        System.out.println(msg);
     }
 }
