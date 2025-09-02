@@ -7,7 +7,7 @@ import view.ReservationsView;
 import controller.AuthController;
 import controller.UserController;
 import controller.BookController;
-import controller.ReservationController; 
+import controller.ReservationController;
 
 import java.io.PrintStream;
 import java.util.Optional;
@@ -25,11 +25,12 @@ public class App {
         AuthController authController = new AuthController(sc);
         UserController userController = new UserController(sc);
         BookController bookController = new BookController(sc);
-        
+
         BookService bookService = new BookService();
         ReservationService reservationService = new ReservationService();
-        
-        ReservationController reservationController = new ReservationController(reservationService, bookService, reservationsView, bookView);
+
+        ReservationController reservationController = new ReservationController(reservationService, bookService,
+                reservationsView, bookView);
 
         boolean running = true;
         while (running) {
@@ -81,8 +82,8 @@ public class App {
             System.out.println(
                     "\n[Logged in as: " + currentUser.getUsername() + " | Role: " + currentUser.getRole() + "]");
             System.out.println("\nPlease select an option:");
-            System.out.println("1. My Account");          
-            System.out.println("2. My Reservations");  
+            System.out.println("1. My Account");
+            System.out.println("2. My Reservations");
             System.out.println("3. Books");
 
             if (currentUser.isAdmin()) {
@@ -102,13 +103,13 @@ public class App {
                     break;
                 case "2":
                     reservationController.handleReservationsMenu(currentUser);
-                break;
+                    break;
                 case "3":
                     bookController.handleMenu(currentUser.isAdmin(), false, currentUser);
                     break;
 
                 case "4":
-                    if (currentUser.isAdmin()) {                        
+                    if (currentUser.isAdmin()) {
                         reservationController.handleReservationsMenu(currentUser);
                     } else {
                         System.out.println("You have been logged out.");
