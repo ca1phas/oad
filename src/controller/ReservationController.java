@@ -26,6 +26,13 @@ public class ReservationController {
     private String idFilter = null;
     private String usernameFilter = null;
     private String bookTitleFilter = null;
+    private String statusFilter = null;
+    private LocalDate resStart = null;
+    private LocalDate resEnd = null;
+    private LocalDate startStart = null;
+    private LocalDate startEnd = null;
+    private LocalDate endStart = null;
+    private LocalDate endEnd = null;
 
     public ReservationController(ReservationService reservationService,
                                  BookService bookService,
@@ -52,6 +59,13 @@ public class ReservationController {
                     idFilter = null;
                     usernameFilter = null;
                     bookTitleFilter = null;
+                    statusFilter = null;
+                    resStart = null;
+                    resEnd = null;
+                    startStart = null;
+                    startEnd = null;
+                    endStart = null;
+                    endEnd = null;
                     sortField = "id";
                     ascending = true;
                     handlePaginatedReservations(currentUser, isAdmin);
@@ -60,9 +74,16 @@ public class ReservationController {
                     ReservationsView.SortFilterOptions sf = view.getSortAndFilterOptions();
                     sortField = sf.sortBy;
                     ascending = sf.ascending;
-                    idFilter = sf.idFilter.isBlank() ? null : sf.idFilter;
-                    usernameFilter = sf.usernameFilter.isBlank() ? null : sf.usernameFilter;
-                    bookTitleFilter = sf.bookTitleFilter.isBlank() ? null : sf.bookTitleFilter;
+                    idFilter = sf.idFilter;
+                    usernameFilter = sf.usernameFilter;
+                    bookTitleFilter = sf.bookTitleFilter;
+                    statusFilter = sf.statusFilter;
+                    resStart = sf.resStart != null ? LocalDate.parse(sf.resStart) : null;
+                    resEnd = sf.resEnd != null ? LocalDate.parse(sf.resEnd) : null;
+                    startStart = sf.startStart != null ? LocalDate.parse(sf.startStart) : null;
+                    startEnd = sf.startEnd != null ? LocalDate.parse(sf.startEnd) : null;
+                    endStart = sf.endStart != null ? LocalDate.parse(sf.endStart) : null;
+                    endEnd = sf.endEnd != null ? LocalDate.parse(sf.endEnd) : null;
                     handlePaginatedReservations(currentUser, isAdmin);
                 }
                 case 3 -> { // Detail
@@ -86,16 +107,18 @@ public class ReservationController {
         while (running) {
             List<Reservation> paginated = reservationService.filterSortPaginate(
                     currentUser.getUsername(), isAdmin,
-                    idFilter, usernameFilter, bookTitleFilter, null,
-                    null, null, null, null, null, null,
+                    idFilter, usernameFilter, bookTitleFilter,
+                    statusFilter != null ? ReservationStatus.valueOf(statusFilter) : null,
+                    resStart, resEnd, startStart, startEnd, endStart, endEnd,
                     sortField, ascending,
                     page, pageSize
             );
 
             int totalItems = reservationService.filterSortPaginate(
                     currentUser.getUsername(), isAdmin,
-                    idFilter, usernameFilter, bookTitleFilter, null,
-                    null, null, null, null, null, null,
+                    idFilter, usernameFilter, bookTitleFilter,
+                    statusFilter != null ? ReservationStatus.valueOf(statusFilter) : null,
+                    resStart, resEnd, startStart, startEnd, endStart, endEnd,
                     sortField, ascending,
                     1, Integer.MAX_VALUE
             ).size();
