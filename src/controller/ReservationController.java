@@ -7,6 +7,7 @@ import model.enums.ReservationStatus;
 import service.BookService;
 import service.ReservationService;
 import util.PaginationUtil;
+import util.DateTimeUtil;
 import view.ReservationsView;
 import view.BookView;
 
@@ -78,12 +79,12 @@ public class ReservationController {
                     usernameFilter = sf.usernameFilter;
                     bookTitleFilter = sf.bookTitleFilter;
                     statusFilter = sf.statusFilter;
-                    resStart = sf.resStart != null ? LocalDate.parse(sf.resStart) : null;
-                    resEnd = sf.resEnd != null ? LocalDate.parse(sf.resEnd) : null;
-                    startStart = sf.startStart != null ? LocalDate.parse(sf.startStart) : null;
-                    startEnd = sf.startEnd != null ? LocalDate.parse(sf.startEnd) : null;
-                    endStart = sf.endStart != null ? LocalDate.parse(sf.endStart) : null;
-                    endEnd = sf.endEnd != null ? LocalDate.parse(sf.endEnd) : null;
+                    resStart = sf.resStart != null ? DateTimeUtil.parseDate(sf.resStart) : null;
+                    resEnd = sf.resEnd != null ? DateTimeUtil.parseDate(sf.resEnd) : null;
+                    startStart = sf.startStart != null ? DateTimeUtil.parseDate(sf.startStart) : null;
+                    startEnd = sf.startEnd != null ? DateTimeUtil.parseDate(sf.startEnd) : null;
+                    endStart = sf.endStart != null ? DateTimeUtil.parseDate(sf.endStart) : null;
+                    endEnd = sf.endEnd != null ? DateTimeUtil.parseDate(sf.endEnd) : null;
                     handlePaginatedReservations(currentUser, isAdmin);
                 }
                 case 3 -> { // Detail
@@ -99,42 +100,49 @@ public class ReservationController {
         }
     }
 
-    private void handlePaginatedReservations(User currentUser, boolean isAdmin) {
-        int page = 1;
-        int pageSize = 5;
-        boolean running = true;
+private void handlePaginatedReservations(User currentUser, boolean isAdmin) {
+    int page = 1;
+    int pageSize = 5;
+    boolean running = true;
 
-        while (running) {
-            List<Reservation> paginated = reservationService.filterSortPaginate(
-                    currentUser.getUsername(), isAdmin,
-                    idFilter, usernameFilter, bookTitleFilter,
-                    statusFilter != null ? ReservationStatus.valueOf(statusFilter) : null,
-                    resStart, resEnd, startStart, startEnd, endStart, endEnd,
-                    sortField, ascending,
-                    page, pageSize
-            );
+    while (running) {
+        List<Reservation> paginated = reservationService.filterSortPaginate(
+                currentUser.getUsername(), isAdmin,
+                idFilter, usernameFilter, bookTitleFilter,
+                statusFilter != null ? ReservationStatus.valueOf(statusFilter) : null,
+                resStart, resEnd, startStart, startEnd, endStart, endEnd,
+                sortField, ascending,
+                page, pageSize
+        );
 
-            int totalItems = reservationService.filterSortPaginate(
-                    currentUser.getUsername(), isAdmin,
-                    idFilter, usernameFilter, bookTitleFilter,
-                    statusFilter != null ? ReservationStatus.valueOf(statusFilter) : null,
-                    resStart, resEnd, startStart, startEnd, endStart, endEnd,
-                    sortField, ascending,
-                    1, Integer.MAX_VALUE
-            ).size();
+        
+        if (paginated.isEmpty()) {
+            view.showMessage("\n No reservations found.");
+            return; 
+        }
 
-            int totalPages = PaginationUtil.getTotalPages(totalItems, pageSize);
-            view.displayReservationsTable(paginated, page, totalPages);
+        int totalItems = reservationService.filterSortPaginate(
+                currentUser.getUsername(), isAdmin,
+                idFilter, usernameFilter, bookTitleFilter,
+                statusFilter != null ? ReservationStatus.valueOf(statusFilter) : null,
+                resStart, resEnd, startStart, startEnd, endStart, endEnd,
+                sortField, ascending,
+                1, Integer.MAX_VALUE
+        ).size();
 
-            int choice = view.promptInt("Enter your choice: ");
-            switch (choice) {
-                case 1 -> { if (page > 1) page--; else view.showMessage("Already at first page."); }
-                case 2 -> { if (page < totalPages) page++; else view.showMessage("Already at last page."); }
-                case 0 -> running = false;
-                default -> view.showMessage("Invalid choice.");
-            }
+        int totalPages = PaginationUtil.getTotalPages(totalItems, pageSize);
+        view.displayReservationsTable(paginated, page, totalPages);
+
+        int choice = view.promptInt("Enter your choice: ");
+        switch (choice) {
+            case 1 -> { if (page > 1) page--; else view.showMessage("Already at first page."); }
+            case 2 -> { if (page < totalPages) page++; else view.showMessage("Already at last page."); }
+            case 0 -> running = false;
+            default -> view.showMessage("Invalid choice.");
         }
     }
+}
+
 
     private void handleReservationDetails(Reservation r, User currentUser) {
         boolean isAdmin = currentUser.isAdmin();
@@ -168,7 +176,7 @@ public class ReservationController {
                         }
                     } else {
                         try {
-                            LocalDate start = LocalDate.parse(view.getDateInput("Enter new start date"));
+                            LocalDate start = DateTimeUtil.parseDate(view.getDateInput("Enter new start date"));
                             boolean ok = reservationService.updateStartDate(r.getId(),
                                     currentUser.getUsername(), false, start);
                             view.showMessage(ok ? "Start date updated!" : "Failed.");
@@ -182,7 +190,7 @@ public class ReservationController {
                 case 3 -> { // Admin: update start date | User: update end date
                     if (isAdmin) {
                         try {
-                            LocalDate start = LocalDate.parse(view.getDateInput("Enter new start date"));
+                            LocalDate start = DateTimeUtil.parseDate(view.getDateInput("Enter new start date"));
                             boolean ok = reservationService.updateStartDate(r.getId(),
                                     currentUser.getUsername(), true, start);
                             view.showMessage(ok ? "Start date updated!" : "Failed.");
@@ -192,7 +200,7 @@ public class ReservationController {
                         }
                     } else {
                         try {
-                            LocalDate end = LocalDate.parse(view.getDateInput("Enter new end date"));
+                            LocalDate end = DateTimeUtil.parseDate(view.getDateInput("Enter new end date"));
                             boolean ok = reservationService.updateEndDate(r.getId(),
                                     currentUser.getUsername(), false, end);
                             view.showMessage(ok ? "End date updated!" : "Failed.");
@@ -206,7 +214,7 @@ public class ReservationController {
                 case 4 -> { // Admin: update end date
                     if (isAdmin) {
                         try {
-                            LocalDate end = LocalDate.parse(view.getDateInput("Enter new end date"));
+                            LocalDate end = DateTimeUtil.parseDate(view.getDateInput("Enter new end date"));
                             boolean ok = reservationService.updateEndDate(r.getId(),
                                     currentUser.getUsername(), true, end);
                             view.showMessage(ok ? "End date updated!" : "Failed.");
@@ -238,8 +246,8 @@ public class ReservationController {
         }
 
         try {
-            LocalDate start = LocalDate.parse(view.getDateInput("Enter start date"));
-            LocalDate end = LocalDate.parse(view.getDateInput("Enter end date"));
+            LocalDate start = DateTimeUtil.parseDate(view.getDateInput("Enter start date"));
+            LocalDate end = DateTimeUtil.parseDate(view.getDateInput("Enter end date"));
             boolean ok = reservationService.reserveBook(bookOpt.get(), currentUser.getUsername(), start, end);
             view.showMessage(ok ? "Reservation created!" : "Failed to reserve book.");
         } catch (Exception e) {
