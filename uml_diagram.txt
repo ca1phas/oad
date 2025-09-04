@@ -1,0 +1,213 @@
+### model.Book
+
+**Attributes**
+- - id : int
+- - title : String
+- - author : String
+- - genre : String
+- - releasedDate : LocalDate
+- - filename : String
+
+**Methods**
+- + Book(int id, String title, String author, String genre, LocalDate releasedDate, String filename)
+- + getId() : int
+- + getTitle() : String
+- + getAuthor() : String
+- + getGenre() : String
+- + getReleasedDate() : LocalDate
+- + getFilename() : String
+- + setTitle(String title) : void
+- + setAuthor(String author) : void
+- + setGenre(String genre) : void
+- + setReleasedDate(LocalDate releasedDate) : void
+- + setFilename(String filename) : void
+- + toString() : String
+- + getKey() : String
+
+**Notes (relationships / multiplicities)**
+- Implements `Identifiable`
+- A `Book` can be linked to *0..* `Reservations`
+
+
+---
+
+### model.User
+
+**Attributes**
+- - id : int
+- - username : String
+- - password : String
+- - role : UserRole
+
+**Methods**
+- + User(int id, String username, String password, UserRole role)
+- + getId() : int
+- + getUsername() : String
+- + getPassword() : String
+- + getRole() : UserRole
+- + setUsername(String username) : void
+- + setPassword(String password) : void
+- + setRole(UserRole role) : void
+- + isAdmin() : boolean
+- + toString() : String
+- + getKey() : String
+
+**Notes (relationships / multiplicities)**
+- Implements `Identifiable`
+- Uses `UserRole` enum
+- A `User` can have *0..* `Reservations`
+
+
+---
+
+### model.Reservation
+
+**Attributes**
+- - id : int
+- - book : Book
+- - username : String
+- - reservationDate : LocalDateTime
+- - status : ReservationStatus
+- - startDate : LocalDate
+- - endDate : LocalDate
+
+**Methods**
+- + Reservation(int id, Book book, String username, LocalDateTime reservationDate, ReservationStatus status, LocalDate startDate, LocalDate endDate)
+- + getId() : int
+- + getBook() : Book
+- + getUsername() : String
+- + getReservationDate() : LocalDateTime
+- + getStatus() : ReservationStatus
+- + getStartDate() : LocalDate
+- + getEndDate() : LocalDate
+- + setStatus(ReservationStatus status) : void
+- + setStartDate(LocalDate startDate) : void
+- + setEndDate(LocalDate endDate) : void
+- + toString() : String
+- + getKey() : String
+
+**Notes (relationships / multiplicities)**
+- Implements `Identifiable`
+- Has-a `Book` (1)
+- Linked to `User` via `username` (1 user → 0..* reservations)
+- Uses `ReservationStatus` enum
+
+### model.enums.ReservationStatus (enum)
+
+**Literals**
+- PENDING
+- APPROVED
+- DENIED
+- CANCELLED
+- ACTIVE
+- EXPIRED
+- RETURNED
+
+**Methods**
+- + fromString(String status) : ReservationStatus
+- + toString() : String
+
+**Notes (relationships / multiplicities)**
+- Used by `Reservation` (1 status per reservation)
+
+
+---
+
+### model.enums.UserRole (enum)
+
+**Literals**
+- ADMIN
+- MEMBER
+
+**Methods**
+- + fromString(String role) : UserRole
+- + toString() : String
+
+**Notes (relationships / multiplicities)**
+- Used by `User` (1 role per user)
+
+
+---
+
+### model.base.Identifiable (interface)
+
+**Methods**
+- + getKey() : String
+
+**Notes (relationships / multiplicities)**
+- Implemented by `Book`, `User`, `Reservation`
+- Defines a common contract for unique identity
+
+## Repository Package
+
+### BaseRepository<T extends Identifiable>
+**Attributes:**
+- `- filePath: String` – Path to the storage file  
+- `- header: String` – File header schema (column names)  
+
+**Constructor:**
+- `+ BaseRepository(filePath: String, header: String)`  
+
+**Abstract Methods:**
+- `# mapToModel(row: List<String>): T` – Convert row → model  
+- `# mapFromModel(model: T): List<String>` – Convert model → row  
+
+**Methods:**
+- `+ getFilePath(): String`  
+- `+ getHeader(): String`  
+- `+ readAll(): List<T>` – Read all records into models  
+- `+ saveAll(data: List<T>): void` – Save all records to file  
+- `+ append(model: T): void` – Append new record  
+- `+ update(matcher: Predicate<T>, updatedModel: T): boolean`  
+- `+ delete(matcher: Predicate<T>): boolean`  
+- `+ findByKey(key: String): Optional<T>`  
+- `+ updateByKey(updatedModel: T): boolean`  
+- `+ deleteByKey(key: String): boolean`  
+
+---
+
+### BookRepository (extends BaseRepository<Book>)
+**Constructor:**
+- `+ BookRepository()` – Sets file path and header for `books.txt`  
+
+**Overrides:**
+- `# mapToModel(row: List<String>): Book`  
+- `# mapFromModel(book: Book): List<String>`  
+
+**Methods:**
+- `+ findById(id: int): Optional<Book>`  
+- `+ update(updated: Book): boolean`  
+- `+ delete(id: int): boolean`  
+
+---
+
+### ReservationRepository (extends BaseRepository<Reservation>)
+**Attributes:**
+- `- bookRepository: BookRepository` – Used to fetch book details  
+
+**Constructor:**
+- `+ ReservationRepository()` – Sets file path and header for `reservations.txt`  
+
+**Overrides:**
+- `# mapToModel(row: List<String>): Reservation`  
+- `# mapFromModel(r: Reservation): List<String>`  
+
+**Methods:**
+- `+ findById(id: int): Optional<Reservation>`  
+- `+ update(r: Reservation): boolean`  
+- `+ delete(id: int): boolean`  
+
+---
+
+### UserRepository (extends BaseRepository<User>)
+**Constructor:**
+- `+ UserRepository()` – Sets file path and header for `users.txt`  
+
+**Overrides:**
+- `# mapToModel(row: List<String>): User`  
+- `# mapFromModel(user: User): List<String>`  
+
+**Methods:**
+- `+ findByUsername(username: String): Optional<User>`  
+- `+ update(updated: User): boolean`  
+- `+ delete(username: String): boolean`  

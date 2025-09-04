@@ -1,0 +1,148 @@
+---
+config:
+  layout: elk
+---
+classDiagram
+    direction LR
+    class Identifiable {
+        <<interface>>
+        + getKey() String
+    }
+    class Book {
+        - id : int
+        - title : String
+        - author : String
+        - genre : String
+        - releasedDate : LocalDate
+        - filename : String
+        + Book(int, String, String, String, LocalDate, String)
+        + getId() int
+        + getTitle() String
+        + getAuthor() String
+        + getGenre() String
+        + getReleasedDate() LocalDate
+        + getFilename() String
+        + setTitle(String) void
+        + setAuthor(String) void
+        + setGenre(String) void
+        + setReleasedDate(LocalDate) void
+        + setFilename(String) void
+        + toString() String
+        + getKey() String
+    }
+    class User {
+        - id : int
+        - username : String
+        - password : String
+        - role : UserRole
+        + User(int, String, String, UserRole)
+        + getId() int
+        + getUsername() String
+        + getPassword() String
+        + getRole() UserRole
+        + setUsername(String) void
+        + setPassword(String) void
+        + setRole(UserRole) void
+        + isAdmin() boolean
+        + toString() String
+        + getKey() String
+    }
+    class Reservation {
+        - id : int
+        - book : Book
+        - username : String
+        - reservationDate : LocalDateTime
+        - status : ReservationStatus
+        - startDate : LocalDate
+        - endDate : LocalDate
+        + Reservation(int, Book, String, LocalDateTime, ReservationStatus, LocalDate, LocalDate)
+        + getId() int
+        + getBook() Book
+        + getUsername() String
+        + getReservationDate() LocalDateTime
+        + getStatus() ReservationStatus
+        + getStartDate() LocalDate
+        + getEndDate() LocalDate
+        + setStatus(ReservationStatus) void
+        + setStartDate(LocalDate) void
+        + setEndDate(LocalDate) void
+        + toString() String
+        + getKey() String
+    }
+    class ReservationStatus {
+        <<enum>>
+        PENDING
+        APPROVED
+        DENIED
+        CANCELLED
+        ACTIVE
+        EXPIRED
+        RETURNED
+        + fromString(String) ReservationStatus
+        + toString() String
+    }
+    class UserRole {
+        <<enum>>
+        ADMIN
+        MEMBER
+        + fromString(String) UserRole
+        + toString() String
+    }
+
+        class BaseRepository~T extends Identifiable~ {
+        - filePath : String
+        - header : String
+        + BaseRepository(String, String)
+        + getFilePath() String
+        + getHeader() String
+        + readAll() List<T>
+        + saveAll(List<T>) void
+        + append(T) void
+        + update(Predicate<T>, T) boolean
+        + delete(Predicate<T>) boolean
+        + findByKey(String) Optional<T>
+        + updateByKey(T) boolean
+        + deleteByKey(String) boolean
+        # mapToModel(List<String>) T
+        # mapFromModel(T) List<String>
+    }
+
+    class BookRepository {
+        + BookRepository()
+        + findById(int) Optional<Book>
+        + update(Book) boolean
+        + delete(int) boolean
+        # mapToModel(List<String>) Book
+        # mapFromModel(Book) List<String>
+    }
+
+    class UserRepository {
+        + UserRepository()
+        + findByUsername(String) Optional<User>
+        + update(User) boolean
+        + delete(String) boolean
+        # mapToModel(List<String>) User
+        # mapFromModel(User) List<String>
+    }
+
+    class ReservationRepository {
+        - bookRepository : BookRepository
+        + ReservationRepository()
+        + findById(int) Optional<Reservation>
+        + update(Reservation) boolean
+        + delete(int) boolean
+        # mapToModel(List<String>) Reservation
+        # mapFromModel(Reservation) List<String>
+    }
+
+Book ..|> Identifiable
+User ..|> Identifiable
+Reservation ..|> Identifiable
+UserRole <.. User : uses
+ReservationStatus <.. Reservation : uses
+Book "1" --> "0..*" Reservation : reserved in >
+User "1" --> "0..*" Reservation : makes >
+BaseRepository <|-- BookRepository
+    BaseRepository <|-- UserRepository
+    BaseRepository <|-- ReservationRepository
+    ReservationRepository --> BookRepository : uses
