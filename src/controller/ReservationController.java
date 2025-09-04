@@ -36,9 +36,9 @@ public class ReservationController {
     private LocalDate endEnd = null;
 
     public ReservationController(ReservationService reservationService,
-                                 BookService bookService,
-                                 ReservationsView view,
-                                 BookView bookView) {
+            BookService bookService,
+            ReservationsView view,
+            BookView bookView) {
         this.reservationService = reservationService;
         this.bookService = bookService;
         this.view = view;
@@ -89,7 +89,8 @@ public class ReservationController {
                 }
                 case 3 -> { // Detail
                     int resId = view.promptInt("Enter reservation ID: ");
-                    Optional<Reservation> opt = reservationService.selectReservation(resId, currentUser.getUsername(), isAdmin);
+                    Optional<Reservation> opt = reservationService.selectReservation(resId, currentUser.getUsername(),
+                            isAdmin);
                     opt.ifPresentOrElse(r -> handleReservationDetails(r, currentUser),
                             () -> view.showMessage("Reservation not found or not accessible."));
                 }
@@ -100,49 +101,55 @@ public class ReservationController {
         }
     }
 
-private void handlePaginatedReservations(User currentUser, boolean isAdmin) {
-    int page = 1;
-    int pageSize = 5;
-    boolean running = true;
+    private void handlePaginatedReservations(User currentUser, boolean isAdmin) {
+        int page = 1;
+        int pageSize = 5;
+        boolean running = true;
 
-    while (running) {
-        List<Reservation> paginated = reservationService.filterSortPaginate(
-                currentUser.getUsername(), isAdmin,
-                idFilter, usernameFilter, bookTitleFilter,
-                statusFilter != null ? ReservationStatus.valueOf(statusFilter) : null,
-                resStart, resEnd, startStart, startEnd, endStart, endEnd,
-                sortField, ascending,
-                page, pageSize
-        );
+        while (running) {
+            List<Reservation> paginated = reservationService.filterSortPaginate(
+                    currentUser.getUsername(), isAdmin,
+                    idFilter, usernameFilter, bookTitleFilter,
+                    statusFilter != null ? ReservationStatus.valueOf(statusFilter) : null,
+                    resStart, resEnd, startStart, startEnd, endStart, endEnd,
+                    sortField, ascending,
+                    page, pageSize);
 
-        
-        if (paginated.isEmpty()) {
-            view.showMessage("\n No reservations found.");
-            return; 
-        }
+            if (paginated.isEmpty()) {
+                view.showMessage("\n No reservations found.");
+                return;
+            }
 
-        int totalItems = reservationService.filterSortPaginate(
-                currentUser.getUsername(), isAdmin,
-                idFilter, usernameFilter, bookTitleFilter,
-                statusFilter != null ? ReservationStatus.valueOf(statusFilter) : null,
-                resStart, resEnd, startStart, startEnd, endStart, endEnd,
-                sortField, ascending,
-                1, Integer.MAX_VALUE
-        ).size();
+            int totalItems = reservationService.filterSortPaginate(
+                    currentUser.getUsername(), isAdmin,
+                    idFilter, usernameFilter, bookTitleFilter,
+                    statusFilter != null ? ReservationStatus.valueOf(statusFilter) : null,
+                    resStart, resEnd, startStart, startEnd, endStart, endEnd,
+                    sortField, ascending,
+                    1, Integer.MAX_VALUE).size();
 
-        int totalPages = PaginationUtil.getTotalPages(totalItems, pageSize);
-        view.displayReservationsTable(paginated, page, totalPages);
+            int totalPages = PaginationUtil.getTotalPages(totalItems, pageSize);
+            view.displayReservationsTable(paginated, page, totalPages);
 
-        int choice = view.promptInt("Enter your choice: ");
-        switch (choice) {
-            case 1 -> { if (page > 1) page--; else view.showMessage("Already at first page."); }
-            case 2 -> { if (page < totalPages) page++; else view.showMessage("Already at last page."); }
-            case 0 -> running = false;
-            default -> view.showMessage("Invalid choice.");
+            int choice = view.promptInt("Enter your choice: ");
+            switch (choice) {
+                case 1 -> {
+                    if (page > 1)
+                        page--;
+                    else
+                        view.showMessage("Already at first page.");
+                }
+                case 2 -> {
+                    if (page < totalPages)
+                        page++;
+                    else
+                        view.showMessage("Already at last page.");
+                }
+                case 0 -> running = false;
+                default -> view.showMessage("Invalid choice.");
+            }
         }
     }
-}
-
 
     private void handleReservationDetails(Reservation r, User currentUser) {
         boolean isAdmin = currentUser.isAdmin();
@@ -160,17 +167,20 @@ private void handlePaginatedReservations(User currentUser, boolean isAdmin) {
                         bookOpt.ifPresentOrElse(bookView::showBookDetails, () -> view.showMessage("Book not found."));
                         System.out.println("\nPress Enter to go back...");
                         new Scanner(System.in).nextLine();
-                    } else view.showMessage("No book linked to this reservation.");
+                    } else
+                        view.showMessage("No book linked to this reservation.");
                 }
                 case 2 -> { // Admin: update status | User: update start date
                     if (isAdmin) {
                         try {
-                            ReservationStatus newStatus =
-                                    ReservationStatus.valueOf(view.getStatusInput(currentUser).toUpperCase());
+                            ReservationStatus newStatus = ReservationStatus
+                                    .valueOf(view.getStatusInput(currentUser).toUpperCase());
                             boolean ok = reservationService.updateStatus(r.getId(),
                                     currentUser.getUsername(), true, newStatus);
                             view.showMessage(ok ? "Status updated!" : "Failed.");
-                            if (ok) r = reservationService.selectReservation(r.getId(), currentUser.getUsername(), true).orElse(r);
+                            if (ok)
+                                r = reservationService.selectReservation(r.getId(), currentUser.getUsername(), true)
+                                        .orElse(r);
                         } catch (IllegalArgumentException e) {
                             view.showMessage("Invalid status.");
                         }
@@ -180,8 +190,9 @@ private void handlePaginatedReservations(User currentUser, boolean isAdmin) {
                             boolean ok = reservationService.updateStartDate(r.getId(),
                                     currentUser.getUsername(), false, start);
                             view.showMessage(ok ? "Start date updated!" : "Failed.");
-                            if (ok) r = reservationService.selectReservation(r.getId(),
-                                    currentUser.getUsername(), false).orElse(r);
+                            if (ok)
+                                r = reservationService.selectReservation(r.getId(),
+                                        currentUser.getUsername(), false).orElse(r);
                         } catch (Exception e) {
                             view.showMessage("Invalid date format.");
                         }
@@ -194,7 +205,9 @@ private void handlePaginatedReservations(User currentUser, boolean isAdmin) {
                             boolean ok = reservationService.updateStartDate(r.getId(),
                                     currentUser.getUsername(), true, start);
                             view.showMessage(ok ? "Start date updated!" : "Failed.");
-                            if (ok) r = reservationService.selectReservation(r.getId(), currentUser.getUsername(), true).orElse(r);
+                            if (ok)
+                                r = reservationService.selectReservation(r.getId(), currentUser.getUsername(), true)
+                                        .orElse(r);
                         } catch (Exception e) {
                             view.showMessage("Invalid date format.");
                         }
@@ -204,8 +217,9 @@ private void handlePaginatedReservations(User currentUser, boolean isAdmin) {
                             boolean ok = reservationService.updateEndDate(r.getId(),
                                     currentUser.getUsername(), false, end);
                             view.showMessage(ok ? "End date updated!" : "Failed.");
-                            if (ok) r = reservationService.selectReservation(r.getId(),
-                                    currentUser.getUsername(), false).orElse(r);
+                            if (ok)
+                                r = reservationService.selectReservation(r.getId(),
+                                        currentUser.getUsername(), false).orElse(r);
                         } catch (Exception e) {
                             view.showMessage("Invalid date format.");
                         }
@@ -218,18 +232,23 @@ private void handlePaginatedReservations(User currentUser, boolean isAdmin) {
                             boolean ok = reservationService.updateEndDate(r.getId(),
                                     currentUser.getUsername(), true, end);
                             view.showMessage(ok ? "End date updated!" : "Failed.");
-                            if (ok) r = reservationService.selectReservation(r.getId(), currentUser.getUsername(), true).orElse(r);
+                            if (ok)
+                                r = reservationService.selectReservation(r.getId(), currentUser.getUsername(), true)
+                                        .orElse(r);
                         } catch (Exception e) {
                             view.showMessage("Invalid date format.");
                         }
-                    } else view.showMessage("Invalid choice.");
+                    } else
+                        view.showMessage("Invalid choice.");
                 }
                 case 5 -> { // Admin: delete
                     if (isAdmin) {
                         boolean ok = reservationService.deleteReservation(r.getId(), true);
                         view.showMessage(ok ? "Deleted successfully!" : "Failed.");
-                        if (ok) running = false;
-                    } else view.showMessage("Invalid choice.");
+                        if (ok)
+                            running = false;
+                    } else
+                        view.showMessage("Invalid choice.");
                 }
                 case 0 -> running = false;
                 default -> view.showMessage("Invalid choice.");

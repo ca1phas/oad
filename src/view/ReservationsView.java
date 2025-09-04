@@ -34,7 +34,8 @@ public class ReservationsView {
 
         for (Reservation r : reservations) {
             String title = r.getBook() != null ? r.getBook().getTitle() : "N/A";
-            if (title.length() > 24) title = title.substring(0, 21) + "...";
+            if (title.length() > 24)
+                title = title.substring(0, 21) + "...";
 
             System.out.printf("| %-4d | %-12s | %-25s | %-10s | %-11s | %-11s | %-11s |\n",
                     r.getId(),
@@ -105,8 +106,7 @@ public class ReservationsView {
                 startStart.isBlank() ? null : startStart,
                 startEnd.isBlank() ? null : startEnd,
                 endStart.isBlank() ? null : endStart,
-                endEnd.isBlank() ? null : endEnd
-        );
+                endEnd.isBlank() ? null : endEnd);
     }
 
     // ------------------- Prompt / Input Helpers -------------------
@@ -151,9 +151,9 @@ public class ReservationsView {
         public final String endEnd;
 
         public SortFilterOptions(String sortBy, boolean ascending,
-                                 String idFilter, String usernameFilter, String bookTitleFilter,
-                                 String statusFilter, String resStart, String resEnd,
-                                 String startStart, String startEnd, String endStart, String endEnd) {
+                String idFilter, String usernameFilter, String bookTitleFilter,
+                String statusFilter, String resStart, String resEnd,
+                String startStart, String startEnd, String endStart, String endEnd) {
             this.sortBy = sortBy;
             this.ascending = ascending;
             this.idFilter = idFilter;
