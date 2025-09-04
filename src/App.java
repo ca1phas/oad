@@ -1,8 +1,13 @@
 import model.User;
+import service.BookService;
+import service.ReservationService;
 import view.AuthView;
+import view.BookView;
+import view.ReservationsView;
 import controller.AuthController;
 import controller.UserController;
 import controller.BookController;
+import controller.ReservationController;
 
 import java.io.PrintStream;
 import java.util.Optional;
@@ -14,9 +19,18 @@ public class App {
 
         Scanner sc = new Scanner(System.in);
         AuthView authView = new AuthView(sc);
+        BookView bookView = new BookView(sc);
+        ReservationsView reservationsView = new ReservationsView();
+
         AuthController authController = new AuthController(sc);
         UserController userController = new UserController(sc);
-        BookController bookController = new BookController(sc); // Added
+        BookController bookController = new BookController(sc);
+
+        BookService bookService = new BookService();
+        ReservationService reservationService = new ReservationService();
+
+        ReservationController reservationController = new ReservationController(reservationService, bookService,
+                reservationsView, bookView);
 
         boolean running = true;
         while (running) {
@@ -30,7 +44,7 @@ public class App {
                         authView.displayLoginFailed();
                     } else {
                         User currentUser = optionalUser.get();
-                        startUserSession(currentUser, sc, userController, bookController);
+                        startUserSession(currentUser, sc, userController, bookController, reservationController);
                     }
                     break;
 
@@ -38,7 +52,7 @@ public class App {
                     Optional<User> registeredUser = authController.handleSignup();
                     if (registeredUser.isPresent()) {
                         User currentUser = registeredUser.get();
-                        startUserSession(currentUser, sc, userController, bookController);
+                        startUserSession(currentUser, sc, userController, bookController, reservationController);
                     }
                     break;
 
@@ -55,7 +69,7 @@ public class App {
     }
 
     private static void startUserSession(User currentUser, Scanner sc, UserController userController,
-            BookController bookController) {
+            BookController bookController, ReservationController reservationController) {
         boolean loggedIn = true;
 
         try {
@@ -88,19 +102,21 @@ public class App {
                     userController.handleAccountMenu(currentUser);
                     break;
                 case "2":
-                    System.out.println("[My Reservations] feature not yet implemented.");
+                    reservationController.handleReservationsMenu(currentUser);
                     break;
                 case "3":
-                    bookController.handleMenu(currentUser.isAdmin(), false); // <-- Books menu
+                    bookController.handleMenu(currentUser.isAdmin(), false, currentUser);
                     break;
+
                 case "4":
                     if (currentUser.isAdmin()) {
-                        System.out.println("[Reservations] feature not yet implemented.");
+                        reservationController.handleReservationsMenu(currentUser);
                     } else {
                         System.out.println("You have been logged out.");
                         loggedIn = false;
                     }
                     break;
+
                 case "5":
                     if (currentUser.isAdmin()) {
                         userController.handleUserManagementMenu(currentUser);
@@ -108,6 +124,7 @@ public class App {
                         System.out.println("Invalid option.");
                     }
                     break;
+
                 case "6":
                     if (currentUser.isAdmin()) {
                         System.out.println("You have been logged out.");
@@ -116,6 +133,7 @@ public class App {
                         System.out.println("Invalid option.");
                     }
                     break;
+
                 default:
                     System.out.println("Invalid option. Please try again.");
             }

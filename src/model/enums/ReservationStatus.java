@@ -18,6 +18,6 @@ public enum ReservationStatus {
 
     @Override
     public String toString() {
-        return name().toLowerCase(); // "approved", "returned", etc.
+        return name().toUpperCase(); // "approved", "returned", etc.
     }
 }

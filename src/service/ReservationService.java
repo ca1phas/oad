@@ -127,7 +127,8 @@ public class ReservationService {
         if (idFilter != null && !idFilter.isBlank()) {
             try {
                 int id = Integer.parseInt(idFilter.trim());
-                list = list.stream().filter(r -> r.getId() == id).collect(Collectors.toList());
+                list = list.stream().filter(r -> Integer.toString(r.getId()).contains(Integer.toString(id)))
+                        .collect(Collectors.toList());
             } catch (NumberFormatException ignored) {
             }
         }
