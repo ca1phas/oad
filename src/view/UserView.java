@@ -8,12 +8,14 @@ import java.util.Scanner;
 import java.io.Console;
 
 public class UserView {
-    private final Scanner sc;
+    private final Scanner sc; // Scanner for reading user input
 
+    // Constructor - takes a Scanner to be reused across methods
     public UserView(Scanner sc) {
         this.sc = sc;
     }
 
+    // Displays account menu for the currently logged-in user
     public void displayAccountMenu(User user) {
         System.out.println("\n=== My Account ===");
         System.out.println("Username: " + user.getUsername());
@@ -25,6 +27,7 @@ public class UserView {
         System.out.print("Enter your choice: ");
     }
 
+    // Displays admin user management menu
     public void displayUserManagementMenu() {
         System.out.println("\n=== User Management (Admin) ===");
         System.out.println("1. View Users by Page");
@@ -35,6 +38,7 @@ public class UserView {
         System.out.print("Enter your choice: ");
     }
 
+    // Displays detailed menu for a specific user (admin use)
     public void displayUserDetailMenu(User user) {
         System.out.println("\n=== User Details ===");
         System.out.println("Username: " + user.getUsername());
@@ -47,53 +51,63 @@ public class UserView {
         System.out.print("Enter your choice: ");
     }
 
-    public String promptPassword(String label){
-        Console console = System.console();
+    // Prompts user to enter a password, with optional hidden/unhidden input
+    public String promptPassword(String label) {
+        Console console = System.console(); // Console allows hidden password entry
         System.out.print(label + " (press [u] to unhide or just press enter to hide): ");
         String choice = sc.nextLine().trim();
 
-        if (choice.toLowerCase().startsWith("u") && choice.length() > 1){
+        // Case 1: User typed "uPasswordHere" to enter visible password directly
+        if (choice.toLowerCase().startsWith("u") && choice.length() > 1) {
             return choice.substring(1).trim();
         }
 
-        if (choice.equalsIgnoreCase("u")){
+        // Case 2: User typed only "u", then prompted again for visible password
+        if (choice.equalsIgnoreCase("u")) {
             System.out.print(label + ": ");
             return sc.nextLine().trim();
         }
 
-        if (console != null){
+        // Case 3: Use console for hidden input if available
+        if (console != null) {
             char[] passwordChars = console.readPassword(label + ": ");
-                return passwordChars != null ? new String(passwordChars).trim() : "";
+            return passwordChars != null ? new String(passwordChars).trim() : "";
         } else {
+            // Fallback: plain text input (not secure)
             System.out.print(label + ": ");
             return sc.nextLine().trim();
         }
     }
 
+    // Generic string input prompt
     public String promptString(String message) {
         System.out.print(message);
         return sc.nextLine().trim();
     }
 
-    public int promptInt(String message){
+    // Integer input with validation loop
+    public int promptInt(String message) {
         while (true) {
             System.out.print(message);
             try {
                 return Integer.parseInt(sc.nextLine().trim());
-            } catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a number.");
             }
         }
     }
 
+    // Simple message display
     public void displayMessage(String message) {
         System.out.println(message);
     }
 
-    public void prompt(String message){
+    // Prompt without capturing input (just prints a message)
+    public void prompt(String message) {
         System.out.print(message);
     }
 
+    // Displays a list of users in table format
     public void displayUsers(List<User> users) {
         if (users.isEmpty()) {
             System.out.println("No users found.");
@@ -109,6 +123,7 @@ public class UserView {
         }
     }
 
+    // Displays user details and returns admin’s choice for further action
     public int viewUserDetails(User user) {
         System.out.println("\n=== User Details ===");
         System.out.println("Username: " + user.getUsername());

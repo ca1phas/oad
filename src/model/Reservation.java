@@ -7,14 +7,15 @@ import model.base.Identifiable;
 import model.enums.ReservationStatus;
 
 public class Reservation implements Identifiable {
-    private int id;
-    private Book book;
-    private String username;
-    private LocalDateTime reservationDate;
-    private ReservationStatus status;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private int id; // Unique reservation ID
+    private Book book; // The reserved book (reference to Book object)
+    private String username; // Username of the member who made the reservation
+    private LocalDateTime reservationDate; // Date & time when the reservation was created
+    private ReservationStatus status; // Current reservation status (PENDING, ACTIVE, COMPLETED, CANCELLED, etc.)
+    private LocalDate startDate; // Reservation start date
+    private LocalDate endDate; // Reservation end date
 
+    // Full constructor
     public Reservation(int id, Book book, String username, LocalDateTime reservationDate,
             ReservationStatus status, LocalDate startDate, LocalDate endDate) {
         this.id = id;
@@ -55,7 +56,7 @@ public class Reservation implements Identifiable {
         return endDate;
     }
 
-    // Setters
+    // Setters for fields that can change
     public void setStatus(ReservationStatus status) {
         this.status = status;
     }
@@ -68,6 +69,7 @@ public class Reservation implements Identifiable {
         this.endDate = endDate;
     }
 
+    // For displaying reservation details in a user-friendly format
     @Override
     public String toString() {
         return id + ": \n" + book.toString() + "\n"
@@ -75,8 +77,9 @@ public class Reservation implements Identifiable {
                 + reservationDate + ", from " + startDate + " to " + endDate + ".";
     }
 
+    // Required by BaseRepository for uniquely identifying the record
     @Override
     public String getKey() {
-        return String.valueOf(id);
+        return String.valueOf(id); // Reservation ID as the key
     }
 }

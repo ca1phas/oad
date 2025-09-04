@@ -5,13 +5,14 @@ import java.time.LocalDate;
 import model.base.Identifiable;
 
 public class Book implements Identifiable {
-    private int id;
-    private String title;
-    private String author;
-    private String genre;
-    private LocalDate releasedDate;
-    private String filename;
+    private int id; // Unique book ID
+    private String title; // Title of the book
+    private String author; // Author name
+    private String genre; // Genre (e.g., Fiction, Science, History)
+    private LocalDate releasedDate; // Release/publication date
+    private String filename; // File name for the digital copy (txt, pdf, etc.)
 
+    // Full constructor
     public Book(int id, String title, String author, String genre, LocalDate releasedDate, String filename) {
         this.id = id;
         this.title = title;
@@ -67,14 +68,16 @@ public class Book implements Identifiable {
         this.filename = filename;
     }
 
+    // For displaying book details in a readable format
     @Override
     public String toString() {
         return id + ": " + title + " by " + author
-                + "in genre " + genre
+                + " in genre " + genre
                 + ", released on " + releasedDate
                 + ". File: " + filename;
     }
 
+    // Used as a unique identifier key for repository operations
     @Override
     public String getKey() {
         return String.valueOf(id);
