@@ -211,3 +211,209 @@
 - `+ findByUsername(username: String): Optional<User>`  
 - `+ update(updated: User): boolean`  
 - `+ delete(username: String): boolean`  
+
+### service.BookService
+**Attributes**
+- `- bookRepository : BookRepository`  
+- `- PAGE_SIZE : int = 20`  
+
+**Constructor**
+- `+ BookService()`  
+
+**Methods**
+- `+ addBook(String title, String author, String genre, LocalDate releasedDate, String filename) : boolean`  
+- `+ viewBook(int id) : Optional<Book>`  
+- `+ readBook(String filename, int pageNumber, boolean hasReserved) : List<String>`  
+- `+ updateTitle(int bookId, String newTitle, boolean isAdmin) : boolean`  
+- `+ updateAuthor(int bookId, String newAuthor, boolean isAdmin) : boolean`  
+- `+ updateGenre(int bookId, String newGenre, boolean isAdmin) : boolean`  
+- `+ updateReleaseDate(int bookId, LocalDate newDate, boolean isAdmin) : boolean`  
+- `+ updateFilename(int bookId, String newFilename, boolean isAdmin) : boolean`  
+- `+ deleteBook(int bookId, boolean isAdmin) : boolean`  
+- `+ filterSortPaginateBooks(String idFilter, String titleFilter, String authorFilter, String genreFilter, LocalDate releasedStart, LocalDate releasedEnd, String sortField, boolean ascending, int pageNumber, int pageSize) : List<Book>`  
+- `+ hasNextPage(String filename, int currentPage) : boolean`  
+
+**Notes (relationships / multiplicities)**
+- Uses `BookRepository`  
+- Uses `Book` model  
+- Uses `PaginationUtil` and `IDGeneratorUtil`  
+
+---
+
+### service.UserService
+**Attributes**
+- `- userRepository : UserRepository`  
+
+**Constructor**
+- `+ UserService()`  
+
+**Methods**
+- `+ usernameExists(String username) : boolean`  
+- `+ signup(String username, String password, String confirmPassword) : boolean`  
+- `+ login(String username, String password) : Optional<User>`  
+- `+ findByUsername(String username) : Optional<User>`  
+- `+ updateUsername(String targetUsername, String newUsername, boolean isAdmin, String currentUsername) : boolean`  
+- `+ updatePassword(String targetUsername, String oldPassword, String newPassword, String confirmNewPassword, boolean isAdmin, String currentUsername) : boolean`  
+- `+ updateRole(String targetUsername, UserRole newRole, boolean isAdmin) : boolean`  
+- `+ deleteUser(String targetUsername, boolean isAdmin, String currentUsername) : boolean`  
+- `+ createUser(String username, String password, String confirmPassword, UserRole role, boolean isAdmin) : boolean`  
+- `+ filterSortPaginateUsers(String usernameFilter, UserRole roleFilter, String sortField, boolean ascending, int pageNumber, int pageSize) : List<User>`  
+
+**Notes (relationships / multiplicities)**
+- Uses `UserRepository`  
+- Uses `User` model and `UserRole` enum  
+- Uses `PaginationUtil` and `IDGeneratorUtil`  
+
+---
+
+### service.ReservationService
+**Attributes**
+- `- reservationRepository : ReservationRepository`  
+
+**Constructor**
+- `+ ReservationService()`  
+
+**Methods**
+- `+ hasValidReservation(String username, int bookId) : boolean`  
+- `+ updateReservationStatusesOnStartup() : void`  
+- `+ reserveBook(Book book, String username, LocalDate startDate, LocalDate endDate) : boolean`  
+- `+ filterSortPaginate(String currentUsername, boolean isAdmin, String idFilter, String usernameFilter, String bookTitleFilter, ReservationStatus statusFilter, LocalDate resStart, LocalDate resEnd, LocalDate startStart, LocalDate startEnd, LocalDate endStart, LocalDate endEnd, String sortField, boolean ascending, int page, int pageSize) : List<Reservation>`  
+- `+ selectReservation(int reservationId, String currentUsername, boolean isAdmin) : Optional<Reservation>`  
+- `+ updateStatus(int reservationId, String currentUser, boolean isAdmin, ReservationStatus newStatus) : boolean`  
+- `+ updateStartDate(int reservationId, String currentUser, boolean isAdmin, LocalDate newStart) : boolean`  
+- `+ updateEndDate(int reservationId, String currentUser, boolean isAdmin, LocalDate newEnd) : boolean`  
+- `+ deleteReservation(int reservationId, boolean isAdmin) : boolean`  
+
+**Notes (relationships / multiplicities)**
+- Uses `ReservationRepository`  
+- Uses `Reservation` model and `ReservationStatus` enum  
+- Uses `UserService` and `BookService`  
+- Uses `PaginationUtil` and `IDGeneratorUtil`
+
+### controller.AuthController
+
+**Attributes**
+- `- userService : UserService`
+- `- authView : AuthView`
+- `- currentUser : User`
+
+**Constructor**
+- `+ AuthController(Scanner sc)`
+
+**Methods**
+- `+ getCurrentUser() : User`  
+- `+ handleSignup() : Optional<User>`  
+- `+ handleLogin() : Optional<User>`  
+- `+ createUser(String username, String password, String confirmPassword, String roleStr) : boolean`  
+
+**Notes (relationships / multiplicities)**
+- Uses `UserService` for business logic  
+- Uses `AuthView` for user input/output  
+- Maintains a `currentUser` session (0..1 `User`)  
+- Depends on `User` model and `UserRole` enum  
+
+### controller.BookController
+
+**Attributes**
+- `- bookService : BookService`  
+- `- bookView : BookView`  
+- `- reservationService : ReservationService`  
+
+**Constants**
+- `- ADMIN_ONLY_MESSAGE : String`  
+- `- INVALID_CHOICE_MESSAGE : String`  
+- `- INVALID_DATE_MESSAGE : String`  
+
+**Constructor**
+- `+ BookController(Scanner sc)`  
+
+**Methods**
+- `+ handleMenu(boolean isAdmin, boolean hasReserved, User currentUser) : void`  
+- `- handleListBooksByPage(boolean isAdmin, boolean hasReserved) : void`  
+- `- handleFilterBooks(boolean isAdmin, boolean hasReserved) : void`  
+- `- isValidSortField(String field) : boolean`  
+- `- handleViewBookDetails(boolean isAdmin, boolean hasReserved, User currentUser) : void`  
+- `- handleBookSubMenu(Book book, boolean isAdmin, boolean hasReserved, User currentUser) : void`  
+- `- handleAddBook() : void`  
+- `- handleUpdateBook(int id) : void`  
+- `- handleDeleteBook(int id) : boolean`  
+- `- handleReadBook(Book book) : void`  
+- `- reserveBook(User currentUser, int bookId) : void`  
+- `- parseDate(String dateStr) : LocalDate`  
+- `- isValidFilename(String filename) : boolean`  
+
+**Notes (relationships / multiplicities)**
+- Uses `BookService` for business logic  
+- Uses `BookView` for input/output  
+- Uses `ReservationService` for reservations  
+- Depends on `Book` and `User` models  
+- Depends on `DateTimeUtil` for date parsing  
+
+### controller.ReservationController
+
+**Attributes**
+- `- reservationService : ReservationService`  
+- `- bookService : BookService`  
+- `- view : ReservationsView`  
+- `- bookView : BookView`  
+- `- sortField : String`  
+- `- ascending : boolean`  
+- `- idFilter : String`  
+- `- usernameFilter : String`  
+- `- bookTitleFilter : String`  
+- `- statusFilter : String`  
+- `- resStart : LocalDate`  
+- `- resEnd : LocalDate`  
+- `- startStart : LocalDate`  
+- `- startEnd : LocalDate`  
+- `- endStart : LocalDate`  
+- `- endEnd : LocalDate`  
+
+**Constructor**
+- `+ ReservationController(reservationService: ReservationService, bookService: BookService, view: ReservationsView, bookView: BookView)`  
+
+**Methods**
+- `+ handleReservationsMenu(currentUser: User) : void`  
+- `- handlePaginatedReservations(currentUser: User, isAdmin: boolean) : void`  
+- `- handleReservationDetails(r: Reservation, currentUser: User) : void`  
+- `- handleReserveBook(currentUser: User) : void`  
+
+**Notes (relationships / multiplicities)**
+- Uses `ReservationService` for reservation management  
+- Uses `BookService` to fetch book details  
+- Uses `ReservationsView` for displaying menus, tables, and details  
+- Uses `BookView` for showing book information  
+- Depends on models `Reservation`, `Book`, and `User`  
+- Depends on `ReservationStatus` enum for status transitions  
+- Depends on `PaginationUtil` for page calculations  
+- Depends on `DateTimeUtil` for date parsing  
+
+### controller.UserController
+
+**Attributes**
+- `- sc : Scanner`  
+- `- userService : UserService`  
+- `- userView : UserView`  
+
+**Constructor**
+- `+ UserController(sc: Scanner)`  
+
+**Methods**
+- `+ handleAccountMenu(currentUser: User) : void`  
+- `+ handleUserManagementMenu(currentUser: User) : void`  
+- `+ handleUserDetailView(currentUser: User) : void`  
+- `+ handleUpdateUsername(currentUser: User) : void`  
+- `+ handleUpdatePassword(currentUser: User) : void`  
+- `+ handleDeleteUser(currentUser: User, userToDelete: User) : boolean`  
+- `+ handleUpdateRole(currentUser: User, targetUser: User) : void`  
+- `+ handleAdminCreateUser(currentUser: User) : void`  
+- `+ handleViewByPage() : void`  
+- `+ handleFilterAndSort() : void`  
+- `- handleViewUserDetails(currentUser: User) : void`  
+- `- handleUserPagination(users: List<User>) : void`  
+
+**Notes (relationships / multiplicities)**
+- Uses `UserService` for user CRUD, search, filter, sort, and pagination  
+- Uses `UserView` for displaying menus, prompts, and user details  
+- Depends on `User` model and `UserRole` enum  
+- Input handled via `Scanner`  

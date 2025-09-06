@@ -5,9 +5,12 @@ import java.util.List;
 import java.util.Scanner;
 
 public class BookView {
+
     private final Scanner sc;
 
-    public BookView(Scanner sc) { this.sc = sc; }
+    public BookView(Scanner sc) {
+        this.sc = sc;
+    }
 
     // === MAIN MENU ===
     public void displayBookMenu() {
@@ -40,8 +43,11 @@ public class BookView {
 
     public int promptInt(String message) {
         System.out.print(message);
-        try { return Integer.parseInt(sc.nextLine().trim()); }
-        catch (NumberFormatException e) { return -1; }
+        try {
+            return Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
     // === BOOK LIST ===
@@ -62,16 +68,17 @@ public class BookView {
                     truncate(book.getTitle(), 35),
                     truncate(book.getAuthor(), 25),
                     truncate(book.getGenre(), 12),
-                    book.getReleasedDate()
-            );
+                    book.getReleasedDate());
         }
 
         System.out.println("---------------------------------------------------------------------------------------");
 
         // Only print navigation once
         System.out.println("Navigation:");
-        if (currentPage > 1) System.out.println("1: Previous");
-        if (currentPage < totalPages) System.out.println("2: Next");
+        if (currentPage > 1)
+            System.out.println("1: Previous");
+        if (currentPage < totalPages)
+            System.out.println("2: Next");
         System.out.println("0: Back to Books (Home)");
     }
 
@@ -105,14 +112,19 @@ public class BookView {
         }
     }
 
-    public void showBookContent(List<String> content) { showBookContent(content, 1); }
+    public void showBookContent(List<String> content) {
+        showBookContent(content, 1);
+    }
 
     // === MESSAGE ===
-    public void showMessage(String message) { System.out.println(" " + message); }
+    public void showMessage(String message) {
+        System.out.println(" " + message);
+    }
 
     // === HELPER ===
     private String truncate(String str, int maxLength) {
-        if (str == null) return "";
+        if (str == null)
+            return "";
         return str.length() <= maxLength ? String.format("%-" + maxLength + "s", str)
                 : str.substring(0, maxLength - 3) + "...";
     }
