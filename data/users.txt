@@ -1,7 +1,6 @@
 username|password|role
 1|admin|admin|admin
 2|js|s|member
-3|luna_rose|rose123|member
 4|techie_ash|ash123|member
 5|mod_stephen|mod123|admin
 6|sara_jones|sara123|member
@@ -14,3 +13,10 @@ username|password|role
 13|tony_stark|iron123|admin
 14|bruce_wayne|bat123|member
 15|clark_kent|super123|member
+16|john|j|admin
+17|Sandy|sansan|member
+18|James|james123|member
+19|luna||admin
+20|harry|potter|member
+21|ron|weasley|member
+22|Dumbledore|prof|admin

@@ -134,7 +134,6 @@ public class App {
                     if (currentUser.isAdmin()) {
                         reservationController.handleReservationsMenu(currentUser);
                     } else {
-                        System.out.println("You have been logged out.");
                         loggedIn = false;
                     }
                     break;
@@ -149,7 +148,6 @@ public class App {
 
                 case "6": // Admin: Logout
                     if (currentUser.isAdmin()) {
-                        System.out.println("You have been logged out.");
                         loggedIn = false;
                     } else {
                         System.out.println("Invalid option.");
@@ -162,5 +160,6 @@ public class App {
         }
         // Print logout message after session ends
         System.out.println("You have been logged out.\n");
+        System.exit(0);
     }
 }

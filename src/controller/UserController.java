@@ -236,33 +236,44 @@ public class UserController {
     }
 
     public void handleAdminCreateUser(User currentUser) {
-        if (!currentUser.isAdmin()) {
-            userView.displayMessage("Only admins can create users.");
-            return;
-        }
-
-        userView.prompt("Enter new username: ");
-        String username = sc.nextLine();
-
-        String password = userView.promptPassword("Enter password: ");
-        String confirm = userView.promptPassword("Confirm password: ");
-
-        UserRole userRole = null;
-        while (true) {
-            userView.prompt("Enter role (ADMIN/MEMBER): ");
-            String roleInput = sc.nextLine().trim().toUpperCase();
-
-            if (roleInput.equals("ADMIN") || roleInput.equals("MEMBER")) {
-                userRole = UserRole.valueOf(roleInput);
-                break;
-            } else {
-                userView.displayMessage("Invalid role entered. Please enter either ADMIN or MEMBER.");
-            }
-        }
-
-        boolean created = userService.createUser(username, password, confirm, userRole, true);
-        userView.displayMessage(created ? "User created successfully." : "User creation failed.");
+    if (!currentUser.isAdmin()) {
+        userView.displayMessage("Only admins can create users.");
+        return;
     }
+
+    userView.prompt("Enter new username: ");
+    String username = sc.nextLine();
+
+    String password = userView.promptPassword("Enter password: ");
+    String confirm = userView.promptPassword("Confirm password: ");
+
+    if (!password.equals(confirm)) {
+        userView.displayMessage("User creation failed. Password and Confirmation Password do not match.");
+        return;
+    }
+
+    UserRole userRole = null;
+    while (true) {
+        userView.prompt("Enter role (ADMIN/MEMBER): ");
+        String roleInput = sc.nextLine().trim().toUpperCase();
+
+        if (roleInput.equals("ADMIN") || roleInput.equals("MEMBER")) {
+            userRole = UserRole.valueOf(roleInput);
+            break;
+        } else {
+            userView.displayMessage("Invalid role entered. Please enter either ADMIN or MEMBER.");
+        }
+    }
+
+    if (userService.findByUsername(username).isPresent()) {
+        userView.displayMessage("User creation failed. User might exist.");
+        return;
+    }
+
+    boolean created = userService.createUser(username, password, confirm, userRole, true);
+    userView.displayMessage(created ? "User created successfully." : "User creation failed.");
+}
+
 
     public void handleViewByPage() {
         List<User> allUsers = userService.filterSortPaginateUsers(

@@ -35,7 +35,6 @@ public class UserView {
         System.out.println("3. View User Details");
         System.out.println("4. Register New User");
         System.out.println("5. Back");
-        System.out.print("Enter your choice: ");
     }
 
     // Displays detailed menu for a specific user (admin use)
@@ -48,7 +47,6 @@ public class UserView {
         System.out.println("3. Update User Role");
         System.out.println("4. Delete User Account");
         System.out.println("5. Back");
-        System.out.print("Enter your choice: ");
     }
 
     // Prompts user to enter a password, with optional hidden/unhidden input
