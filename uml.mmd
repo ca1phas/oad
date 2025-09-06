@@ -1,445 +1,443 @@
 ---
 config:
   layout: elk
+  class:
+    hideEmptyMembersBox: true
+  theme: default
 ---
 classDiagram
-    direction LR
+direction TB
     class Identifiable {
-        <<interface>>
-        + getKey() String
+	    + getKey() String
     }
     class Book {
-        - id : int
-        - title : String
-        - author : String
-        - genre : String
-        - releasedDate : LocalDate
-        - filename : String
-        + Book(int, String, String, String, LocalDate, String)
-        + getId() int
-        + getTitle() String
-        + getAuthor() String
-        + getGenre() String
-        + getReleasedDate() LocalDate
-        + getFilename() String
-        + setTitle(String) void
-        + setAuthor(String) void
-        + setGenre(String) void
-        + setReleasedDate(LocalDate) void
-        + setFilename(String) void
-        + toString() String
-        + getKey() String
+	    - id : int
+	    - title : String
+	    - author : String
+	    - genre : String
+	    - releasedDate : LocalDate
+	    - filename : String
+	    + Book(int, String, String, String, LocalDate, String)
+	    + getId() int
+	    + getTitle() String
+	    + getAuthor() String
+	    + getGenre() String
+	    + getReleasedDate() LocalDate
+	    + getFilename() String
+	    + setTitle(String) void
+	    + setAuthor(String) void
+	    + setGenre(String) void
+	    + setReleasedDate(LocalDate) void
+	    + setFilename(String) void
+	    + toString() String
+	    + getKey() String
     }
     class User {
-        - id : int
-        - username : String
-        - password : String
-        - role : UserRole
-        + User(int, String, String, UserRole)
-        + getId() int
-        + getUsername() String
-        + getPassword() String
-        + getRole() UserRole
-        + setUsername(String) void
-        + setPassword(String) void
-        + setRole(UserRole) void
-        + isAdmin() boolean
-        + toString() String
-        + getKey() String
+	    - id : int
+	    - username : String
+	    - password : String
+	    - role : UserRole
+	    + User(int, String, String, UserRole)
+	    + getId() int
+	    + getUsername() String
+	    + getPassword() String
+	    + getRole() UserRole
+	    + setUsername(String) void
+	    + setPassword(String) void
+	    + setRole(UserRole) void
+	    + isAdmin() boolean
+	    + toString() String
+	    + getKey() String
     }
     class Reservation {
-        - id : int
-        - book : Book
-        - username : String
-        - reservationDate : LocalDateTime
-        - status : ReservationStatus
-        - startDate : LocalDate
-        - endDate : LocalDate
-        + Reservation(int, Book, String, LocalDateTime, ReservationStatus, LocalDate, LocalDate)
-        + getId() int
-        + getBook() Book
-        + getUsername() String
-        + getReservationDate() LocalDateTime
-        + getStatus() ReservationStatus
-        + getStartDate() LocalDate
-        + getEndDate() LocalDate
-        + setStatus(ReservationStatus) void
-        + setStartDate(LocalDate) void
-        + setEndDate(LocalDate) void
-        + toString() String
-        + getKey() String
+	    - id : int
+	    - book : Book
+	    - username : String
+	    - reservationDate : LocalDateTime
+	    - status : ReservationStatus
+	    - startDate : LocalDate
+	    - endDate : LocalDate
+	    + Reservation(int, Book, String, LocalDateTime, ReservationStatus, LocalDate, LocalDate)
+	    + getId() int
+	    + getBook() Book
+	    + getUsername() String
+	    + getReservationDate() LocalDateTime
+	    + getStatus() ReservationStatus
+	    + getStartDate() LocalDate
+	    + getEndDate() LocalDate
+	    + setStatus(ReservationStatus) void
+	    + setStartDate(LocalDate) void
+	    + setEndDate(LocalDate) void
+	    + toString() String
+	    + getKey() String
     }
     class ReservationStatus {
-        <<enum>>
-        PENDING
-        APPROVED
-        DENIED
-        CANCELLED
-        ACTIVE
-        EXPIRED
-        RETURNED
-        + fromString(String) ReservationStatus
-        + toString() String
+	    PENDING
+	    APPROVED
+	    DENIED
+	    CANCELLED
+	    ACTIVE
+	    EXPIRED
+	    RETURNED
+	    + fromString(String) ReservationStatus
+	    + toString() String
     }
     class UserRole {
-        <<enum>>
-        ADMIN
-        MEMBER
-        + fromString(String) UserRole
-        + toString() String
+	    ADMIN
+	    MEMBER
+	    + fromString(String) UserRole
+	    + toString() String
     }
-
     class BaseRepository~T extends Identifiable~ {
-        - filePath : String
-        - header : String
-        + BaseRepository(String, String)
-        + getFilePath() String
-        + getHeader() String
-        + readAll() List<T>
-        + saveAll(List<T>) void
-        + append(T) void
-        + update(Predicate<T>, T) boolean
-        + delete(Predicate<T>) boolean
-        + findByKey(String) Optional<T>
-        + updateByKey(T) boolean
-        + deleteByKey(String) boolean
-        # mapToModel(List<String>) T
-        # mapFromModel(T) List<String>
+	    - filePath : String
+	    - header : String
+	    + BaseRepository(String, String)
+	    + getFilePath() String
+	    + getHeader() String
+	    + readAll() List
+	    + saveAll(List) void
+	    + append(T) void
+	    + update(Predicate, T) boolean
+	    + delete(Predicate) boolean
+	    + findByKey(String) Optional
+	    + updateByKey(T) boolean
+	    + deleteByKey(String) boolean
+	    # mapToModel(List) T
+	    # mapFromModel(T) List
     }
     class BookRepository {
-        + BookRepository()
-        + findById(int) Optional<Book>
-        + update(Book) boolean
-        + delete(int) boolean
-        # mapToModel(List<String>) Book
-        # mapFromModel(Book) List<String>
+	    + BookRepository()
+	    + findById(int) Optional
+	    + update(Book) boolean
+	    + delete(int) boolean
+	    # mapToModel(List) Book
+	    # mapFromModel(Book) List
     }
     class UserRepository {
-        + UserRepository()
-        + findByUsername(String) Optional<User>
-        + update(User) boolean
-        + delete(String) boolean
-        # mapToModel(List<String>) User
-        # mapFromModel(User) List<String>
+	    + UserRepository()
+	    + findByUsername(String) Optional
+	    + update(User) boolean
+	    + delete(String) boolean
+	    # mapToModel(List) User
+	    # mapFromModel(User) List
     }
     class ReservationRepository {
-        - bookRepository : BookRepository
-        + ReservationRepository()
-        + findById(int) Optional<Reservation>
-        + update(Reservation) boolean
-        + delete(int) boolean
-        # mapToModel(List<String>) Reservation
-        # mapFromModel(Reservation) List<String>
+	    - bookRepository : BookRepository
+	    + ReservationRepository()
+	    + findById(int) Optional
+	    + update(Reservation) boolean
+	    + delete(int) boolean
+	    # mapToModel(List) Reservation
+	    # mapFromModel(Reservation) List
     }
-    
     class BookService {
-        - BookRepository bookRepository
-        - static int PAGE_SIZE = 20
-        + BookService()
-        + addBook(String, String, String, LocalDate, String) boolean
-        + viewBook(int) Optional~Book~
-        + readBook(String, int, boolean) List~String~
-        + updateTitle(int, String, boolean) boolean
-        + updateAuthor(int, String, boolean) boolean
-        + updateGenre(int, String, boolean) boolean
-        + updateReleaseDate(int, LocalDate, boolean) boolean
-        + updateFilename(int, String, boolean) boolean
-        + deleteBook(int, boolean) boolean
-        + filterSortPaginateBooks(String, String, String, String, LocalDate, LocalDate, String, boolean, int, int) List~Book~
-        + hasNextPage(String, int) boolean
+	    - BookRepository bookRepository
+	    - static int PAGE_SIZE = 20
+	    + BookService()
+	    + addBook(String, String, String, LocalDate, String) boolean
+	    + viewBook(int) Optional~Book~
+	    + readBook(String, int, boolean) List~String~
+	    + updateTitle(int, String, boolean) boolean
+	    + updateAuthor(int, String, boolean) boolean
+	    + updateGenre(int, String, boolean) boolean
+	    + updateReleaseDate(int, LocalDate, boolean) boolean
+	    + updateFilename(int, String, boolean) boolean
+	    + deleteBook(int, boolean) boolean
+	    + filterSortPaginateBooks(String, String, String, String, LocalDate, LocalDate, String, boolean, int, int) List~Book~
+	    + hasNextPage(String, int) boolean
     }
     class UserService {
-        - UserRepository userRepository
-        + UserService()
-        + usernameExists(String) boolean
-        + signup(String, String, String) boolean
-        + login(String, String) Optional~User~
-        + findByUsername(String) Optional~User~
-        + updateUsername(String, String, boolean, String) boolean
-        + updatePassword(String, String, String, String, boolean, String) boolean
-        + updateRole(String, UserRole, boolean) boolean
-        + deleteUser(String, boolean, String) boolean
-        + createUser(String, String, String, UserRole, boolean) boolean
-        + filterSortPaginateUsers(String, UserRole, String, boolean, int, int) List~User~
+	    - UserRepository userRepository
+	    + UserService()
+	    + usernameExists(String) boolean
+	    + signup(String, String, String) boolean
+	    + login(String, String) Optional~User~
+	    + findByUsername(String) Optional~User~
+	    + updateUsername(String, String, boolean, String) boolean
+	    + updatePassword(String, String, String, String, boolean, String) boolean
+	    + updateRole(String, UserRole, boolean) boolean
+	    + deleteUser(String, boolean, String) boolean
+	    + createUser(String, String, String, UserRole, boolean) boolean
+	    + filterSortPaginateUsers(String, UserRole, String, boolean, int, int) List~User~
     }
     class ReservationService {
-        - ReservationRepository reservationRepository
-        + ReservationService()
-        + hasValidReservation(String, int) boolean
-        + updateReservationStatusesOnStartup() void
-        + reserveBook(Book, String, LocalDate, LocalDate) boolean
-        + filterSortPaginate(String, boolean, String, String, String, ReservationStatus, LocalDate, LocalDate, LocalDate, LocalDate, LocalDate, LocalDate, String, boolean, int, int) List~Reservation~
-        + selectReservation(int, String, boolean) Optional~Reservation~
-        + updateStatus(int, String, boolean, ReservationStatus) boolean
-        + updateStartDate(int, String, boolean, LocalDate) boolean
-        + updateEndDate(int, String, boolean, LocalDate) boolean
-        + deleteReservation(int, boolean) boolean
+	    - ReservationRepository reservationRepository
+	    + ReservationService()
+	    + hasValidReservation(String, int) boolean
+	    + updateReservationStatusesOnStartup() void
+	    + reserveBook(Book, String, LocalDate, LocalDate) boolean
+	    + filterSortPaginate(String, boolean, String, String, String, ReservationStatus, LocalDate, LocalDate, LocalDate, LocalDate, LocalDate, LocalDate, String, boolean, int, int) List~Reservation~
+	    + selectReservation(int, String, boolean) Optional~Reservation~
+	    + updateStatus(int, String, boolean, ReservationStatus) boolean
+	    + updateStartDate(int, String, boolean, LocalDate) boolean
+	    + updateEndDate(int, String, boolean, LocalDate) boolean
+	    + deleteReservation(int, boolean) boolean
     }
-
     class AuthController {
-        - UserService userService
-        - AuthView authView
-        - User currentUser
-        + AuthController(Scanner)
-        + getCurrentUser() User
-        + handleSignup() Optional~User~
-        + handleLogin() Optional~User~
-        + createUser(String, String, String, String) boolean
+	    - UserService userService
+	    - AuthView authView
+	    - User currentUser
+	    + AuthController(Scanner)
+	    + getCurrentUser() User
+	    + handleSignup() Optional~User~
+	    + handleLogin() Optional~User~
+	    + createUser(String, String, String, String) boolean
     }
     class BookController {
-        - BookService bookService
-        - BookView bookView
-        - ReservationService reservationService
-        - String
-        - String
-        - String
-        + BookController(Scanner)
-        + handleMenu(boolean, boolean, User) void
-        - handleListBooksByPage(boolean, boolean) void
-        - handleFilterBooks(boolean, boolean) void
-        - isValidSortField(String) boolean
-        - handleViewBookDetails(boolean, boolean, User) void
-        - handleBookSubMenu(Book, boolean, boolean, User) void
-        - handleAddBook() void
-        - handleUpdateBook(int) void
-        - handleDeleteBook(int) boolean
-        - handleReadBook(Book) void
-        - reserveBook(User, int) void
-        - parseDate(String) LocalDate
-        - isValidFilename(String) boolean
+	    - BookService bookService
+	    - BookView bookView
+	    - ReservationService reservationService
+	    - String
+	    - String
+	    - String
+	    + BookController(Scanner)
+	    + handleMenu(boolean, boolean, User) void
+	    - handleListBooksByPage(boolean, boolean) void
+	    - handleFilterBooks(boolean, boolean) void
+	    - isValidSortField(String) boolean
+	    - handleViewBookDetails(boolean, boolean, User) void
+	    - handleBookSubMenu(Book, boolean, boolean, User) void
+	    - handleAddBook() void
+	    - handleUpdateBook(int) void
+	    - handleDeleteBook(int) boolean
+	    - handleReadBook(Book) void
+	    - reserveBook(User, int) void
+	    - parseDate(String) LocalDate
+	    - isValidFilename(String) boolean
     }
     class ReservationController {
-        - ReservationService reservationService
-        - BookService bookService
-        - ReservationsView view
-        - BookView bookView
-        - String sortField
-        - boolean ascending
-        - String idFilter
-        - String usernameFilter
-        - String bookTitleFilter
-        - String statusFilter
-        - LocalDate resStart
-        - LocalDate resEnd
-        - LocalDate startStart
-        - LocalDate startEnd
-        - LocalDate endStart
-        - LocalDate endEnd
-        + ReservationController(ReservationService, BookService, ReservationsView, BookView)
-        + handleReservationsMenu(User) void
-        - handlePaginatedReservations(User, boolean) void
-        - handleReservationDetails(Reservation, User) void
-        - handleReserveBook(User) void
+	    - ReservationService reservationService
+	    - BookService bookService
+	    - ReservationsView view
+	    - BookView bookView
+	    - String sortField
+	    - boolean ascending
+	    - String idFilter
+	    - String usernameFilter
+	    - String bookTitleFilter
+	    - String statusFilter
+	    - LocalDate resStart
+	    - LocalDate resEnd
+	    - LocalDate startStart
+	    - LocalDate startEnd
+	    - LocalDate endStart
+	    - LocalDate endEnd
+	    + ReservationController(ReservationService, BookService, ReservationsView, BookView)
+	    + handleReservationsMenu(User) void
+	    - handlePaginatedReservations(User, boolean) void
+	    - handleReservationDetails(Reservation, User) void
+	    - handleReserveBook(User) void
     }
     class UserController {
-        - Scanner sc
-        - UserService userService
-        - UserView userView
-        + UserController(Scanner)
-        + handleAccountMenu(User) void
-        + handleUserManagementMenu(User) void
-        + handleUserDetailView(User) void
-        + handleUpdateUsername(User) void
-        + handleUpdatePassword(User) void
-        + handleDeleteUser(User, User) boolean
-        + handleUpdateRole(User, User) void
-        + handleAdminCreateUser(User) void
-        + handleViewByPage() void
-        + handleFilterAndSort() void
-        - handleViewUserDetails(User) void
-        - handleUserPagination(List~User~) void
+	    - Scanner sc
+	    - UserService userService
+	    - UserView userView
+	    + UserController(Scanner)
+	    + handleAccountMenu(User) void
+	    + handleUserManagementMenu(User) void
+	    + handleUserDetailView(User) void
+	    + handleUpdateUsername(User) void
+	    + handleUpdatePassword(User) void
+	    + handleDeleteUser(User, User) boolean
+	    + handleUpdateRole(User, User) void
+	    + handleAdminCreateUser(User) void
+	    + handleViewByPage() void
+	    + handleFilterAndSort() void
+	    - handleViewUserDetails(User) void
+	    - handleUserPagination(List~User~) void
     }
-
     class AuthView {
-        - Scanner sc
-        + AuthView(Scanner sc)
-        + displayWelcome() void
-        + prompt(String message) void
-        + displayMessage(String message) void
-        + showLoginHeader() void
-        + promptUsername() String
-        + promptPassword() String
-        + promptPassword(String message) String
-        + showUserNotFound() void
-        + showIncorrectPassword() void
-        + showLoginSuccess(User user) void
-        + displayLoginFailed() void
-        + showSignupHeader() void
-        + promptConfirmPassword() String
-        + promptConfirmPassword(String message) String
-        + showPasswordMismatch() void
-        + showSignupSuccess() void
-        + showSignupAndAutoLoginSuccess(User user) void
-        + showCreateUserHeader() void
-        + promptRole() String
-        + showUserCreated() void
-        + displayRegisterSuccess() void
-        + displayRegisterFailed(String reason) void
-        + showUserAlreadyExists() String
+	    - Scanner sc
+	    + AuthView(Scanner sc)
+	    + displayWelcome() void
+	    + prompt(String message) void
+	    + displayMessage(String message) void
+	    + showLoginHeader() void
+	    + promptUsername() String
+	    + promptPassword() String
+	    + promptPassword(String message) String
+	    + showUserNotFound() void
+	    + showIncorrectPassword() void
+	    + showLoginSuccess(User user) void
+	    + displayLoginFailed() void
+	    + showSignupHeader() void
+	    + promptConfirmPassword() String
+	    + promptConfirmPassword(String message) String
+	    + showPasswordMismatch() void
+	    + showSignupSuccess() void
+	    + showSignupAndAutoLoginSuccess(User user) void
+	    + showCreateUserHeader() void
+	    + promptRole() String
+	    + showUserCreated() void
+	    + displayRegisterSuccess() void
+	    + displayRegisterFailed(String reason) void
+	    + showUserAlreadyExists() String
     }
     class BookView {
-        - Scanner sc
-        + BookView(Scanner sc)
-        + displayBookMenu() void
-        + displayBookSubMenu(boolean isAdmin) void
-        + prompt(String message) String
-        + promptInt(String message) int
-        + showBookListPage(List~Book~ books, int currentPage, int totalPages) void
-        + showBookDetails(Book book) void
-        + showBookContent(List~String~ content, int pageNumber) void
-        + showBookContent(List~String~ content) void
-        + showMessage(String message) void
-        - truncate(String str, int maxLength) String
+	    - Scanner sc
+	    + BookView(Scanner sc)
+	    + displayBookMenu() void
+	    + displayBookSubMenu(boolean isAdmin) void
+	    + prompt(String message) String
+	    + promptInt(String message) int
+	    + showBookListPage(List~Book~ books, int currentPage, int totalPages) void
+	    + showBookDetails(Book book) void
+	    + showBookContent(List~String~ content, int pageNumber) void
+	    + showBookContent(List~String~ content) void
+	    + showMessage(String message) void
+	    - truncate(String str, int maxLength) String
     }
     class ReservationsView {
-        - Scanner scanner
-        + displayMainMenu() void
-        + displayReservationsTable(List~Reservation~ reservations, int page, int totalPages) void
-        + getSortAndFilterOptions() SortFilterOptions
-        + promptInt(String message) int
-        + getDateInput(String message) String
-        + getStatusInput(User user) String
-        + showMessage(String msg) void
-        + displayReservationDetails(Reservation r) void
-        + displayDetailsMenu(Reservation r, User user) void
+	    - Scanner scanner
+	    + displayMainMenu() void
+	    + displayReservationsTable(List~Reservation~ reservations, int page, int totalPages) void
+	    + getSortAndFilterOptions() SortFilterOptions
+	    + promptInt(String message) int
+	    + getDateInput(String message) String
+	    + getStatusInput(User user) String
+	    + showMessage(String msg) void
+	    + displayReservationDetails(Reservation r) void
+	    + displayDetailsMenu(Reservation r, User user) void
     }
     class SortFilterOptions {
-        + String sortBy
-        + boolean ascending
-        + String idFilter
-        + String usernameFilter
-        + String bookTitleFilter
-        + String statusFilter
-        + String resStart
-        + String resEnd
-        + String startStart
-        + String startEnd
-        + String endStart
-        + String endEnd
-        + SortFilterOptions(String sortBy, boolean ascending, String idFilter, String usernameFilter, String bookTitleFilter, String statusFilter, String resStart, String resEnd, String startStart, String startEnd, String endStart, String endEnd)
+	    + String sortBy
+	    + boolean ascending
+	    + String idFilter
+	    + String usernameFilter
+	    + String bookTitleFilter
+	    + String statusFilter
+	    + String resStart
+	    + String resEnd
+	    + String startStart
+	    + String startEnd
+	    + String endStart
+	    + String endEnd
+	    + SortFilterOptions(String sortBy, boolean ascending, String idFilter, String usernameFilter, String bookTitleFilter, String statusFilter, String resStart, String resEnd, String startStart, String startEnd, String endStart, String endEnd)
     }
     class UserView {
-        - Scanner sc
-        + UserView(Scanner sc)
-        + displayAccountMenu(User user) void
-        + displayUserManagementMenu() void
-        + displayUserDetailMenu(User user) void
-        + promptPassword(String label) String
-        + promptString(String message) String
-        + promptInt(String message) int
-        + displayMessage(String message) void
-        + prompt(String message) void
-        + displayUsers(List~User~ users) void
-        + viewUserDetails(User user) int
+	    - Scanner sc
+	    + UserView(Scanner sc)
+	    + displayAccountMenu(User user) void
+	    + displayUserManagementMenu() void
+	    + displayUserDetailMenu(User user) void
+	    + promptPassword(String label) String
+	    + promptString(String message) String
+	    + promptInt(String message) int
+	    + displayMessage(String message) void
+	    + prompt(String message) void
+	    + displayUsers(List~User~ users) void
+	    + viewUserDetails(User user) int
     }
-
     class App {
-        + main(String[] args) void
-        - startUserSession(User currentUser, Scanner sc, UserController userController, BookController bookController, ReservationController reservationController) void
+	    + main(String[] args) void
+	    - startUserSession(User currentUser, Scanner sc, UserController userController, BookController bookController, ReservationController reservationController) void
     }
-
     class DateTimeUtil {
-        <<utility>>
-        + static DATE_FORMAT : DateTimeFormatter
-        + static DATETIME_FORMAT : DateTimeFormatter
-        + static parseDate(String str) LocalDate
-        + static parseDateTime(String str) LocalDateTime
-        + static formatDate(LocalDate date) String
-        + static formatDateTime(LocalDateTime dateTime) String
+	    + static DATE_FORMAT : DateTimeFormatter
+	    + static DATETIME_FORMAT : DateTimeFormatter
+	    + static parseDate(String str) LocalDate
+	    + static parseDateTime(String str) LocalDateTime
+	    + static formatDate(LocalDate date) String
+	    + static formatDateTime(LocalDateTime dateTime) String
     }
     class FileHandlerUtil {
-        <<utility>>
-        - static DELIMITER : String
-        - static SEPERATOR : String
-        + static readData(String filePath) List~List~String~~
-        + static readHeader(String filePath) String
-        + static writeData(String filePath, String header, List~List~String~~) void
-        + static appendDataRow(String filePath, List~String~ row) void
-        + static clearFile(String filePath, String header) void
-        + static updateDataRow(String filePath, int rowIndex, List~String~ newRow) void
-        + static deleteDataRow(String filePath, int rowIndex) void
+	    - static DELIMITER : String
+	    - static SEPERATOR : String
+	    + static readData(String filePath) List~List~String~~
+	    + static readHeader(String filePath) String
+	    + static writeData(String filePath, String header, List~List~String~~) void
+	    + static appendDataRow(String filePath, List~String~ row) void
+	    + static clearFile(String filePath, String header) void
+	    + static updateDataRow(String filePath, int rowIndex, List~String~ newRow) void
+	    + static deleteDataRow(String filePath, int rowIndex) void
     }
     class IDGeneratorUtil {
-        <<utility>>
-        + static generateId(String filePath) int
+	    + static generateId(String filePath) int
     }
     class PaginationUtil~T~ {
-        <<utility>>
-        + static paginate(List~T~ items, int pageNumber, int pageSize) List~T~
-        + static getTotalPages(int totalItems, int pageSize) int
-        + static validatePageNumber(int requestedPage, int totalItems, int pageSize) int
+	    + static paginate(List~T~ items, int pageNumber, int pageSize) List~T~
+	    + static getTotalPages(int totalItems, int pageSize) int
+	    + static validatePageNumber(int requestedPage, int totalItems, int pageSize) int
     }
 
-Book ..|> Identifiable
-User ..|> Identifiable
-Reservation ..|> Identifiable
-UserRole <.. User : uses
-ReservationStatus <.. Reservation : uses
-Book "1" --> "0..*" Reservation : reserved in >
-User "1" --> "0..*" Reservation : makes >
-BaseRepository <|-- BookRepository
-BaseRepository <|-- UserRepository
-BaseRepository <|-- ReservationRepository
-ReservationRepository --> BookRepository : uses
-BookService --> BookRepository : "uses"
-BookService --> Book : "manages"
-UserService --> UserRepository : "uses"
-UserService --> User : "manages"
-UserService --> UserRole : "assigns"
-ReservationService --> ReservationRepository : "uses"
-ReservationService --> Reservation : "manages"
-ReservationService --> ReservationStatus : "updates"
-ReservationService --> UserService : "depends on"
-ReservationService --> BookService : "depends on"
-AuthController --> UserService : "uses"
-AuthController --> AuthView : "uses"
-AuthController --> User : "manages session"
-AuthController --> UserRole : "assigns role"
-BookController --> BookService : "uses"
-BookController --> BookView : "uses"
-BookController --> ReservationService : "uses"
-BookController --> Book : "depends on"
-BookController --> User : "depends on"
-BookController --> DateTimeUtil : "parses dates"
-ReservationController --> ReservationService : "uses"
-ReservationController --> BookService : "uses"
-ReservationController --> ReservationsView : "uses"
-ReservationController --> BookView : "uses"
-ReservationController --> Reservation : "manages"
-ReservationController --> Book : "depends on"
-ReservationController --> User : "depends on"
-ReservationController --> ReservationStatus : "updates"
-ReservationController --> PaginationUtil : "paginates"
-ReservationController --> DateTimeUtil : "parses dates"
-UserController --> UserService : "uses"
-UserController --> UserView : "uses"
-UserController --> User : "manages"
-UserController --> UserRole : "updates role"
-UserController --> Scanner : "input"
-AuthView --> User : "displays login/signup info for"
-BookView --> Book : "displays details of"
-ReservationsView --> Reservation : "lists and details"
-ReservationsView --> User : "prompts status update from"
-ReservationsView --> SortFilterOptions : "returns"
-UserView --> User : "manages accounts of"
-UserView --> UserRole : "shows role of"
-App --> AuthView : "initializes and displays menus via"
-App --> BookView : "initializes and displays menus via"
-App --> ReservationsView : "initializes and displays menus via"
-App --> AuthController : "delegates login/signup to"
-App --> UserController : "delegates account/user mgmt to"
-App --> BookController : "delegates book actions to"
-App --> ReservationController : "delegates reservation actions to"
-App --> User : "manages sessions for"
-ReservationService --> IDGeneratorUtil : "generates IDs with"
-ReservationService --> PaginationUtil : "paginates results with"
-UserService --> IDGeneratorUtil : "generates IDs via"
-UserService --> PaginationUtil : "paginates results via"
-BookService --> IDGeneratorUtil : "generates IDs via"
-BookService --> PaginationUtil : "paginates results via"
-BaseRepository --> FileHandlerUtil : "performs file I/O via"
-BookRepository --> DateTimeUtil : "parses/formats dates via"
-ReservationRepository --> DateTimeUtil : "parses/formats dates via"
-BookController --> DateTimeUtil : "parses/validates dates"
-ReservationController --> PaginationUtil : paginates
-ReservationController --> DateTimeUtil : parses dates
+	<<interface>> Identifiable
+	<<enum>> ReservationStatus
+	<<enum>> UserRole
+	<<utility>> DateTimeUtil
+	<<utility>> FileHandlerUtil
+	<<utility>> IDGeneratorUtil
+	<<utility>> PaginationUtil
+
+    Book ..|> Identifiable
+    User ..|> Identifiable
+    Reservation ..|> Identifiable
+    UserRole <.. User : uses
+    ReservationStatus <.. Reservation : uses
+    Book "1" --> "0..*" Reservation : reserved in >
+    User "1" --> "0..*" Reservation : makes >
+    BaseRepository <|-- BookRepository
+    BaseRepository <|-- UserRepository
+    BaseRepository <|-- ReservationRepository
+    ReservationRepository --> BookRepository : uses
+    BookService --> BookRepository : "uses"
+    BookService --> Book : "manages"
+    UserService --> UserRepository : "uses"
+    UserService --> User : "manages"
+    UserService --> UserRole : "assigns"
+    ReservationService --> ReservationRepository : "uses"
+    ReservationService --> Reservation : "manages"
+    ReservationService --> ReservationStatus : "updates"
+    ReservationService --> UserService : "depends on"
+    ReservationService --> BookService : "depends on"
+    AuthController --> UserService : "uses"
+    AuthController --> AuthView : "uses"
+    AuthController --> User : "manages session"
+    AuthController --> UserRole : "assigns role"
+    BookController --> BookService : "uses"
+    BookController --> BookView : "uses"
+    BookController --> ReservationService : "uses"
+    BookController --> Book : "depends on"
+    BookController --> User : "depends on"
+    BookController --> DateTimeUtil : "parses dates"
+    ReservationController --> ReservationService : "uses"
+    ReservationController --> BookService : "uses"
+    ReservationController --> ReservationsView : "uses"
+    ReservationController --> BookView : "uses"
+    ReservationController --> Reservation : "manages"
+    ReservationController --> Book : "depends on"
+    ReservationController --> User : "depends on"
+    ReservationController --> ReservationStatus : "updates"
+    ReservationController --> PaginationUtil : "paginates"
+    ReservationController --> DateTimeUtil : "parses dates"
+    UserController --> UserService : "uses"
+    UserController --> UserView : "uses"
+    UserController --> User : "manages"
+    UserController --> UserRole : "updates role"
+    UserController --> Scanner : "input"
+    AuthView --> User : "displays login/signup info for"
+    BookView --> Book : "displays details of"
+    ReservationsView --> Reservation : "lists and details"
+    ReservationsView --> User : "prompts status update from"
+    ReservationsView --> SortFilterOptions : "returns"
+    UserView --> User : "manages accounts of"
+    UserView --> UserRole : "shows role of"
+    App --> AuthView : "initializes and displays menus via"
+    App --> BookView : "initializes and displays menus via"
+    App --> ReservationsView : "initializes and displays menus via"
+    App --> AuthController : "delegates login/signup to"
+    App --> UserController : "delegates account/user mgmt to"
+    App --> BookController : "delegates book actions to"
+    App --> ReservationController : "delegates reservation actions to"
+    App --> User : "manages sessions for"
+    ReservationService --> IDGeneratorUtil : "generates IDs with"
+    ReservationService --> PaginationUtil : "paginates results with"
+    UserService --> IDGeneratorUtil : "generates IDs via"
+    UserService --> PaginationUtil : "paginates results via"
+    BookService --> IDGeneratorUtil : "generates IDs via"
+    BookService --> PaginationUtil : "paginates results via"
+    BaseRepository --> FileHandlerUtil : "performs file I/O via"
+    BookRepository --> DateTimeUtil : "parses/formats dates via"
+    ReservationRepository --> DateTimeUtil : "parses/formats dates via"
+    BookController --> DateTimeUtil : "parses/validates dates"
+    ReservationController --> PaginationUtil : paginates
+    ReservationController --> DateTimeUtil : parses dates
