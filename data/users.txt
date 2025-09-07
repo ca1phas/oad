@@ -15,8 +15,8 @@ username|password|role
 15|clark_kent|super123|member
 16|john|j|admin
 17|Sandy|sansan|member
-18|James|james123|member
 19|luna||admin
 20|harry|potter|member
 21|ron|weasley|member
 22|Dumbledore|prof|admin
+23|JamesLee|james|member
