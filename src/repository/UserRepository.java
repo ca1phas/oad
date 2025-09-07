@@ -8,7 +8,7 @@ import java.util.*;
 public class UserRepository extends BaseRepository<User> {
 
     public UserRepository() {
-        super("data/users.txt", "username|password|role");
+        super("data/users.txt", "id|username|password|role");
     }
 
     @Override
