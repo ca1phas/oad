@@ -4,6 +4,7 @@ config:
   class:
     hideEmptyMembersBox: true
   theme: default
+  look: classic
 ---
 classDiagram
 direction TB
@@ -250,19 +251,19 @@ direction TB
 	    - Scanner sc
 	    + AuthView(Scanner sc)
 	    + displayWelcome() void
-	    + prompt(String message) void
-	    + displayMessage(String message) void
+	    + prompt(String) void
+	    + displayMessage(String) void
 	    + showLoginHeader() void
 	    + promptUsername() String
 	    + promptPassword() String
-	    + promptPassword(String message) String
+	    + promptPassword(String) String
 	    + showUserNotFound() void
 	    + showIncorrectPassword() void
 	    + showLoginSuccess(User user) void
 	    + displayLoginFailed() void
 	    + showSignupHeader() void
 	    + promptConfirmPassword() String
-	    + promptConfirmPassword(String message) String
+	    + promptConfirmPassword(String) String
 	    + showPasswordMismatch() void
 	    + showSignupSuccess() void
 	    + showSignupAndAutoLoginSuccess(User user) void
@@ -270,34 +271,34 @@ direction TB
 	    + promptRole() String
 	    + showUserCreated() void
 	    + displayRegisterSuccess() void
-	    + displayRegisterFailed(String reason) void
+	    + displayRegisterFailed(String) void
 	    + showUserAlreadyExists() String
     }
     class BookView {
 	    - Scanner sc
 	    + BookView(Scanner sc)
 	    + displayBookMenu() void
-	    + displayBookSubMenu(boolean isAdmin) void
-	    + prompt(String message) String
-	    + promptInt(String message) int
-	    + showBookListPage(List~Book~ books, int currentPage, int totalPages) void
+	    + displayBookSubMenu(boolean) void
+	    + prompt(String) String
+	    + promptInt(String) int
+	    + showBookListPage(List, int, int) void
 	    + showBookDetails(Book book) void
-	    + showBookContent(List~String~ content, int pageNumber) void
-	    + showBookContent(List~String~ content) void
-	    + showMessage(String message) void
-	    - truncate(String str, int maxLength) String
+	    + showBookContent(List, int) void
+	    + showBookContent(List) void
+	    + showMessage(String) void
+	    - truncate(String, int) String
     }
     class ReservationsView {
 	    - Scanner scanner
 	    + displayMainMenu() void
-	    + displayReservationsTable(List~Reservation~ reservations, int page, int totalPages) void
+	    + displayReservationsTable(List, int, int) void
 	    + getSortAndFilterOptions() SortFilterOptions
-	    + promptInt(String message) int
-	    + getDateInput(String message) String
-	    + getStatusInput(User user) String
-	    + showMessage(String msg) void
-	    + displayReservationDetails(Reservation r) void
-	    + displayDetailsMenu(Reservation r, User user) void
+	    + promptInt(String) int
+	    + getDateInput(String) String
+	    + getStatusInput(User) String
+	    + showMessage(String) void
+	    + displayReservationDetails(Reservation) void
+	    + displayDetailsMenu(Reservation, User) void
     }
     class SortFilterOptions {
 	    + String sortBy
@@ -312,25 +313,25 @@ direction TB
 	    + String startEnd
 	    + String endStart
 	    + String endEnd
-	    + SortFilterOptions(String sortBy, boolean ascending, String idFilter, String usernameFilter, String bookTitleFilter, String statusFilter, String resStart, String resEnd, String startStart, String startEnd, String endStart, String endEnd)
+	    + SortFilterOptions(String, boolean, String, String, String, String, String, String, String, String, String, String)
     }
     class UserView {
 	    - Scanner sc
-	    + UserView(Scanner sc)
-	    + displayAccountMenu(User user) void
+	    + UserView(Scanner)
+	    + displayAccountMenu(User) void
 	    + displayUserManagementMenu() void
-	    + displayUserDetailMenu(User user) void
-	    + promptPassword(String label) String
-	    + promptString(String message) String
-	    + promptInt(String message) int
-	    + displayMessage(String message) void
-	    + prompt(String message) void
-	    + displayUsers(List~User~ users) void
-	    + viewUserDetails(User user) int
+	    + displayUserDetailMenu(User) void
+	    + promptPassword(String) String
+	    + promptString(String) String
+	    + promptInt(String) int
+	    + displayMessage(String) void
+	    + prompt(String) void
+	    + displayUsers(List) void
+	    + viewUserDetails(User) int
     }
     class App {
-	    + main(String[] args) void
-	    - startUserSession(User currentUser, Scanner sc, UserController userController, BookController bookController, ReservationController reservationController) void
+	    + main(String[]) void
+	    - startUserSession(User, Scanner, UserController, BookController, ReservationController) void
     }
     class DateTimeUtil {
 	    + static DATE_FORMAT : DateTimeFormatter
@@ -343,23 +344,24 @@ direction TB
     class FileHandlerUtil {
 	    - static DELIMITER : String
 	    - static SEPERATOR : String
-	    + static readData(String filePath) List~List~String~~
-	    + static readHeader(String filePath) String
-	    + static writeData(String filePath, String header, List~List~String~~) void
-	    + static appendDataRow(String filePath, List~String~ row) void
-	    + static clearFile(String filePath, String header) void
-	    + static updateDataRow(String filePath, int rowIndex, List~String~ newRow) void
-	    + static deleteDataRow(String filePath, int rowIndex) void
+	    + static readData(String) List~List~String~~
+	    + static readHeader(String) String
+	    + static writeData(String, String, List&lt;String&gt;) void
+	    + static appendDataRow(String, List) void
+	    + static clearFile(String, String) void
+	    + static updateDataRow(String, int, List) void
+	    + static deleteDataRow(String, int) void
     }
     class IDGeneratorUtil {
 	    + static generateId(String filePath) int
     }
     class PaginationUtil~T~ {
-	    + static paginate(List~T~ items, int pageNumber, int pageSize) List~T~
-	    + static getTotalPages(int totalItems, int pageSize) int
-	    + static validatePageNumber(int requestedPage, int totalItems, int pageSize) int
+	    + static paginate(List~T~, int, int) List~T~
+	    + static getTotalPages(int, int) int
+	    + static validatePageNumber(int, int, int) int
     }
-
+    class Scanner {
+    }
 	<<interface>> Identifiable
 	<<enum>> ReservationStatus
 	<<enum>> UserRole
@@ -367,77 +369,75 @@ direction TB
 	<<utility>> FileHandlerUtil
 	<<utility>> IDGeneratorUtil
 	<<utility>> PaginationUtil
-
     Book ..|> Identifiable
     User ..|> Identifiable
     Reservation ..|> Identifiable
     UserRole <.. User : uses
     ReservationStatus <.. Reservation : uses
     Book "1" --> "0..*" Reservation : reserved in >
+    Reservation "1" --> "1" Book : belongs to >
     User "1" --> "0..*" Reservation : makes >
+    Reservation "1" --> "1" User : belongs to >
     BaseRepository <|-- BookRepository
     BaseRepository <|-- UserRepository
     BaseRepository <|-- ReservationRepository
-    ReservationRepository --> BookRepository : uses
-    BookService --> BookRepository : "uses"
-    BookService --> Book : "manages"
-    UserService --> UserRepository : "uses"
-    UserService --> User : "manages"
-    UserService --> UserRole : "assigns"
-    ReservationService --> ReservationRepository : "uses"
-    ReservationService --> Reservation : "manages"
-    ReservationService --> ReservationStatus : "updates"
-    ReservationService --> UserService : "depends on"
-    ReservationService --> BookService : "depends on"
-    AuthController --> UserService : "uses"
-    AuthController --> AuthView : "uses"
-    AuthController --> User : "manages session"
-    AuthController --> UserRole : "assigns role"
-    BookController --> BookService : "uses"
-    BookController --> BookView : "uses"
-    BookController --> ReservationService : "uses"
-    BookController --> Book : "depends on"
-    BookController --> User : "depends on"
-    BookController --> DateTimeUtil : "parses dates"
-    ReservationController --> ReservationService : "uses"
-    ReservationController --> BookService : "uses"
-    ReservationController --> ReservationsView : "uses"
-    ReservationController --> BookView : "uses"
-    ReservationController --> Reservation : "manages"
-    ReservationController --> Book : "depends on"
-    ReservationController --> User : "depends on"
-    ReservationController --> ReservationStatus : "updates"
-    ReservationController --> PaginationUtil : "paginates"
-    ReservationController --> DateTimeUtil : "parses dates"
-    UserController --> UserService : "uses"
-    UserController --> UserView : "uses"
-    UserController --> User : "manages"
-    UserController --> UserRole : "updates role"
-    UserController --> Scanner : "input"
-    AuthView --> User : "displays login/signup info for"
-    BookView --> Book : "displays details of"
-    ReservationsView --> Reservation : "lists and details"
-    ReservationsView --> User : "prompts status update from"
-    ReservationsView --> SortFilterOptions : "returns"
-    UserView --> User : "manages accounts of"
-    UserView --> UserRole : "shows role of"
-    App --> AuthView : "initializes and displays menus via"
-    App --> BookView : "initializes and displays menus via"
-    App --> ReservationsView : "initializes and displays menus via"
-    App --> AuthController : "delegates login/signup to"
-    App --> UserController : "delegates account/user mgmt to"
-    App --> BookController : "delegates book actions to"
-    App --> ReservationController : "delegates reservation actions to"
-    App --> User : "manages sessions for"
-    ReservationService --> IDGeneratorUtil : "generates IDs with"
-    ReservationService --> PaginationUtil : "paginates results with"
-    UserService --> IDGeneratorUtil : "generates IDs via"
-    UserService --> PaginationUtil : "paginates results via"
-    BookService --> IDGeneratorUtil : "generates IDs via"
-    BookService --> PaginationUtil : "paginates results via"
-    BaseRepository --> FileHandlerUtil : "performs file I/O via"
-    BookRepository --> DateTimeUtil : "parses/formats dates via"
-    ReservationRepository --> DateTimeUtil : "parses/formats dates via"
-    BookController --> DateTimeUtil : "parses/validates dates"
+    ReservationRepository "1" --> "1" BookRepository : uses
+    BookService "1" --> "1" BookRepository : uses
+    BookService "1" --> "0..*" Book : manages
+    UserService "1" --> "1" UserRepository : uses
+    UserService "1" --> "0..*" User : manages
+    UserService --> UserRole : assigns
+    ReservationService "1" --> "1" ReservationRepository : uses
+    ReservationService "1" --> "0..*" Reservation : manages
+    ReservationService --> ReservationStatus : updates
+    ReservationService "1" --> "1" UserService : depends on
+    ReservationService "1" --> "1" BookService : depends on
+    AuthController "1" --> "1" UserService : uses
+    AuthController "1" --> "1" AuthView : uses
+    AuthController "1" --> "0..1" User : manages session
+    AuthController --> UserRole : assigns role
+    BookController "1" --> "1" BookService : uses
+    BookController "1" --> "1" BookView : uses
+    BookController "1" --> "1" ReservationService : uses
+    BookController --> Book : depends on
+    BookController --> User : depends on
+    BookController --> DateTimeUtil : parses dates
+    ReservationController "1" --> "1" ReservationService : uses
+    ReservationController "1" --> "1" BookService : uses
+    ReservationController "1" --> "1" ReservationsView : uses
+    ReservationController "1" --> "1" BookView : uses
+    ReservationController "1" --> "0..*" Reservation : manages
+    ReservationController --> Book : depends on
+    ReservationController --> User : depends on
+    ReservationController --> ReservationStatus : updates
     ReservationController --> PaginationUtil : paginates
     ReservationController --> DateTimeUtil : parses dates
+    UserController "1" --> "1" UserService : uses
+    UserController "1" --> "1" UserView : uses
+    UserController "1" --> "0..*" User : manages
+    UserController --> UserRole : updates role
+    UserController "1" --> "1" Scanner : input
+    AuthView "1" --> "0..1" User : displays login/signup info for
+    BookView "1" --> "0..*" Book : displays details of
+    ReservationsView "1" --> "0..*" Reservation : lists and details
+    ReservationsView --> User : prompts status update from
+    ReservationsView --> SortFilterOptions : returns
+    UserView "1" --> "0..*" User : manages accounts of
+    UserView --> UserRole : shows role of
+    App --> AuthView : initializes and displays menus via
+    App --> BookView : initializes and displays menus via
+    App --> ReservationsView : initializes and displays menus via
+    App --> AuthController : delegates login/signup to
+    App --> UserController : delegates account/user management to
+    App --> BookController : delegates book actions to
+    App --> ReservationController : delegates reservation actions to
+    App --> User : manages sessions for
+    ReservationService --> IDGeneratorUtil : generates IDs with
+    ReservationService --> PaginationUtil : paginates results with
+    UserService --> IDGeneratorUtil : generates IDs via
+    UserService --> PaginationUtil : paginates results via
+    BookService --> IDGeneratorUtil : generates IDs via
+    BookService --> PaginationUtil : paginates results via
+    BaseRepository --> FileHandlerUtil : performs file I/O via
+    BookRepository --> DateTimeUtil : parses/formats dates via
+    ReservationRepository --> DateTimeUtil : parses/formats dates via
