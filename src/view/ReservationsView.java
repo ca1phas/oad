@@ -14,7 +14,7 @@ public class ReservationsView {
         System.out.println("\n=== Reservations Menu ===");
         System.out.println("1. View All Reservations");
         System.out.println("2. Sort & Filter Reservations");
-        System.out.println("3. Select Reservation Detail");
+        System.out.println("3. Select Reservation Details");
         System.out.println("4. Reserve a Book");
         System.out.println("0. Back");
     }
@@ -28,7 +28,7 @@ public class ReservationsView {
 
         System.out.println("\n           = RESERVATIONS - PAGE " + page + " OF " + totalPages + " =");
         System.out.println("-----------------------------------------------------------------------------------------");
-        System.out.printf("| %-4s | %-12s | %-25s | %-10s | %-11s | %-11s | %-11s |\n",
+        System.out.printf("| %-4s | %-12s | %-25s | %-10s | %-16s | %-11s | %-11s |\n",
                 "ID", "Username", "Book Title", "Status", "Res. Date", "Start Date", "End Date");
         System.out.println("-----------------------------------------------------------------------------------------");
 

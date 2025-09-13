@@ -209,7 +209,7 @@ public class ReservationController {
                                 r = reservationService.selectReservation(r.getId(), currentUser.getUsername(), true)
                                         .orElse(r);
                         } catch (Exception e) {
-                            view.showMessage("Invalid date format.");
+                            view.showMessage("Invalid date format.Reservation failed");
                         }
                     } else {
                         try {
@@ -236,7 +236,7 @@ public class ReservationController {
                                 r = reservationService.selectReservation(r.getId(), currentUser.getUsername(), true)
                                         .orElse(r);
                         } catch (Exception e) {
-                            view.showMessage("Invalid date format.");
+                            view.showMessage("Invalid date format.Reservation failed");
                         }
                     } else
                         view.showMessage("Invalid choice.");
