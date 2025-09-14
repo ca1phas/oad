@@ -17,22 +17,27 @@ public class BookView {
         System.out.println("3. View Book Details");
         System.out.println("4. Create New Book (Admin Only)");
         System.out.println("0. Back to Main Menu");
-        System.out.print("Enter your choice: ");
     }
 
     // === SUBMENU ===
-    public void displayBookSubMenu(boolean isAdmin) {
-        System.out.println("      BOOK OPTIONS ");
-        if (isAdmin) {
-            System.out.println("1. Update Book (Admin)");
-            System.out.println("2. Delete Book (Admin)");
-        }
-        System.out.println("3. Read Book");
-        System.out.println("4. Reserve Book");
-        System.out.println("0. Back");
+
+public void displayBookSubMenu(boolean isAdmin) {
+    System.out.println("      BOOK OPTIONS ");
+    int optionNumber = 1;
+
+    if (isAdmin) {
+        System.out.println(optionNumber++ + ". Update Book (Admin)");
+        System.out.println(optionNumber++ + ". Delete Book (Admin)");
     }
 
+    System.out.println(optionNumber++ + ". Read Book");
+    System.out.println(optionNumber++ + ". Reserve Book");
+    System.out.println("0. Back");
+}
+
+
     // === INPUT ===
+    // Controller will call these when needed
     public String prompt(String message) {
         System.out.print(message);
         return sc.nextLine().trim();

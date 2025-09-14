@@ -54,7 +54,6 @@ id|title|author|genre|releasedDate|filename
 53|A Modest Proposal by Jonathan Swift|42 by Jonathan Swift|Fiction|1997-10-01|1080_A_Modest_Proposal_by_Jonathan_Swift
 54|The Count of Monte Cristo by Alexandre Dumas and Auguste Maquet|175 by Alexandre Dumas|Fiction|1998-01-01|1184_The_Count_of_Monte_Cristo_by_Alexandre_Dumas_and_Auguste_Maquet
 55|Narrative of the Life of Frederick Douglass, an American Slave by Douglass|9 by Frederick Douglass|Fiction|2006-01-12|23_Narrative_of_the_Life_of_Frederick_Douglass,_an_American_Slave_by_Douglass
-56|Great Expectations by Charles Dickens|211 by Charles Dickens|Fiction|1998-07-01|1400_Great_Expectations_by_Charles_Dickens
 57|The Wars of Religion in France 1559-1576 by James Westfall Thompson|Thompson, James Westfall, 1869-1941|Fiction|2015-06-23|49266_The_Wars_of_Religion_in_France_1559-1576_by_James_Westfall_Thompson
 58|White Nights and Other Stories by Fyodor Dostoyevsky|57 by Fyodor Dostoyevsky|Fiction|2011-05-05|36034_White_Nights_and_Other_Stories_by_Fyodor_Dostoyevsky
 59|War and Peace by graf Leo Tolstoy|100 by graf Leo Tolstoy|Fiction|2001-04-01|2600_War_and_Peace_by_graf_Leo_Tolstoy
@@ -65,7 +64,7 @@ id|title|author|genre|releasedDate|filename
 64|The Yellow Wallpaper by Charlotte Perkins Gilman|15 by Charlotte Perkins Gilman|Fiction|1999-11-01|1952_The_Yellow_Wallpaper_by_Charlotte_Perkins_Gilman
 65|Raquel of the ranch country by Alida Malkus|3 by Alida Malkus|Fiction|2025-08-20|76708_Raquel_of_the_ranch_country_by_Alida_Malkus
 66|Simple Sabotage Field Manual by United States. Office of Strategic Services|United States. Office of Strategic Services|Fiction|2008-08-04|26184_Simple_Sabotage_Field_Manual_by_United_States._Office_of_Strategic_Services
-67|Walden, and On The Duty Of Civil Disobedience by Henry David Thoreau|24 by Henry David Thoreau|Fiction|1995-01-01|205_Walden,_and_On_The_Duty_Of_Civil_Disobedience_by_Henry_David_Thoreau
+67|Walden, and On The Duty Of Civil Disobedience by Henry David Thoreau|24 by Henry David Thoreau|Fiction|1995-01-01|filenamedoenstexist
 68|The Odyssey by Homer|37 by Homer|Fiction|1999-04-01|1727_The_Odyssey_by_Homer
 69|Du côté de chez Swann by Marcel Proust|23 by Marcel Proust|Fiction|2001-05-01|2650_Du_côté_de_chez_Swann_by_Marcel_Proust
 70|The Critique of Pure Reason by Immanuel Kant|27 by Immanuel Kant|Fiction|2003-07-01|4280_The_Critique_of_Pure_Reason_by_Immanuel_Kant
@@ -100,3 +99,5 @@ id|title|author|genre|releasedDate|filename
 99|Meditations by Emperor of Rome Marcus Aurelius|7 by Emperor of Rome Marcus Aurelius|Fiction|2001-06-01|2680_Meditations_by_Emperor_of_Rome_Marcus_Aurelius
 100|The Romance of Lust_ A classic Victorian erotic novel by Anonymous|936 by Anonymous|Fiction|2009-10-14|30254_The_Romance_of_Lust_A_classic_Victorian_erotic_novel_by_Anonymous
 101|Hi|Hi|Fantasy|2923-12-21|sample
+102|Test Book|Tharmu|Fiction|2005-09-19|sample
+103|TestTitlee|Alicia|Non-Fiction|2005-09-19|sample
